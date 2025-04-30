@@ -1,0 +1,21 @@
+plugins {
+  id 'quran.android.library'
+  alias libs.plugins.anvil
+}
+
+anvil {
+  useKsp(true)
+  generateDaggerFactories.set(true)
+}
+
+dependencies {
+  implementation project(":common:data")
+
+  implementation libs.androidx.annotation
+
+  implementation libs.kotlinx.coroutines.core
+  implementation libs.kotlinx.coroutines.android
+
+  // dagger
+  implementation libs.dagger.runtime
+}
