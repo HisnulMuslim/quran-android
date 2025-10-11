@@ -29,13 +29,14 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:theme="@style/ToolbarStyle"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        app:popupTheme="@style/QuranToolBarOverlayPopUp"
         app:titleTextAppearance="@style/ToolbarTitleText"
         app:subtitleTextAppearance="@style/ToolbarSubtitleText"
         android:elevation="4dp"
         >
+      <!-- TODO This can be added to QuranSpinner . android:background="@drawable/spinner_background-->
       <com.quran.labs.androidquran.view.QuranSpinner
           android:id="@+id/spinner"
           android:layout_width="match_parent"

@@ -2,10 +2,10 @@ package com.quran.labs.androidquran.widget
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService.RemoteViewsFactory
+import androidx.core.content.ContextCompat
 import com.quran.data.core.QuranInfo
 import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.R
@@ -64,7 +64,8 @@ class BookmarksWidgetListProvider(private val context: Context) : RemoteViewsFac
     remoteView.setImageViewResource(R.id.widget_favorite_icon, item.imageResource)
     if (item.imageFilterColor == null) {
       // If a color filter isn't set, then sometimes the color filter of bookmarks can crossover into each other
-      remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter", Color.WHITE)
+      remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter",
+        ContextCompat.getColor(context, R.color.overlay_text_color))
     } else {
       remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter", item.imageFilterColor)
     }

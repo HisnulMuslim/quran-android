@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<!--KQACR26-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:background="@color/page_background"
     >
-
+  <!-- TODO: check theme android:theme="@style/Quran" -->
+  <!--KQACR26 added android:textColor for linearlayout and removed for QuranSpinner-->
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical"
+      android:textColor="@color/accent_color"
       >
     <com.quran.labs.androidquran.view.QuranSpinner
         android:id="@+id/translator"
@@ -20,7 +23,6 @@
         android:layout_marginRight="@dimen/translation_left_right_margin"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="@color/accent_color"
         />
     <com.quran.labs.androidquran.view.InlineTranslationView
         android:id="@+id/translation_view"

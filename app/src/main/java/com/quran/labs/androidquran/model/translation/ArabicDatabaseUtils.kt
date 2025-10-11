@@ -148,6 +148,8 @@ open class ArabicDatabaseUtils @Inject internal constructor(
   companion object {
     const val AR_BASMALLAH: String = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
     const val AR_BASMALLAH_IN_TEXT: String = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِیمِ"
+    /*KQACR7 Kannada text for sharing */
+    const val AR_BASMALLAH_IN_TEXT_KN: String = "ಪರಮ ದಯಾಮಯನೂ ಕರುಣಾನಿಧಿಯೂ ಆಗಿರುವ ಅಲ್ಲಾಹುವಿನ ನಾಮದಿಂದ"
 
     @VisibleForTesting
     const val NUMBER_OF_WORDS: Int = 4

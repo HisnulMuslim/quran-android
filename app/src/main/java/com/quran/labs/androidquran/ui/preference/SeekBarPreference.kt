@@ -1,6 +1,7 @@
 package com.quran.labs.androidquran.ui.preference
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.view.View
 import android.widget.SeekBar
@@ -10,6 +11,7 @@ import androidx.preference.PreferenceViewHolder
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.data.Constants
 import com.quran.labs.androidquran.util.QuranUtils
+import timber.log.Timber
 
 open class SeekBarPreference(
   context: Context,
@@ -19,6 +21,7 @@ open class SeekBarPreference(
   private lateinit var valueText: TextView
   protected lateinit var previewText: TextView
   protected lateinit var previewBox: View
+  protected lateinit var previewBoxText: TextView
 
   private val suffix = attrs.getAttributeValue(ANDROID_NS, "text")
   private val default = attrs.getAttributeIntValue(
@@ -40,13 +43,18 @@ open class SeekBarPreference(
     valueText = holder.findViewById(R.id.value) as TextView
     previewText = holder.findViewById(R.id.pref_preview) as TextView
     previewBox = holder.findViewById(R.id.preview_square)
+    previewBoxText = holder.findViewById(R.id.preview_square_text) as TextView
     previewText.visibility = getPreviewVisibility()
+
+    previewBox.visibility = getPreviewBoxVisibility()
+
     seekBar.setOnSeekBarChangeListener(this)
     value = if (shouldDisableView) getPersistedInt(default) else 0
     seekBar.apply {
       max = maxValue
       progress = value
     }
+    updatePreview()
   }
 
   override fun onSetInitialValue(defaultValue: Any?) {
@@ -73,10 +81,40 @@ open class SeekBarPreference(
     }
   }
 
+  private val preferenceChangeListener =
+    SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+      val textKey = context.getString(R.string.prefs_night_mode_text_brightness)
+      val bgKey = context.getString(R.string.prefs_night_mode_background_brightness)
+      if (changedKey == textKey || changedKey == bgKey) {
+        Timber.d("KQA chnaged key is $changedKey textKey $textKey bgKey $bgKey")
+        updatePreview()
+      }
+
+
+    }
+
+  override fun onAttached() {
+    super.onAttached()
+    preferenceManager?.sharedPreferences
+      ?.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+  }
+
+  override fun onDetached() {
+    super.onDetached()
+    preferenceManager?.sharedPreferences
+      ?.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
+  }
+
+
   /**
    * Visibility of the preview view under the seek bar
    */
+
+  protected open fun updatePreview() = Unit
+
   protected open fun getPreviewVisibility(): Int = View.GONE
+
+  protected open fun getPreviewBoxVisibility(): Int = View.GONE
 
   companion object {
     private const val ANDROID_NS = "http://schemas.android.com/apk/res/android"

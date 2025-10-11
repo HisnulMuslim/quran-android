@@ -10,10 +10,14 @@
 
     <style name="ToolBarArea" />
 
-  <style name="ToolbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+  <style name="ToolbarStyle" parent="ThemeOverlay.AppCompat.ActionBar">
     <item name="iconTint">@color/toolbar_icon_tint</item>
     <item name="android:textColorPrimary">@color/toolbar_text</item>
     <item name="android:textColorSecondary">@color/toolbar_secondary_text</item>
+
+    <item name="android:colorBackground">@color/page_background</item>
+    <item name="android:textColor">@color/accent_color_dark</item>
+    <item name="android:textColorHint">@color/search_text_hint</item>
   </style>
 
   <style name="ToolbarTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title" />

@@ -19,7 +19,7 @@
   <string name="extracting_title">Processing&#8230;</string>
   <string name="menu_about">About Us</string>
   <string name="menu_other_apps">Other apps</string>
-  <string name="menu_settings">Settings</string>
+  <string name="menu_settings" translatable="false">Settings</string>
   <string name="menu_jump_last_page">Last page</string>
   <string name="menu_bookmarks">Bookmarks</string>
   <string name="menu_bookmarks_page">Page Bookmarks</string>
@@ -388,7 +388,7 @@
   <string name="audio_updated_title">Quran Audio files Update</string>
   <string name="audio_updated_text">Several Quran audio files have been updated. Quran has removed
   your copy of these files so that the newest versions can be downloaded the next time you play them
-  back.</string>
+  back.</string>c
 
   <!-- format strings -->
   <string name="sura_ayah" translatable="false">%1$d:%2$d</string>
@@ -401,4 +401,23 @@
   <!-- notification channel names [CHAR LIMIT=40] -->
   <string name="notification_channel_download">Quran Downloads</string>
   <string name="notification_channel_audio">Quran Recitation</string>
+
+  <!-- KQACR6 -->
+  <string name="prefs_language_title">Application Language</string>
+  <string name="prefs_language_summary">Preferred application language</string>
+
+  <string name="prefs_category_sharing">Sharing Preferences</string>
+  <string name="prefs_include_translation_title">Include translation</string>
+  <string name="prefs_include_translation_summary">Translations are included in the shared or copied text</string>
+  <string name="prefs_include_inline_ayah_numbers_title">Include Ayah number</string>
+  <string name="prefs_include_inline_ayah_numbers_summary">Ayah numbers are included in the shared or copied text</string>
+  <string name="prefs_include_notes_title">Include notes</string>
+  <string name="prefs_include_notes_summary">Notes are included in the shared or copied text</string>
+  <string name="prefs_inline_translation_title">Show translation after each ayah</string>
+  <string name="prefs_inline_translation_summary_on">Translation will be shown after each ayah</string>
+  <string name="prefs_inline_translation_summary_off">All ayahs will appear first in Arabic, followed by the full translation</string>
+
+  <!-- KQACR6 -->
+
+
 </resources>

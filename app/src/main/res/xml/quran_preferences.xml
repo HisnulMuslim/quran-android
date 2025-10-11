@@ -9,21 +9,33 @@
       android:title="@string/prefs_category_display_settings"
       app:iconSpaceReserved="false">
 
-    <CheckBoxPreference
+    <!--<CheckBoxPreference
         android:defaultValue="false"
         android:disableDependentsState="false"
         android:key="@string/prefs_use_arabic_names"
         android:persistent="true"
         android:summary="@string/prefs_use_arabic_summary_on"
         android:title="@string/prefs_use_arabic_title"
+        app:iconSpaceReserved="false"/>-->
+
+    <ListPreference
+        android:defaultValue="kn"
+        android:dialogTitle="@string/prefs_language_title"
+        android:entries="@array/preferred_language"
+        android:entryValues="@array/preferred_language_values"
+        android:key="@string/prefs_interface_language"
+        android:summary="@string/prefs_language_summary"
+        android:title="@string/prefs_language_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+
+
+    <!--<CheckBoxPreference
         android:defaultValue="true"
         android:key="@string/prefs_new_background"
         android:persistent="true"
         android:title="@string/prefs_new_background_title"
-        app:iconSpaceReserved="false"/>
+        app:iconSpaceReserved="false"/>-->
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -76,6 +88,47 @@
         android:summary="@string/prefs_night_mode_background_brightness_summary"
         android:title="@string/prefs_night_mode_background_brightness_title"/>
   </PreferenceCategory>
+
+  <PreferenceCategory
+      android:key="@string/prefs_sharing_category_key"
+      android:title="@string/prefs_category_sharing"
+      app:iconSpaceReserved="false">
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/prefs_include_translation"
+        android:persistent="true"
+        android:summary="@string/prefs_include_translation_summary"
+        android:title="@string/prefs_include_translation_title"
+        app:iconSpaceReserved="false"/>
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:dependency="@string/prefs_include_translation"
+        android:key="@string/prefs_inline_translation"
+        android:persistent="true"
+        android:summaryOff="@string/prefs_inline_translation_summary_off"
+        android:summaryOn="@string/prefs_inline_translation_summary_on"
+        android:title="@string/prefs_inline_translation_title"
+        app:iconSpaceReserved="false"/>
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/prefs_include_inline_ayah_numbers"
+        android:persistent="true"
+        android:summary="@string/prefs_include_inline_ayah_numbers_summary"
+        android:title="@string/prefs_include_inline_ayah_numbers_title"
+        app:iconSpaceReserved="false"/>
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/prefs_show_notes"
+        android:persistent="true"
+        android:summary="@string/prefs_include_notes_summary"
+        android:title="@string/prefs_include_notes_title"
+        app:iconSpaceReserved="false"/>
+
+  </PreferenceCategory>
+
 
   <PreferenceCategory
       android:key="@string/prefs_reading_category_key"
@@ -174,14 +227,14 @@
         app:iconSpaceReserved="false"/>
 
     <com.quran.labs.androidquran.ui.preference.SeekBarAyahTextSizePreference
-        android:defaultValue="15"
+        android:defaultValue="17"
         android:key="@string/prefs_ayah_text_size"
         android:max="40"
         android:persistent="true"
         android:title="@string/prefs_ayah_text_title"/>
 
     <com.quran.labs.androidquran.ui.preference.SeekBarTranslationTextSizePreference
-      android:defaultValue="15"
+      android:defaultValue="17"
       android:key="@string/prefs_translation_text_size"
       android:max="40"
       android:persistent="true"

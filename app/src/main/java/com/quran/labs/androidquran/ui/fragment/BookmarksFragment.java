@@ -211,6 +211,7 @@ public class BookmarksFragment extends Fragment implements QuranListAdapter.Qura
             res.getQuantityString(R.plurals.bookmark_tag_deleted, size, size),
             BookmarkPresenter.DELAY_DELETION_DURATION_IN_MS);
         snackbar.setAction(R.string.undo, mOnUndoClickListener);
+        snackbar.setActionTextColor(ContextCompat.getColor(activity, R.color.color_control_normal));
         snackbar.getView().setBackgroundColor(ContextCompat.getColor(activity,
             R.color.snackbar_background_color));
         snackbar.show();

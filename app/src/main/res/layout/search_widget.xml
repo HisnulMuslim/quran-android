@@ -21,7 +21,7 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:background="@android:color/transparent"
-      android:src="@drawable/ic_ab_search" />
+      android:src="@drawable/baseline_home_search_white_bg_28" />
 
   <ImageButton
       android:id="@+id/search_widget_btn_go_to_quran"
@@ -29,7 +29,7 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:background="@android:color/transparent"
-      android:src="@drawable/ic_goto_quran" />
+      android:src="@drawable/baseline_goto_quran_whitebg_28" />
 
   <ImageButton
       android:id="@+id/search_widget_btn_jump"
@@ -37,6 +37,6 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:background="@android:color/transparent"
-      android:src="@drawable/ic_baseline_arrow_upright_24" />
+      android:src="@drawable/jump_to_element_24" />
 
 </LinearLayout>

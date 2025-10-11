@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="audio_manager_files_downloaded">
+    <item quantity="one" tools:ignore="ImpliedQuantity">1 ಅಧ್ಯಾಯವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ</item>
+    <item quantity="other">%1$d ಅಧ್ಯಾಯಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ</item>
+  </plurals>
+
+  <!-- audio manager -->
+  <string name="audio_manager">ಆಡಿಯೋ ಮ್ಯಾನೇಜರ್</string>
+  <string name="audio_manager_remove_audio_title">ಅಧ್ಯಾಯ ತೆಗೆದುಹಾಕಿ ? </string>
+  <string name="audio_manager_remove_audio_msg">ನೀವು ಖಚಿತವಾಗಿ  %1$s ಅನ್ನು ತೆಗೆದುಹಾಕಲು ಬಯಸುವಿರಾ?</string>
+  <string name="audio_manager_remove_multiple_audio_msg">ನೀವು ಖಚಿತವಾಗಿ ತೆಗೆದುಹಾಕಲು ಬಯಸುವಿರಾ?</string>
+  <plurals name="audio_manager_delete_surah_success">
+    <item quantity="one" tools:ignore="ImpliedQuantity">ಅಧ್ಯಾಯವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ</item>
+    <item quantity="other">%1$d ಅಧ್ಯಾಯಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ</item>
+  </plurals>
+  <plurals name="audio_manager_delete_surah_error">
+    <item quantity="one" tools:ignore="ImpliedQuantity">ಅಧ್ಯಾಯವನ್ನು ಅಳಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ</item>
+    <item quantity="other">%1$d ಅಧ್ಯಾಯಗಳನ್ನು ಅಳಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ</item>
+  </plurals>
+  <string name="audio_manager_surah_download">ಅಧ್ಯಾಯವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+  <string name="audio_manager_surah_delete">ಅಧ್ಯಾಯವನ್ನು ಅಳಿಸಿ</string>
+  <string name="audio_manager_database">ಆಡಿಯೋ ಡೇಟಾಬೇಸ್</string>
+  <string name="audio_manager_database_download">ಡೇಟಾಬೇಸ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+  <string name="audio_manager_database_delete">ಡೇಟಾಬೇಸ್ ಅಳಿಸಿ</string>
+  <string name="audio_manager_download_all">ಎಲ್ಲವನ್ನೂ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+  <string name="audio_manager_download_selection">ಆಯ್ಕೆಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+  <string name="audio_manager_delete_selection">ಆಯ್ಕೆಯನ್ನು ಅಳಿಸಿ</string>
+  <string name="audio_manager_post_notifications_permission_title">ಅಧಿಸೂಚನೆಗಳನ್ನು ಪೋಸ್ಟ್ ಮಾಡಲು ಅನುಮತಿಸುವಿರಾ ?</string>
+  <string name="audio_manager_post_notifications_permission_description">ಡೌನ್‌ಲೋಡ್ ಸ್ಥಿತಿಯ ಬಗ್ಗೆ  ಅಥವಾ ಆಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನವೀಕರಿಸಿದಾಗ ಎಚ್ಚರಿಕೆ ನೀಡಲು ಮಾತ್ರ ಇದನ್ನು ಬಳಸಲಾಗುತ್ತದೆ.</string>
+
+  <string name="download_amount_in_megabytes">%s MB</string>
+  <string name="download_progress">%1$s / %2$s ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ</string>
+  <string name="download_sura_progress">ಅಧ್ಯಾಯ %3$d ರ  %1$s / %2$s ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ</string>
+  <string name="download_sura_ayah_progress" tools:ignore="PluralsCandidate">ಅಧ್ಯಾಯ %1$d ಸೂಕ್ತಿ %2$d ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ</string>
+</resources>

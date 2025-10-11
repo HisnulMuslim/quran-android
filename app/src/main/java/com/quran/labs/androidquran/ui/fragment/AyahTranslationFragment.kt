@@ -53,7 +53,7 @@ class AyahTranslationFragment : AyahActionFragment(), TranslationScreen {
 
   object Provider : AyahActionFragmentProvider {
     override val order = SlidingPagerAdapter.TRANSLATION_PAGE
-    override val iconResId = com.quran.labs.androidquran.common.toolbar.R.drawable.ic_translation
+    override val iconResId = com.quran.labs.androidquran.common.toolbar.R.drawable.icon_kannada_toolbar
     override fun newAyahActionFragment() = AyahTranslationFragment()
   }
 

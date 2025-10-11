@@ -37,8 +37,9 @@ open class QuranApplication : Application(), QuranApplicationComponentProvider, 
     initializeWorkManager()
     bookmarksWidgetSubscriber.subscribeBookmarksWidgetIfNecessary()
 
-    // set dark mode as the default for now
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+    // KQACR12 set light mode as the default for now
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
   }
 
   open fun setupTimber() {
@@ -59,24 +60,27 @@ open class QuranApplication : Application(), QuranApplicationComponentProvider, 
     )
   }
 
+
+
   override fun refreshLocale(
     context: Context,
     force: Boolean
   ) {
-    val language = if (QuranSettings.getInstance(this).isArabicNames) "ar" else null
-    val locale: Locale = when {
-      "ar" == language -> {
-        Locale("ar")
-      }
-      force -> {
-        // get the system locale (since we overwrote the default locale)
-        Resources.getSystem().configuration.locale
+    val language = QuranSettings.getInstance(this).interfaceLanguage().lowercase()
+    /*KQACR6 start*/
+    val locale: Locale = when (language){
+      "ar", "en", "kn" -> {
+        Locale(language)
       }
       else -> {
-        // nothing to do...
-        return
+        if (force) {
+          Resources.getSystem().configuration.locale
+        } else {
+          return
+        }
       }
     }
+    /*KQACR6 end*/
     updateLocale(context, locale)
     val appContext = context.applicationContext
     if (context !== appContext) {

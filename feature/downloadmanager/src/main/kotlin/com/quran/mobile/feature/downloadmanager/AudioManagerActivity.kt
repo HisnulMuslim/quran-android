@@ -1,8 +1,10 @@
 package com.quran.mobile.feature.downloadmanager
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -48,7 +50,8 @@ class AudioManagerActivity : ComponentActivity() {
     val downloadedShuyookhFlow =
       audioManagerPresenter.downloadedShuyookh { QariItem.fromQari(this, it) }
 
-    enableEdgeToEdge()
+    enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT),SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT))
+
 
     setContent {
       val downloadedShuyookhState = downloadedShuyookhFlow.collectAsState(persistentListOf())

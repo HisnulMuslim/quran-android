@@ -5,11 +5,18 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
+import android.view.View
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
@@ -28,6 +35,7 @@ import com.quran.labs.androidquran.ui.QuranActivity
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranScreenInfo
 import com.quran.labs.androidquran.util.QuranSettings
+import com.quran.labs.androidquran.widget.QuranMaxImageView
 import com.quran.labs.androidquran.worker.WorkerConstants
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -35,6 +43,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -53,7 +62,8 @@ import javax.inject.Inject
  * and [QuranDownloadService] is (mostly) used to perform the actual downloading of
  * any Quran data.
  */
-class QuranDataActivity : Activity(), SimpleDownloadListener, OnRequestPermissionsResultCallback {
+/*KQACR2 SplashScreen Make this class open for extending it*/
+class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequestPermissionsResultCallback {
 
   @Inject
   lateinit var quranFileUtils: QuranFileUtils
@@ -82,11 +92,32 @@ class QuranDataActivity : Activity(), SimpleDownloadListener, OnRequestPermissio
   private val scope = MainScope()
 
   public override fun onCreate(savedInstanceState: Bundle?) {
+
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
+    )
+    showSplashScreen()/*KQACR2*/
     super.onCreate(savedInstanceState)
     val quranApp = application as QuranApplication
+    quranApp.refreshLocale(this, false)
     quranApp.applicationComponent.inject(this)
     quranSettings = QuranSettings.getInstance(this)
     quranSettings.upgradePreferences(preferencesUpgrade)
+  }
+
+  /*KQACR2 NFN*/
+  private fun showSplashScreen() {
+    setContentView(R.layout.splash_screen)
+
+    val splashView = findViewById<QuranMaxImageView>(R.id.splashview)
+    splashView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+    try {
+      splashView.setImageResource(R.drawable.splash)
+    } catch (error: OutOfMemoryError) {
+      splashView.setBackgroundColor(Color.BLACK)
+    }
   }
 
   override fun onResume() {
@@ -437,7 +468,7 @@ class QuranDataActivity : Activity(), SimpleDownloadListener, OnRequestPermissio
       R.string.downloadPrompt
     }
 
-    val dialog = AlertDialog.Builder(this)
+    val dialog = AlertDialog.Builder(this,R.style.QuranDialog)
     dialog.setMessage(message)
     dialog.setCancelable(false)
     dialog.setPositiveButton(
@@ -476,13 +507,18 @@ class QuranDataActivity : Activity(), SimpleDownloadListener, OnRequestPermissio
   }
 
   private fun runListView() {
-    val i = Intent(this, QuranActivity::class.java)
-    i.putExtra(
-        QuranActivity.EXTRA_SHOW_TRANSLATION_UPGRADE, quranSettings.haveUpdatedTranslations()
-    )
-    startActivity(i)
-    finish()
+    /*KQACR2 Added 2 sec delay before showing the surah list */
+    Handler(Looper.getMainLooper()).postDelayed({
+      val intent = Intent(this@QuranDataActivity, QuranActivity::class.java)
+      intent.putExtra(
+        QuranActivity.EXTRA_SHOW_TRANSLATION_UPGRADE,
+        quranSettings.haveUpdatedTranslations()
+      )
+      startActivity(intent)
+      finish()
+    }, 2000)
   }
+
 
   companion object {
     const val PAGES_DOWNLOAD_KEY = "PAGES_DOWNLOAD_KEY"

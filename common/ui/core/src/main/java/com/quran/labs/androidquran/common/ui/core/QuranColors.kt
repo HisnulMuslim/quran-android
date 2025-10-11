@@ -10,7 +10,9 @@ class QuranColors(
 )
 
 val lightQuranColors = QuranColors(
-  defaultTextColor = Color.Black
+
+
+  defaultTextColor = Color.White
 )
 
 val darkQuranColors = QuranColors(

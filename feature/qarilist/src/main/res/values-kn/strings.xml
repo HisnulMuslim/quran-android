@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--KQACR17 NF -->
+<resources>
+  <string name="qarilist_select_qari">ಖಾರಿ ಆಯ್ಕೆಮಾಡಿ</string>
+  <string name="qarilist_ready_to_play">ಪ್ಲೇ ಮಾಡಲು ಲಭ್ಯ</string>
+  <string name="qarilist_qaris_with_downloads">ಲಭ್ಯವಿರುವ  ಖಾರಿ</string>
+  <string name="qarilist_gapless">ಅಂತರವಿಲ್ಲದ</string>
+  <string name="qarilist_gapped">ಅಂತರವಿರುವ</string>
+  <string name="qarilist_selected">ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ</string>
+  <string name="qarilist_dismiss">ವಜಾಗೊಳಿಸಿ</string>
+</resources>

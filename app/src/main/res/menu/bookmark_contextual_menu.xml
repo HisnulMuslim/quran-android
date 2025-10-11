@@ -2,19 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/cab_tag_bookmark"
-          android:icon="@drawable/ic_tag"
+          android:icon="@drawable/tag_24"
           android:title="@string/tag_bookmark"
-          app:showAsAction="ifRoom" />
+          app:showAsAction="ifRoom"
+        />
     <item android:id="@+id/cab_edit_tag"
-          android:icon="@drawable/ic_edit"
+          android:icon="@drawable/edit_24"
           android:title="@string/edit_tag"
           app:showAsAction="ifRoom" />
     <item android:id="@+id/cab_delete"
-          android:icon="@drawable/ic_cancel"
+          android:icon="@drawable/cancel_24"
           android:title="@string/delete_tag"
           app:showAsAction="ifRoom" />
     <item android:id="@+id/cab_new_tag"
-          android:icon="@drawable/ic_new"
+          android:icon="@drawable/add_tag_plus_green_24"
           android:title="@string/new_tag"
           app:showAsAction="ifRoom" />
 </menu>

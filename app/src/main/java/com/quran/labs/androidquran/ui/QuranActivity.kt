@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import androidx.core.graphics.scale
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,12 +18,14 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -59,6 +63,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import timber.log.Timber
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
 import kotlin.math.abs
@@ -114,8 +119,8 @@ class QuranActivity : AppCompatActivity(),
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
     enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
     )
     super.onCreate(savedInstanceState)
     quranApp.applicationComponent
@@ -151,6 +156,24 @@ class QuranActivity : AppCompatActivity(),
     setSupportActionBar(tb)
     val ab = supportActionBar
     ab?.setTitle(R.string.app_name)
+
+    val logoDrawable = ContextCompat.getDrawable(this, R.drawable.icon)
+    if (logoDrawable is BitmapDrawable) {
+      val resizePercentage = 0.75f
+      val bitmap = logoDrawable.bitmap
+      val newWidth = (bitmap.width * resizePercentage).toInt()
+      val newHeight = (bitmap.height * resizePercentage).toInt()
+
+      val resizedBitmap = bitmap.scale(newWidth, newHeight, true) // KTX extension
+      val resizedDrawable = BitmapDrawable(resources, resizedBitmap)
+
+      ab?.apply {
+        setDisplayUseLogoEnabled(true)
+        setDisplayShowHomeEnabled(true)
+        setLogo(resizedDrawable)
+      }
+    }
+
 
     val pager = findViewById<ViewPager>(R.id.index_pager)
     pager.offscreenPageLimit = 3
@@ -191,7 +214,10 @@ class QuranActivity : AppCompatActivity(),
     compositeDisposable.add(latestPageObservable.subscribe())
     super.onResume()
     val isRtl = isRtl()
-    if (isRtl != this.isRtl) {
+    /*KQACR6 start*/
+    if (isRtl != this.isRtl || shouldRecreate) {
+      shouldRecreate = false
+      /*KQACR6 end*/
       val i = intent
       finish()
       startActivity(i)
@@ -330,9 +356,9 @@ class QuranActivity : AppCompatActivity(),
       }
       R.id.other_apps -> {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("market://search?q=pub:quran.com")
+        intent.data = Uri.parse("market://search?q=pub:Muslim Akhi") /*KQACR9*/
         if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
-          intent.data = Uri.parse("https://play.google.com/store/search?q=pub:quran.com")
+          intent.data = Uri.parse("https://play.google.com/store/search?q=pub:Muslim Akhi") /*KQACR9*/
         }
         startActivity(intent)
       }
@@ -399,7 +425,7 @@ class QuranActivity : AppCompatActivity(),
       dialog.dismiss()
       upgradeDialog = null
       // pretend we don't have updated translations.  we'll
-      // check again after 10 days.
+      // check again after 10 days.TODO
       settings.setHaveUpdatedTranslations(false)
     }
 
@@ -514,6 +540,7 @@ class QuranActivity : AppCompatActivity(),
   }
 
   companion object {
+    var shouldRecreate = false/*KQACR6*/
     private val TITLES = intArrayOf(
         R.string.quran_sura,
         R.string.quran_juz2,

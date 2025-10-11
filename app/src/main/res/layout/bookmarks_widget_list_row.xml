@@ -15,7 +15,7 @@
       android:layout_centerVertical="true"
       android:layout_gravity="center_vertical"
       android:layout_marginHorizontal="8dp"
-      app:srcCompat="@drawable/ic_favorite"
+      app:srcCompat="@drawable/baseline_bookmark_currentpage_24"
       />
   <TextView
       android:id="@+id/sura_title"

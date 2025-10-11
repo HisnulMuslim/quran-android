@@ -4,13 +4,13 @@ import com.quran.data.core.QuranConstants
 
 object Constants {
 
-  // data domain
-  const val HOST = "https://quran.app/"
+  //KQACR5 change translation list url
+  const val HOST = "https://files.pavitra-quraan.com/"
 
   // Numerics
   const val DEFAULT_NIGHT_MODE_TEXT_BRIGHTNESS = 255
   const val DEFAULT_NIGHT_MODE_BACKGROUND_BRIGHTNESS = 0
-  const val DEFAULT_TEXT_SIZE = 15
+  const val DEFAULT_TEXT_SIZE = 17
 
   // 1 hour in ms
   const val MIN_TRANSLATION_REFRESH_TIME = 60 * 60 * 1000
@@ -45,6 +45,9 @@ object Constants {
   // Settings Key (some of these have corresponding values in preference_keys.xml)
   const val PREF_APP_LOCATION = "appLocation"
   const val PREF_USE_ARABIC_NAMES = "useArabicNames"
+  //KQACR6 add option for interface language change
+  const val PREF_INTERFACE_LANGUAGE = "interfaceLanguage"
+  const val PREF_BACKGROUND_COLOR = "backgroundColor"
   const val PREF_LAST_PAGE = "lastPage"
   const val PREF_LOCK_ORIENTATION = "lockOrientation"
   const val PREF_LANDSCAPE_ORIENTATION = "landscapeOrientation"
@@ -93,4 +96,9 @@ object Constants {
   const val PREF_SHOW_SIDELINES = "showSidelines"
   const val PREF_SHOW_LINE_DIVIDERS = "showLineDividers"
   const val PREFS_PREFER_DNS_OVER_HTTPS = "preferDnsOverHttps"
+  const val PREF_INCLUDE_TRANSLATION = "includeTranslation"
+  const val PREF_INLINE_TRANSLATION = "inlineTranslation"
+  const val PREF_INCLUDE_INLINE_AYAH_NUMBERS = "includeInlineAyahNumbers"
+  const val PREF_INCLUDE_NOTES = "includeNotes"
+
 }

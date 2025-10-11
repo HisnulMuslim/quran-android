@@ -37,8 +37,8 @@ class PageSelectActivity : AppCompatActivity() {
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
     enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
     )
 
     super.onCreate(savedInstanceState)

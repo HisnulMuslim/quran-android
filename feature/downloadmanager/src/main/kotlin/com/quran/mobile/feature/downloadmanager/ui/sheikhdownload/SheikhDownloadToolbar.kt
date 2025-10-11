@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,7 +28,8 @@ fun SheikhDownloadToolbar(
         val contentDescription = if (isContextual) R.string.audio_manager_download_selection else R.string.audio_manager_download_all
         Icon(
           painterResource(id = R.drawable.ic_download),
-          contentDescription = stringResource(id = contentDescription)
+          contentDescription = stringResource(id = contentDescription),
+          tint = MaterialTheme.colorScheme.surface
         )
       }
     }
@@ -36,7 +38,8 @@ fun SheikhDownloadToolbar(
       IconButton(onClick = eraseAction) {
         Icon(
           imageVector = Icons.Filled.Close,
-          contentDescription = stringResource(id = R.string.audio_manager_delete_selection)
+          contentDescription = stringResource(id = R.string.audio_manager_delete_selection),
+          tint = MaterialTheme.colorScheme.surface
         )
       }
     }

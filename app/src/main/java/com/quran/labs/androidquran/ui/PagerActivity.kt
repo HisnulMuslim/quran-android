@@ -50,6 +50,7 @@ import com.quran.data.core.QuranInfo
 import com.quran.data.dao.BookmarksDao
 import com.quran.data.model.QuranText
 import com.quran.data.model.SuraAyah
+import com.quran.data.model.VerseRange
 import com.quran.data.model.bookmark.Bookmark
 import com.quran.data.model.selection.AyahSelection
 import com.quran.data.model.selection.AyahSelection.AyahRange
@@ -82,6 +83,7 @@ import com.quran.labs.androidquran.feature.reading.presenter.RecentPagePresenter
 import com.quran.labs.androidquran.feature.reading.presenter.recitation.PagerActivityRecitationPresenter
 import com.quran.labs.androidquran.model.translation.ArabicDatabaseUtils
 import com.quran.labs.androidquran.presenter.data.QuranEventLogger
+import com.quran.labs.androidquran.presenter.translation.InlineTranslationPresenter
 import com.quran.labs.androidquran.presenter.translationlist.TranslationListPresenter
 import com.quran.labs.androidquran.service.AudioService
 import com.quran.labs.androidquran.service.QuranDownloadService
@@ -233,6 +235,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   @Inject lateinit var downloadInfoStreams: DownloadInfoStreams
   @Inject lateinit var qariManager: CurrentQariManager
   @Inject lateinit var downloadBridge: DownloadBridge
+  //KQACR7 Share and copy logic change
+  @Inject lateinit var translationPresenter: InlineTranslationPresenter
 
   private lateinit var audioStatusRepositoryBridge: AudioStatusRepositoryBridge
   private lateinit var readingEventPresenterBridge: ReadingEventPresenterBridge
@@ -1309,7 +1313,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   }
 
   private fun updateActionBarTitle(page: Int) {
-    val sura = quranDisplayData.getSuraNameFromPage(this, page, true)
+    val sura = quranDisplayData.getSuraNameFromPage(this, page, false)
     val actionBar = supportActionBar
     if (actionBar != null) {
       translationsSpinner.visibility = View.GONE
@@ -1353,7 +1357,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
             val page: Int = currentPage
 
             val sura =
-              quranDisplayData.getSuraNameFromPage(this@PagerActivity, page, true)
+              quranDisplayData.getSuraNameFromPage(this@PagerActivity, page, false)
             holder.title.text = sura
             holder.title.setTextColor(ResourcesCompat.getColor(resources, R.color.toolbar_text, null))
             val desc = quranDisplayData.getPageSubtitle(this@PagerActivity, page)
@@ -1855,6 +1859,13 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
       updateLocalTranslations(start)
       val quranAyahInfo = lastSelectedTranslationAyah
+
+      Toast.makeText(
+        this@PagerActivity,
+        "ಬಹು ಆಯತ್'ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಅರೇಬಿಕ್ ಪರದೆಯಲ್ಲಿ ದೀರ್ಘ ಒತ್ತಿರಿ.",/*TODO language translation*/
+        Toast.LENGTH_LONG
+      ).show()
+
       if (quranAyahInfo != null) {
         val shareText = shareUtil.getShareText(this, quranAyahInfo, translationNames)
         if (isCopy) {
@@ -1870,7 +1881,24 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
       return
     }
+    /*KQACR7 start*/
+    val verses = 1 + abs(
+      quranInfo.getAyahId(start.sura, start.ayah) - quranInfo.getAyahId(end.sura, end.ayah)
+    )
+    val verseRange = VerseRange(start.sura, start.ayah, end.sura, end.ayah, verses)
 
+    scope.launch {
+      var activeTranslations = translationPresenter.getTranslations(quranSettings)
+      val result = translationPresenter.getVerses(true, activeTranslations, verseRange)
+      if (isCopy) {
+        shareUtil.copyVersesKQA(this@PagerActivity, result,verseRange,activeTranslations)
+      } else {
+        shareUtil.shareVersesKQA(this@PagerActivity, result,verseRange,activeTranslations)
+      }
+    }
+
+
+ /*
     compositeDisposable.add(
       arabicDatabaseUtils
         .getVerses(start, end)
@@ -1883,6 +1911,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
             shareUtil.shareVerses(this@PagerActivity, quranAyahs)
           }
         })
+    */
+    /*KQACR7 end*/
   }
 
   fun shareAyahLink(start: SuraAyah, end: SuraAyah) {

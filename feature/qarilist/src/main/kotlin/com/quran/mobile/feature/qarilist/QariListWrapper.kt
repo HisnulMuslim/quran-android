@@ -104,20 +104,23 @@ class QariListWrapper(
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         sheetContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.background),
+        sheetContainerColor = MaterialTheme.colorScheme.surface,
         sheetContent = {
           Column {
             TopAppBar(
               title = {
                 Text(
                   stringResource(R.string.qarilist_select_qari),
-                  style = MaterialTheme.typography.titleLarge
+                  style = MaterialTheme.typography.titleLarge,
+                  color = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.background)
                 )
               },
               navigationIcon = {
                 IconButton(onClick = { closeDialog() }) {
                   Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.qarilist_dismiss)
+                    contentDescription = stringResource(R.string.qarilist_dismiss),
+                    tint = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.background)
                   )
                 }
               }

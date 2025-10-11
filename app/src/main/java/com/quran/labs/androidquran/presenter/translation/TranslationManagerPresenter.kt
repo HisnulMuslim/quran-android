@@ -236,7 +236,8 @@ open class TranslationManagerPresenter @Inject internal constructor(
   }
 
   companion object {
-    private const val WEB_SERVICE_ENDPOINT = "data/translations.php?v=5"
+    /*KQACR5*/
+    private const val WEB_SERVICE_ENDPOINT = "data/api/translations.json"
     private const val CACHED_RESPONSE_FILE_NAME = "translations.v5.cache"
   }
 }

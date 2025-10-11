@@ -41,8 +41,9 @@
     <activity
         android:name=".QuranDataActivity"
         android:configChanges="keyboardHidden|orientation|screenSize"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarSplashScreen"
         android:exported="true">
+      <!--KQACR2 theme changed to QuranToolBarSplashScreen-->
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>

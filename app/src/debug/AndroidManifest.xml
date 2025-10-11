@@ -4,13 +4,15 @@
   android:installLocation="auto">
 
   <application
-      android:icon="@drawable/debug_icon"
-      android:roundIcon="@drawable/debug_icon"
+      android:icon="@mipmap/icon"
+      android:roundIcon="@mipmap/icon"
       android:label="${app_debug_label}"
       android:name=".DebugApplication"
+      android:theme="@style/Quran"
       tools:replace="android:icon,android:roundIcon,android:label,android:name">
 
-    <activity android:name=".QuranDataActivity" />
+    <activity android:name=".QuranDataActivity"
+        android:theme="@style/QuranToolBarSplashScreen"/>
 
     <meta-data
         android:name="firebase_crashlytics_collection_enabled"

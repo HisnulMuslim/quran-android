@@ -2,10 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+  <!--KQACR23-->
   <item
       android:id="@+id/sort"
       android:enabled="false"
-      android:icon="@drawable/ic_sort"
+      android:icon="@drawable/baseline_sort_28"
       android:title="@string/menu_sort"
       android:visible="false"
       tools:visible="true"
@@ -39,14 +40,16 @@
           app:showAsAction="withText" />
     </menu>
   </item>
+  <!--KQACR23-->
   <item
       android:id="@+id/last_page"
-      android:icon="@drawable/ic_goto_quran"
+      android:icon="@drawable/baseline_goto_quran_28"
       android:title="@string/menu_jump_last_page"
       app:showAsAction="ifRoom" />
+  <!--KQACR23-->
   <item
       android:id="@+id/search"
-      android:icon="@drawable/ic_ab_search"
+      android:icon="@drawable/baseline_home_search_28"
       android:title="@string/menu_search"
       app:actionViewClass="androidx.appcompat.widget.SearchView"
       app:showAsAction="ifRoom|collapseActionView" />
@@ -54,9 +57,10 @@
       android:id="@+id/jump"
       android:title="@string/menu_jump"
       app:showAsAction="never" />
+  <!--KQACR23-->
   <item
       android:id="@+id/settings"
-      android:icon="@drawable/ic_action_settings"
+      android:icon="@drawable/baseline_home_settings_28"
       android:title="@string/menu_settings"
       app:showAsAction="never" />
   <item

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--KQACR17 NF -->
+<resources>
+  <string name="remove_button">ತೆಗೆದುಹಾಕಿ</string>
+  <string name="cancel">ರದ್ದುಮಾಡು</string>
+  <string name="from">ಇಂದ</string>
+  <string name="to">ಗೆ</string>
+  <string name="loading">ಲೋಡ್ ಆಗುತ್ತಿದೆ&#8230;</string>
+  <string name="canceling">ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತಿದೆ&#8230;</string>
+</resources>
+

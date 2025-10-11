@@ -80,7 +80,7 @@ open class TagBookmarkDialog : DialogFragment() {
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    val builder = Builder(requireActivity())
+    val builder = Builder(requireActivity(),R.style.QuranDialog)
     builder.setView(createTagsListView())
     builder.setPositiveButton(R.string.dialog_ok) { _: DialogInterface?, _: Int -> }
     builder.setNegativeButton(com.quran.mobile.common.ui.core.R.string.cancel) { _: DialogInterface?, _: Int -> dismiss() }

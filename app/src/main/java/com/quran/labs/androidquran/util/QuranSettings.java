@@ -56,6 +56,11 @@ public class QuranSettings {
   public boolean isArabicNames() {
     return prefs.getBoolean(Constants.PREF_USE_ARABIC_NAMES, false);
   }
+  /*KQACR6 start*/
+  public String interfaceLanguage() {
+    return prefs.getString(Constants.PREF_INTERFACE_LANGUAGE, "kn");
+  }
+  /*KQACR6 end*/
 
   public boolean isLockOrientation() {
     return prefs.getBoolean(Constants.PREF_LOCK_ORIENTATION, false);
@@ -78,7 +83,7 @@ public class QuranSettings {
   }
 
   public boolean useNewBackground() {
-    return prefs.getBoolean(Constants.PREF_USE_NEW_BACKGROUND, true);
+    return prefs.getBoolean(Constants.PREF_USE_NEW_BACKGROUND, false);
   }
 
   public boolean highlightBookmarks() {
@@ -171,7 +176,7 @@ public class QuranSettings {
   }
 
   public boolean getBookmarksGroupedByTags() {
-    return prefs.getBoolean(Constants.PREF_GROUP_BOOKMARKS_BY_TAG, false);
+    return prefs.getBoolean(Constants.PREF_GROUP_BOOKMARKS_BY_TAG, true);
   }
 
   public void setBookmarksGroupedByTags(boolean groupedByTags) {
@@ -345,6 +350,7 @@ public class QuranSettings {
         haveUpdatedTranslations).apply();
   }
 
+  //KQA TODO
   public long getLastUpdatedTranslationDate() {
     return perInstallationPrefs.getLong(Constants.PREF_LAST_UPDATED_TRANSLATIONS,
         System.currentTimeMillis());
@@ -416,5 +422,21 @@ public class QuranSettings {
     setToSave.add(pageType);
     perInstallationPrefs.edit()
         .putStringSet(Constants.PREF_CHECKED_PARTIAL_IMAGES, setToSave).apply();
+  }
+
+  public boolean isIncludeTranslation() {
+    return prefs.getBoolean(Constants.PREF_INCLUDE_TRANSLATION, true);
+  }
+
+  public boolean isInlineTranslation() {
+    return  prefs.getBoolean(Constants.PREF_INLINE_TRANSLATION, false);
+  }
+
+  public boolean isIncludeInlineAyahNumber() {
+    return prefs.getBoolean(Constants.PREF_INCLUDE_INLINE_AYAH_NUMBERS, false);
+  }
+
+  public boolean isIncludeNotes() {
+    return prefs.getBoolean(Constants.PREF_INCLUDE_NOTES, true);
   }
 }

@@ -1,4 +1,4 @@
-package com.quran.labs.androidquran.ui.fragment
+  package com.quran.labs.androidquran.ui.fragment
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -54,7 +54,7 @@ class JumpFragment : DialogFragment() {
     @SuppressLint("InflateParams")
     val layout = inflater.inflate(R.layout.jump_dialog, null)
 
-    val builder = Builder(activity)
+    val builder = Builder(activity,R.style.QuranDialog)
     builder.setTitle(activity.getString(R.string.menu_jump))
 
     // Sura chooser

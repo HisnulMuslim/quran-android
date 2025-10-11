@@ -1,24 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="Quran" parent="Theme.AppCompat">
+  <style name="Quran" parent="Theme.AppCompat.Light">
     <item name="colorAccent">@color/accent_color</item>
     <item name="spinnerStyle">?attr/actionDropDownStyle</item>
     <item name="spinnerDropDownItemStyle">@style/SherlockDropDownItem</item>
     <item name="spinnerItemStyle">@style/SherlockSpinnerItem</item>
     <item name="android:forceDarkAllowed">false</item>
+
+    <!--custom start-->
+    <item name="colorPrimary" >@color/accent_color_dark</item>
+    <item name="android:textColor">@color/header_text_color</item>
+    <item name="android:textColorPrimary">@color/toolbar_text</item>
+    <item name="android:windowBackground">@color/page_background</item>
+    <item name="android:colorBackground">@color/page_background</item>
+    <item name="android:textColorHint">@color/search_text_hint</item>
+
+
+    <!--custom end-->
   </style>
 
-  <style name="QuranToolBar" parent="Theme.AppCompat.NoActionBar">
-    <item name="android:windowBackground">@color/dark_background</item>
+  <style name="QuranToolBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowBackground">@color/page_background</item>
     <item name="colorAccent">@color/accent_color</item>
     <item name="windowActionModeOverlay">true</item>
     <item name="spinnerStyle">?attr/actionDropDownStyle</item>
     <item name="spinnerDropDownItemStyle">@style/SherlockDropDownItem</item>
     <item name="spinnerItemStyle">@style/SherlockSpinnerItem</item>
     <item name="android:forceDarkAllowed">false</item>
+
+    <item name="android:colorBackground">@color/page_background</item>
+    <item name="android:textCursorDrawable">@drawable/custom_cursor</item>
   </style>
 
-  <style name="QuranDialog" parent="Theme.AppCompat.Dialog">
+
+
+  <style name="QuranDialog" parent="Theme.AppCompat.Light.Dialog">
+    <item name="android:background">@color/page_background</item>
+    <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+    <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+    <item name="android:textColor">@color/header_text_color</item>
     <item name="android:forceDarkAllowed">false</item>
   </style>
+
+  <!--custom theme start-->
+
+  <style name="QuranToolBarSplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:colorBackground">@color/splash_screen_background</item>
+    <item name="android:forceDarkAllowed">false</item>
+  </style>
+
+  <!--custom theme end-->
 </resources>

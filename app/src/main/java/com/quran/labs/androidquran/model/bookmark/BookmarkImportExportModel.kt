@@ -81,6 +81,6 @@ class BookmarkImportExportModel @Inject internal constructor(
   }
 
   companion object {
-    private const val FILE_NAME = "quran_android.backup"
+    private const val FILE_NAME = "kannada_quran.backup"
   }
 }

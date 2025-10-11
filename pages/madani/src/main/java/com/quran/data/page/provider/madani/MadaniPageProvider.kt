@@ -16,7 +16,7 @@ class MadaniPageProvider : PageProvider {
   override fun getPageSizeCalculator(displaySize: DisplaySize): PageSizeCalculator =
       DefaultPageSizeCalculator(displaySize)
 
-  override fun getImageVersion() = 8
+  override fun getImageVersion() = 8/*KQACR19*/
 
   override fun getImagesBaseUrl() = "$baseUrl/"
 
@@ -34,7 +34,7 @@ class MadaniPageProvider : PageProvider {
 
   override fun getDatabasesBaseUrl() = "$baseUrl/databases/"
 
-  override fun getAudioDatabasesBaseUrl() = getDatabasesBaseUrl() + "audio/"
+  override fun getAudioDatabasesBaseUrl() =  "https://android.quran.com/data/databases/audio/"
 
   override fun getImagesDirectoryName() = ""
 
@@ -45,6 +45,7 @@ class MadaniPageProvider : PageProvider {
   override fun getDefaultQariId(): Int = 0
 
   override fun getQaris(): List<Qari> {
+    /*KQACR16 added list of Qari TODO do not upload this to git as per original developer */
     return listOf(
       Qari(
         0,
@@ -69,12 +70,58 @@ class MadaniPageProvider : PageProvider {
         "2",
         false,
         null
-      )
+      ),Qari(
+        3,
+        audioR.string.qari_sudais_gapless,
+        "https://download.quranicaudio.com/quran/abdurrahmaan_as-sudays/",
+        "sudais_murattal",
+        false,
+        "sudais_murattal"
+      ),
+      Qari(
+        4,
+        audioR.string.qari_shuraym_gapless,
+        "https://download.quranicaudio.com/quran/sa3ood_al-shuraym/",
+        "shuraym",
+        false,
+        "shuraym"
+      ),
+      Qari(
+        5,
+        audioR.string.qari_muaiqly_haramain_gapless,
+        "https://download.quranicaudio.com/quran/maher_256/",
+        "maher_al_muaiqly",
+        false,
+        "maher_al_muaiqly"),
+      Qari(
+        6,
+        audioR.string.qari_saad_al_ghamidi_gapless,
+        "https://download.quranicaudio.com/quran/sa3d_al-ghaamidi/complete/",
+        "sa3d_alghamidi",
+        false,
+        "sa3d_alghamidi"),
+
+      Qari(
+        7,
+        audioR.string.qari_yasser_dussary_gapless,
+        "https://download.quranicaudio.com/quran/yasser_ad-dussary/",
+        "yasser_dussary",
+        false,
+        "yasser_dussary"),
+
+      Qari(
+        8,
+        audioR.string.qari_afasy_gapless,
+        "https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/",
+        "mishari_alafasy",
+        false,
+        "mishari_alafasy")
     )
   }
 
   companion object {
-    private const val baseUrl = "https://android.quran.com/data"
+      /*KQACR4 updated the cloud file url*/
+    private const val baseUrl = "https://files.pavitra-quraan.com/data"
     private val dataSource by lazy { MadaniDataSource() }
   }
 }

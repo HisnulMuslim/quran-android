@@ -10,7 +10,7 @@
   <string name="extracting_title">تجهيز…</string>
   <string name="menu_about">عنا</string>
   <string name="menu_other_apps">تطبيقات أخرى‎</string>
-  <string name="menu_settings">الإعدادات</string>
+  <!--<string name="menu_settings">الإعدادات</string>-->
   <string name="menu_jump_last_page">الصفحة الأخيرة</string>
   <string name="menu_bookmarks">المرجعيات</string>
   <string name="menu_bookmarks_page">مرجعيات الصفحات</string>
@@ -318,5 +318,16 @@
     القادمة، هل ترغب في نقل البيانات على أية حال؟
   </string>
   <string name="comma">"،"</string>
+
+  <string name="prefs_category_sharing">تفضيلات القراءة</string>
+  <string name="prefs_include_translation_title">تضمين الترجمة</string>
+  <string name="prefs_include_translation_summary">يتم تضمين الترجمات في النص المشترك أو المنسوخ</string>
+  <string name="prefs_include_inline_ayah_numbers_title">تضمين رقم الآية</string>
+  <string name="prefs_include_inline_ayah_numbers_summary">يتم تضمين أرقام الآيات في النص المشترك أو المنسوخ</string>
+  <string name="prefs_include_notes_title">تضمين الملاحظات</string>
+  <string name="prefs_include_notes_summary">يتم تضمين الملاحظات في النص المشترك أو المنسوخ</string>
+  <string name="prefs_inline_translation_title">اعرض الترجمة بعد كل آية</string>
+  <string name="prefs_inline_translation_summary_on">ستُعرَض الترجمة بعد كل آية</string>
+  <string name="prefs_inline_translation_summary_off">ستظهر جميع الآيات أولًا بالعربية، ثم يليها الترجمة الكاملة</string>
 
 </resources>

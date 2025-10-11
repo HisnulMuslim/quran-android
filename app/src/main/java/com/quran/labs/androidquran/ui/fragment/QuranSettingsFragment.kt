@@ -13,6 +13,7 @@ import com.quran.labs.androidquran.QuranPreferenceActivity
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.data.Constants
 import com.quran.labs.androidquran.pageselect.PageSelectActivity
+import com.quran.labs.androidquran.ui.QuranActivity
 import com.quran.labs.androidquran.ui.TranslationManagerActivity
 import com.quran.mobile.di.ExtraPreferencesProvider
 import com.quran.mobile.feature.downloadmanager.AudioManagerActivity
@@ -53,6 +54,7 @@ class QuranSettingsFragment : PreferenceFragmentCompat(),
     if (pageTypes.size < 2 && pageChangePref != null) {
       val readingPrefs: Preference? = findPreference(Constants.PREF_READING_CATEGORY)
       (readingPrefs as PreferenceGroup).removePreference(pageChangePref)
+      //TODO KQACR25  Show page type preference in settings
     }
 
     // add additional injected preferences (if any)
@@ -78,6 +80,15 @@ class QuranSettingsFragment : PreferenceFragmentCompat(),
         context.restartActivity()
       }
     }
+    /*KQACR6 start*/
+    else if (key == Constants.PREF_INTERFACE_LANGUAGE) {
+      QuranActivity.shouldRecreate = true
+      val context = activity
+      if (context is QuranPreferenceActivity) {
+        context.restartActivity()
+      }
+    }
+    /*KQACR6 end*/
   }
 
   override fun onPreferenceTreeClick(preference: Preference): Boolean {

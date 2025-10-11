@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--KQACR17 NF -->
+<resources>
+  <string name="downloading">ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ&#8230;</string>
+  <string name="download_non_wifi_prompt">ನೀವು Wi-Fi ನಲ್ಲಿ ಇಲ್ಲ. ಆದರೂ ಡೌನ್ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?</string>
+</resources>

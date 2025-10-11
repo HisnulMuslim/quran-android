@@ -5,12 +5,14 @@
           android:icon="@drawable/ic_not_favorite"
           android:title="@string/menu_bookmarks"
           app:showAsAction="ifRoom" />
+    <!--KQACR22 switch to kannada mode icon change  -->
     <item android:id="@+id/goto_translation"
-          android:icon="@drawable/ic_translation"
+          android:icon="@drawable/icon_kannada_toolbar"
           android:title="@string/menu_translation"
           app:showAsAction="ifRoom" />
+    <!--KQACR22 switch to arabic mode icon change  -->
     <item android:id="@+id/goto_quran"
-          android:icon="@drawable/ic_goto_quran"
+          android:icon="@drawable/baseline_goto_quran_whitebg_28"
           android:title="@string/menu_back_to_page"
           app:showAsAction="ifRoom" />
     <item android:id="@+id/search"

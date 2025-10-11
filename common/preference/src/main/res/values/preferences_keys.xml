@@ -3,4 +3,5 @@
   <string translatable="false" name="prefs_reading_category_key">readingCategoryKey</string>
   <string translatable="false" name="prefs_show_sidelines">showSidelines</string>
   <string translatable="false" name="prefs_show_line_dividers">showLineDividers</string>
+  <string translatable="false" name="prefs_sharing_category_key">sharingCategoryKey</string>
 </resources>

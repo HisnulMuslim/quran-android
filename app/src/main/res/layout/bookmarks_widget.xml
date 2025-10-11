@@ -4,21 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/translation_verse_text_color">
+    android:background="@color/accent_color">
 
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginVertical="2dp"
       android:background="@drawable/quran_row_background"
-      android:orientation="horizontal">
+      android:orientation="horizontal"
+      >
 
     <ImageButton
         android:id="@+id/widget_icon_button"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/translation_verse_text_color"
+        android:background="@color/accent_color"
         android:src="@drawable/icon" />
 
     <ImageButton
@@ -26,24 +27,24 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/translation_verse_text_color"
-        android:src="@drawable/ic_ab_search" />
+        android:background="@color/accent_color"
+        android:src="@drawable/baseline_home_search_white_bg_28" />
 
     <ImageButton
         android:id="@+id/widget_btn_go_to_quran"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/translation_verse_text_color"
-        android:src="@drawable/ic_goto_quran" />
+        android:background="@color/accent_color"
+        android:src="@drawable/baseline_goto_quran_whitebg_28" />
 
     <ImageButton
         android:id="@+id/search_widget_btn_jump"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/translation_verse_text_color"
-        android:src="@drawable/ic_baseline_arrow_upright_24" />
+        android:background="@color/accent_color"
+        android:src="@drawable/jump_to_element_24" />
 
   </LinearLayout>
 
@@ -64,6 +65,7 @@
       android:textColor="#ffffff"
       android:textSize="20sp"
       android:layout_marginHorizontal="8dp"
-      android:visibility="gone" />
+      android:visibility="gone"
+      />
 
 </LinearLayout>

@@ -56,7 +56,8 @@ android {
   flavorDimensions += listOf("pageType")
   productFlavors {
     create("madani") {
-      applicationId = "com.quran.labs.androidquran"
+      /*KQACR1 change the application id*/
+      applicationId = "com.quran.kannada"
     }
   }
 
@@ -220,4 +221,10 @@ dependencies {
 
   // Number Picker
   implementation(libs.number.picker)
+
+  implementation ("com.mikepenz:iconics-core:5.3.4")
+  implementation ("com.mikepenz:google-material-typeface:4.0.0.3-kotlin@aar")
+  implementation ("com.github.QuadFlask:colorpicker:0.0.15")
+  implementation ("com.github.yukuku:ambilwarna:2.0.1")
+
 }

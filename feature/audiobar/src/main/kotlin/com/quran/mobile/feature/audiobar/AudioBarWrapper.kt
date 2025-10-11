@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -57,7 +58,7 @@ class AudioBarWrapper @JvmOverloads constructor(
       }
 
       Card(
-        shape = CardDefaults.shape.topOnly(),
+        shape = RectangleShape,
         modifier = Modifier.fillMaxWidth()
       ) {
         AudioBar(
