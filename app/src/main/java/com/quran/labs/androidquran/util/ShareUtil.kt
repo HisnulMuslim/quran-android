@@ -151,7 +151,7 @@ class ShareUtil @Inject internal constructor(private val quranDisplayData: Quran
         append(verseRange.endingAyah)
       }
       append("]\n\n")
-      append(activity.getString(R.string.download_text)+"\nhttps://download.pavitra-quraan.com/")
+      append(activity.getString(R.string.download_text)+"\nhttps://download.hisnulmuslimdua.com/")
       }
     }
 

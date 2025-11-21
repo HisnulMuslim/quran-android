@@ -1866,7 +1866,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         Toast.LENGTH_LONG
       ).show()
 
-      if (quranAyahInfo != null) {
+     /* if (quranAyahInfo != null) {
         val shareText = shareUtil.getShareText(this, quranAyahInfo, translationNames)
         if (isCopy) {
           shareUtil.copyToClipboard(this, shareText)
@@ -1877,9 +1877,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
             com.quran.labs.androidquran.common.toolbar.R.string.share_ayah_text
           )
         }
-      }
+      }*/
 
-      return
+     // return
     }
     /*KQACR7 start*/
     val verses = 1 + abs(

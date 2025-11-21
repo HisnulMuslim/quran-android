@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--KQACR17 NF -->
 <resources>
-  <string name="qari_minshawi_murattal_gapless">ಮಿನ್ ಶಾವಿ ಮುರತ್ತಲ್[Minshawi Murattal]</string>
+  <string name="qari_minshawi_murattal_gapless">Minshawi Murattal</string>
   <string name="qari_husary_gapless">Husary</string>
   <string name="qari_sudais_gapless">Abdurrahman As-Sudais</string>
   <string name="qari_qatami_gapless">Nasser Al Qatami</string>

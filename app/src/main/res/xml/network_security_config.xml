@@ -3,6 +3,6 @@
   <domain-config cleartextTrafficPermitted="true">
     <domain includeSubdomains="true">quran.com</domain>
     <domain includeSubdomains="true">quranicaudio.com</domain>
-    <domain includeSubdomains="true">pavitra-quraan.com</domain>
+    <domain includeSubdomains="true">hisnulmuslimdua.com</domain>
   </domain-config>
 </network-security-config>

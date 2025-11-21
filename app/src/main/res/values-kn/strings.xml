@@ -13,7 +13,7 @@
   <string name="downloading_message">ಫೈಲ್‌ಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವವರೆಗೆ ನಿರೀಕ್ಷಿಸಿ(resume supported).</string>
   <string name="extracting_title">ಸಂಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ&#8230;</string>
   <string name="menu_about">ಪವಿತ್ರ ಕುರ್ ಆನ್  ಬಗ್ಗೆ</string>
-  <string name="menu_other_apps">Other apps</string>
+  <string name="menu_other_apps">ನಮ್ಮ ಇತರ ಅಪ್ಲಿಕೇಶನ್ಗಳು</string>
   <string name="menu_settings">ಸೆಟ್ಟಿಂಗ್</string>
   <string name="menu_jump_last_page">ಕೊನೆಯ ಪುಟ</string>
   <string name="menu_bookmarks">ಗುರುತು</string>
@@ -35,7 +35,8 @@
   <string name="please_wait">ದಯಮಾಡಿ ನಿರೀಕ್ಷಿಸಿ…</string>
 
   <!-- about -->
-  <string name="about_description">ಇದು ಉಚಿತ ಕುರ್ ಆನ್ ಅಪ್ಲಿಕೇಶನ್ ಆಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಾರ್ಥನೆಗಳಲ್ಲಿ ಕೊಡುಗೆದಾರರನ್ನು ಮರೆಯಬೇಡಿ.</string>
+  <string name="about_description"> ಪವಿತ್ರ ಕುರ್ ಆನ್,ಇದು ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಮಾರ್ಟ್ ಫೋನ್ ಗಳಿಗಾಗಿರುವ ಉಚಿತ ಕನ್ನಡ ಕುರ್ ಆನ್ ಆಪ್ಲಿಕೇಷನ್ ಆಗಿದೆ. &lt;br/>&lt;br/> ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಓಪನ್ ಸೋರ್ಸ್ ಆಂಡ್ರಾಯ್ಡ್ ಪ್ರಾಜೆಕ್ಟ್    &lt;a href="https://quran.com/"> QURAN.COM &lt;/a> ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.ಅಲ್ಲಾಹು ಅವರಿಗೆ  ಶ್ರೇಷ್ಟವಾದದ್ದನ್ನು ದಯಪಾಲಿಸಲಿ. &lt;br/>&lt;br/>
+    ಕನ್ನಡ ಅರ್ಥಾನುವಾದವನ್ನು ಮುಹಮ್ಮದ್ ಹಂಝಾ ಪುತ್ತೂರು ರವರು ಭಾಷಾಂತರಿಸಿದ, ಉಮರ್ ಇಬ್ನ್ ಅಹ್ಮದ್ ಮದನಿ , ಅಹ್ಮದ್ ಎಸ್ ಎಮ್ ಮತ್ತು ಅಬೂಬಕರ್ ನಝೀರ್ ಸಲಫಿಯವರು ಪರಿಶೀಲಿಸಿದ &lt;br/>  &lt;b>ಆದರಣೀಯ ಖುರ್ ಆನ್ ಹಾಗೂ ಅದರ ಕನ್ನಡ ಅರ್ಥಾನುವಾದ &lt;br/> &lt;i>ಪ್ರಕಾಶಕರು :ಅಲ್  ಮಲಿಕ್  ಫಹದ್ ಪವಿತ್ರ  ಖುರ್ ಆನ್  ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್ , ಮದೀನಾ, ಸೌದಿ ಅರೇಬಿಯಾ  &lt;i/> &lt;/b> &lt;br/>ದಿಂದ ತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ.&lt;br/></string>
 
   <string name="about_data_sources">ಡೇಟಾ ಮೂಲಗಳು</string>
   <string name="about_images">ಕುರ್ ಆನ್ ಮೂಲ ಅರಬಿ ಪುಟಗಳು</string>
@@ -299,7 +300,7 @@
   <string name="get_translations">ಅನುವಾದಗಳನ್ನು ಪಡೆಯಿರಿ</string>
 
   <!-- help -->
-  <string name="email_us">ನಿಮ್ಮ ಪ್ರಶ್ನೆಗಳನ್ನು  apps.kannada.quran@gmail.com ಗೆ ಇಮೇಲ್ ಮಾಡಬಹುದು.ನಾವು ಸಾಕಷ್ಟು ಇಮೇಲ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತೇವೆ ಎಂಬುದನ್ನು ದಯವಿಟ್ಟು ಗಮನಿಸಿ, ಹಾಗಾಗಿ ಅವೆಲ್ಲಕ್ಕೂ ಪ್ರತ್ಯುತ್ತರ ನೀಡಲು ನಮಗೆ ಸಾಧ್ಯವಾಗದೇ ಇರಬಹುದು.</string>
+  <string name="email_us">ನಿಮ್ಮ ಪ್ರಶ್ನೆಗಳನ್ನು  hmkannada@gmail.com ಗೆ ಇಮೇಲ್ ಮಾಡಬಹುದು.ನಾವು ಸಾಕಷ್ಟು ಇಮೇಲ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತೇವೆ ಎಂಬುದನ್ನು ದಯವಿಟ್ಟು ಗಮನಿಸಿ, ಹಾಗಾಗಿ ಅವೆಲ್ಲಕ್ಕೂ ಪ್ರತ್ಯುತ್ತರ ನೀಡಲು ನಮಗೆ ಸಾಧ್ಯವಾಗದೇ ಇರಬಹುದು.</string>
 
   <!-- sura metainfo -->
   <string name="makki">ಮಕ್ಕಾದಲ್ಲಿ</string>

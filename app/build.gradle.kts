@@ -31,9 +31,14 @@ android {
   namespace = "com.quran.labs.androidquran"
 
   defaultConfig {
-    versionCode = 3460
-    versionName = "3.4.6"
+    versionCode = 1010
+    versionName = "1.0.1"
     testInstrumentationRunner = "com.quran.labs.androidquran.core.QuranTestRunner"
+
+  }
+
+  androidResources {
+    localeFilters += listOf("en", "ar", "kn")
   }
 
   dependenciesInfo {
@@ -108,6 +113,12 @@ android {
   packaging {
     resources {
       excludes += setOf("META-INF/*.kotlin_module", "META-INF/DEPENDENCIES", "META-INF/INDEX.LIST")
+    }
+  }
+
+  bundle {
+    language {
+      enableSplit = false
     }
   }
 }

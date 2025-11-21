@@ -63,14 +63,14 @@ class MadaniPageProvider : PageProvider {
         false,
         "husary"
       ),
-      Qari(
+     /* Qari(
         2,
         audioR.string.qari_basfar,
         "https://mirrors.quranicaudio.com/everyayah/Abdullah_Basfar_192kbps/",
         "2",
         false,
         null
-      ),Qari(
+      ),*/Qari(
         3,
         audioR.string.qari_sudais_gapless,
         "https://download.quranicaudio.com/quran/abdurrahmaan_as-sudays/",
@@ -121,7 +121,7 @@ class MadaniPageProvider : PageProvider {
 
   companion object {
       /*KQACR4 updated the cloud file url*/
-    private const val baseUrl = "https://files.pavitra-quraan.com/data"
+    private const val baseUrl = "https://quran-files.hisnulmuslimdua.com/data"
     private val dataSource by lazy { MadaniDataSource() }
   }
 }

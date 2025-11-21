@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="app_name">ಪವಿತ್ರ ಕುರ್ ಆನ್ Quran</string>
   <string name="download_text" translatable="false">Download :</string>
   <string name="about_contact_us" translatable="false">ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ</string>
   <string name="about_us" translatable="false">&#169;Kannada Quran Application</string>
-  <string name="about_us_email" translatable="false">apps.kannada.quran@gmail.com</string>
-  <string name="about_us_email_url" translatable="false">mailto:apps.kannada.quran@gmail.com</string>
+  <string name="about_us_email" translatable="false">hmkannada@gmail.com</string>
+  <string name="about_us_email_url" translatable="false">mailto:hmkannada@gmail.com</string>
 
   <string name="about_description" translatable="false">
     ಪವಿತ್ರ ಕುರ್ ಆನ್,ಇದು ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಮಾರ್ಟ್ ಫೋನ್ ಗಳಿಗಾಗಿರುವ ಉಚಿತ ಕನ್ನಡ ಕುರ್ ಆನ್ ಆಪ್ಲಿಕೇಷನ್ ಆಗಿದೆ. &lt;br/>&lt;br/> ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಓಪನ್ ಸೋರ್ಸ್ ಆಂಡ್ರಾಯ್ಡ್ ಪ್ರಾಜೆಕ್ಟ್    &lt;a href="https://quran.com/"> QURAN.COM &lt;/a> ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.ಅಲ್ಲಾಹು ಅವರಿಗೆ  ಶ್ರೇಷ್ಟವಾದದ್ದನ್ನು ದಯಪಾಲಿಸಲಿ. &lt;br/>&lt;br/>

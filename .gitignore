@@ -24,4 +24,4 @@ extras
 app/google-services.json
 /.github
 app/gradle.properties
-app/gradle.properties
+/app/madani/release

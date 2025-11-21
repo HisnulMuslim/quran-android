@@ -5,7 +5,7 @@ import com.quran.data.core.QuranConstants
 object Constants {
 
   //KQACR5 change translation list url
-  const val HOST = "https://files.pavitra-quraan.com/"
+  const val HOST = "https://quran-files.hisnulmuslimdua.com/"
 
   // Numerics
   const val DEFAULT_NIGHT_MODE_TEXT_BRIGHTNESS = 255
