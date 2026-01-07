@@ -25,3 +25,5 @@ app/google-services.json
 /.github
 app/gradle.properties
 /app/madani/release
+app/gradle.properties
+app/gradle.properties

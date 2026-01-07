@@ -19,7 +19,7 @@
         android:id="@+id/indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/sura_details_color"
+        android:background="@color/accent_color_dark"
         style="@style/ToolBarArea"
         />
     <com.quran.labs.androidquran.view.QuranViewPager

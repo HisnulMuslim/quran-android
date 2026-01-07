@@ -350,7 +350,6 @@ public class QuranSettings {
         haveUpdatedTranslations).apply();
   }
 
-  //KQA TODO
   public long getLastUpdatedTranslationDate() {
     return perInstallationPrefs.getLong(Constants.PREF_LAST_UPDATED_TRANSLATIONS,
         System.currentTimeMillis());

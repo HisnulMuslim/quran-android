@@ -86,7 +86,6 @@ open class SeekBarPreference(
       val textKey = context.getString(R.string.prefs_night_mode_text_brightness)
       val bgKey = context.getString(R.string.prefs_night_mode_background_brightness)
       if (changedKey == textKey || changedKey == bgKey) {
-        Timber.d("KQA chnaged key is $changedKey textKey $textKey bgKey $bgKey")
         updatePreview()
       }
 

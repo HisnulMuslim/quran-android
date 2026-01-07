@@ -157,7 +157,7 @@ class QuranActivity : AppCompatActivity(),
     val ab = supportActionBar
     ab?.setTitle(R.string.app_name)
 
-    val logoDrawable = ContextCompat.getDrawable(this, R.drawable.icon)
+    val logoDrawable = ContextCompat.getDrawable(this, R.mipmap.icon)
     if (logoDrawable is BitmapDrawable) {
       val resizePercentage = 0.75f
       val bitmap = logoDrawable.bitmap
@@ -403,10 +403,10 @@ class QuranActivity : AppCompatActivity(),
   }
 
   private fun updateTranslationsListAsNeeded() {
-    if (!updatedTranslations) {
+   /* if (!updatedTranslations) {*/
       translationManagerPresenter.checkForUpdates()
-      updatedTranslations = true
-    }
+     /* updatedTranslations = true
+    }*/
   }
 
   private fun showTranslationsUpgradeDialog() {
@@ -425,7 +425,7 @@ class QuranActivity : AppCompatActivity(),
       dialog.dismiss()
       upgradeDialog = null
       // pretend we don't have updated translations.  we'll
-      // check again after 10 days.TODO
+      // check again after 1 day.TODO
       settings.setHaveUpdatedTranslations(false)
     }
 

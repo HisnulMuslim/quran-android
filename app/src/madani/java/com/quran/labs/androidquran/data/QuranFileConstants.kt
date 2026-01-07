@@ -16,5 +16,5 @@ object QuranFileConstants {
   const val ARABIC_SHARE_TEXT_HAS_BASMALLAH = true
   const val FETCH_QUARTER_NAMES_FROM_DATABASE = false
 
-  var ICON_RESOURCE_ID = com.quran.labs.androidquran.R.drawable.icon
+  var ICON_RESOURCE_ID = com.quran.labs.androidquran.R.mipmap.icon
 }

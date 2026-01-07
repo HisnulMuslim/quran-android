@@ -12,8 +12,8 @@ object Constants {
   const val DEFAULT_NIGHT_MODE_BACKGROUND_BRIGHTNESS = 0
   const val DEFAULT_TEXT_SIZE = 17
 
-  // 1 hour in ms
-  const val MIN_TRANSLATION_REFRESH_TIME = 60 * 60 * 1000
+  // 24 hour in ms
+  const val MIN_TRANSLATION_REFRESH_TIME = 24 * 60 * 60 * 1000
 
   // Pages
   const val PAGES_FIRST = QuranConstants.PAGES_FIRST

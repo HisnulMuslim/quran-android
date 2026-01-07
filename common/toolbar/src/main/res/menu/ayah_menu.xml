@@ -10,9 +10,9 @@
           android:icon="@drawable/ic_share"
           android:title="@string/share_ayah_text">
         <menu>
-            <item android:id="@+id/cab_share_ayah_link"
+           <!-- <item android:id="@+id/cab_share_ayah_link"
                 android:icon="@drawable/ic_link"
-                android:title="@string/share_ayah" />
+                android:title="@string/share_ayah" />-->
             <item android:id="@+id/cab_share_ayah_text"
                 android:icon="@drawable/ic_share"
                 android:title="@string/share_ayah_text" />

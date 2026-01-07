@@ -4,9 +4,9 @@
   android:installLocation="auto">
 
   <application
-      android:icon="@mipmap/icon"
-      android:roundIcon="@mipmap/icon"
       android:label="${app_debug_label}"
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
       android:name=".DebugApplication"
       android:theme="@style/Quran"
       tools:replace="android:icon,android:roundIcon,android:label,android:name">

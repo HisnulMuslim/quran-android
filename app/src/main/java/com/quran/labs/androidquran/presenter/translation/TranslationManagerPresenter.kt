@@ -52,11 +52,9 @@ open class TranslationManagerPresenter @Inject internal constructor(
   }
 
   fun checkForUpdates() {
-    Timber.d("checking whether we should update translations..")
     val isCacheStale = System.currentTimeMillis() -
         quranSettings.lastUpdatedTranslationDate > Constants.MIN_TRANSLATION_REFRESH_TIME
     if (isCacheStale) {
-      Timber.d("updating translations list...")
       getTranslations(true)
         .catch { Timber.e(it) }
         .launchIn(scope)
