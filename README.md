@@ -1,6 +1,6 @@
 <div align="center">
 `KQACR21`
-<img src="https://raw.githubusercontent.com/quran/quran_android/main/app/src/madani/res/drawable-xxhdpi/icon.png" alt='Quran for Android logo'/>
+<img src="https://github.com/HisnulMuslim/quran-android/blob/main/app/src/madani/res/mipmap-xxxhdpi/icon.png" alt='Quran for Android logo'/>
 
 # Quran for Android
 
