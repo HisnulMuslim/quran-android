@@ -1,10 +1,10 @@
 <div align="center">
-`KQACR21`
+
 <img src="https://github.com/HisnulMuslim/quran-android/blob/main/app/src/madani/res/mipmap-xxxhdpi/icon.png" alt='Quran for Android logo'/>
 
 # Quran for Android
 
-[![Build Status](https://github.com/quran/quran_android/actions/workflows/build.yml/badge.svg)](https://github.com/quran/quran_android/actions/workflows/build.yml)
+[![Build Status](https://github.com/quran/quran_android/actions/workflows/build.yml/badge.svg)](https://github.com/HisnulMuslim/quran-android/actions/workflows/build.yml)
 [![Version](https://img.shields.io/github/v/release/quran/quran_android?include_prereleases&sort=semver)](https://github.com/quran/quran_android/releases/latest)
 [![Github Downloads](https://img.shields.io/github/downloads/quran/quran_android/total?logo=Github)](https://github.com/quran/quran_android/releases)
 
