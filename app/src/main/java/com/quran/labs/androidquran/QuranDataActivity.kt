@@ -8,8 +8,6 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.TextUtils
 import android.view.View
 import androidx.activity.SystemBarStyle
@@ -62,7 +60,6 @@ import javax.inject.Inject
  * and [QuranDownloadService] is (mostly) used to perform the actual downloading of
  * any Quran data.
  */
-/*KQACR2 SplashScreen Make this class open for extending it*/
 class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequestPermissionsResultCallback {
 
   @Inject
@@ -266,6 +263,7 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
     permissions: Array<String>,
     grantResults: IntArray
   ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     if (requestCode == REQUEST_POST_NOTIFICATION_PERMISSIONS) {
       actuallyDownloadQuranImages(lastForceValue)
     }
@@ -507,16 +505,35 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
   }
 
   private fun runListView() {
-    /*KQACR2 Added 2 sec delay before showing the surah list */
-    Handler(Looper.getMainLooper()).postDelayed({
-      val intent = Intent(this@QuranDataActivity, QuranActivity::class.java)
-      intent.putExtra(
-        QuranActivity.EXTRA_SHOW_TRANSLATION_UPGRADE,
-        quranSettings.haveUpdatedTranslations()
-      )
-      startActivity(intent)
-      finish()
-    }, 2000)
+    scope.launch {
+      try {
+        // Wait for splash/loading UI
+        delay(2000)
+
+        // Double-check activity state after delay
+        if (!isFinishing && !isDestroyed) {
+          val intent = Intent(this@QuranDataActivity, QuranActivity::class.java)
+          intent.putExtra(
+            QuranActivity.EXTRA_SHOW_TRANSLATION_UPGRADE,
+            quranSettings.haveUpdatedTranslations()
+          )
+          startActivity(intent)
+          finish()
+        } else {
+          Timber.w("QuranDataActivity finishing/destroyed, skipping navigation to QuranActivity")
+        }
+      } catch (e: kotlinx.coroutines.CancellationException) {
+        // Scope cancelled (activity destroyed) - this is expected, don't log as error
+        Timber.d("Navigation to QuranActivity cancelled")
+      } catch (e: Exception) {
+        // Unexpected error - log it
+        Timber.e(e, "Error navigating to QuranActivity")
+        // Try to close activity safely
+        if (!isFinishing) {
+          finish()
+        }
+      }
+    }
   }
 
 

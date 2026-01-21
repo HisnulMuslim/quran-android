@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -59,7 +60,11 @@ class AudioBarWrapper @JvmOverloads constructor(
 
       Card(
         shape = RectangleShape,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.secondary
+        )
+
       ) {
         AudioBar(
           flow,

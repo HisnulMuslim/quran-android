@@ -92,7 +92,7 @@ open class QuranApplication : Application(), QuranApplicationComponentProvider, 
     val resources = context.resources
     val config = resources.configuration
     config.setLocale(locale)
-    config.setLayoutDirection(config.locale)
+    config.setLayoutDirection(locale)
     resources.updateConfiguration(config, resources.displayMetrics)
   }
 }

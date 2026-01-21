@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/accent_color">
+    android:background="@color/accent_color_dark">
 
   <LinearLayout
       android:layout_width="match_parent"
@@ -19,15 +19,15 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/accent_color"
-        android:src="@drawable/icon" />
+        android:background="@color/accent_color_dark"
+        android:src="@mipmap/ic_launcher_round" />
 
     <ImageButton
         android:id="@+id/widget_btn_search"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/accent_color"
+        android:background="@color/accent_color_dark"
         android:src="@drawable/baseline_home_search_white_bg_28" />
 
     <ImageButton
@@ -35,7 +35,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/accent_color"
+        android:background="@color/accent_color_dark"
         android:src="@drawable/baseline_goto_quran_whitebg_28" />
 
     <ImageButton
@@ -43,7 +43,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/accent_color"
+        android:background="@color/accent_color_dark"
         android:src="@drawable/jump_to_element_24" />
 
   </LinearLayout>

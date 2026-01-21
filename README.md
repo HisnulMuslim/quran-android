@@ -2,7 +2,7 @@
 
 <img src="https://github.com/HisnulMuslim/quran-android/blob/main/app/src/madani/res/mipmap-xxxhdpi/icon.png" alt='Quran for Android logo'/>
 
-# Quran for Android
+# Kannada Quran
 
 [![Build Status](https://github.com/HisnulMuslim/quran-android/actions/workflows/build.yml/badge.svg)](https://github.com/HisnulMuslim/quran-android/actions/workflows/build.yml)
 [![Version](https://img.shields.io/github/v/release/HisnulMuslim/quran-android?include_prereleases&sort=semver)](https://github.com/HisnulMuslim/quran-android/releases/latest)
