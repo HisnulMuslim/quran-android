@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+  <TextView
+      android:id="@+id/sponsorLabel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/sponsored_by"
+      android:textSize="16sp"
+      android:alpha="0.75"
+      android:paddingBottom="12dp" />
+
+  <ImageView
+      android:id="@+id/sponsorLogo"
+      android:layout_width="64dp"
+      android:layout_height="64dp"
+      android:src="@mipmap/ksa_logo"
+      android:contentDescription="@string/sponsored_by" />
+
+  <TextView
+      android:id="@+id/sponsorName"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Karnataka Salafi Association"
+      android:textSize="16sp"
+      android:paddingTop="10dp" />
+
+</LinearLayout>

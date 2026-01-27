@@ -40,7 +40,11 @@
   <string name="please_wait">Please wait…</string>
 
   <!-- about -->
-  <string name="about_description">Quran for Android is a free Quran application. Please do not forget the contributors in your prayers.</string>
+  <string name="about_description">The Holy Qur’an — a free Kannada Qur’an application designed for Android smartphones. &lt;br/>&lt;br/>This application has been developed using the open-source Android project &lt;a href="https://quran.com/">QURAN.COM  &lt;/a>.May Allah reward them with the best of rewards.&lt;br/>&lt;br/>
+    The Kannada translation was translated by Muhammad Hamza Puttur and reviewed by Umar ibn Ahmad Madani, Ahmad S. M., and Abu Bakr Nazeer Salafi. &lt;br/>&lt;br/>  &lt;b>The Noble Qur’an along with its Kannada translation &lt;br/>
+ &lt;i> Publisher: King Fahd Holy Quran Printing Complex, Madinah, Saudi Arabia  &lt;i/> &lt;/b> &lt;br/>
+
+  </string>
   <string name="about_data_sources">Data Sources</string>
   <string name="about_images">Images</string>
   <string name="about_madani_images">The Quran images are based on the fonts from the King Fahd Quran Printing Complex</string>

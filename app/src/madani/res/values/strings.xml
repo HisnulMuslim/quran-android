@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">ಪವಿತ್ರ ಕುರ್ ಆನ್ Quran</string>
+  <string name="app_name" >ಪವಿತ್ರ ಕುರ್ ಆನ್ Quran</string>
   <string name="download_text" translatable="false">Download :</string>
-  <string name="about_contact_us" translatable="false">ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ</string>
+  <string name="about_contact_us" translatable="false">Contact us </string>
   <string name="about_us" translatable="false">&#169;Kannada Quran Application</string>
   <string name="about_us_email" translatable="false">hmkannada@gmail.com</string>
-  <string name="about_us_email_url" translatable="false">mailto:hmkannada@gmail.com</string>
+  <string name="support_email_subject" translatable="false">Pavitra Qur\'an App Support</string>
 
-  <string name="about_description" translatable="false">
-    ಪವಿತ್ರ ಕುರ್ ಆನ್,ಇದು ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಮಾರ್ಟ್ ಫೋನ್ ಗಳಿಗಾಗಿರುವ ಉಚಿತ ಕನ್ನಡ ಕುರ್ ಆನ್ ಆಪ್ಲಿಕೇಷನ್ ಆಗಿದೆ. &lt;br/>&lt;br/> ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಓಪನ್ ಸೋರ್ಸ್ ಆಂಡ್ರಾಯ್ಡ್ ಪ್ರಾಜೆಕ್ಟ್    &lt;a href="https://quran.com/"> QURAN.COM &lt;/a> ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.ಅಲ್ಲಾಹು ಅವರಿಗೆ  ಶ್ರೇಷ್ಟವಾದದ್ದನ್ನು ದಯಪಾಲಿಸಲಿ. &lt;br/>&lt;br/>
-    ಕನ್ನಡ ಅರ್ಥಾನುವಾದವನ್ನು ಮುಹಮ್ಮದ್ ಹಂಝಾ ಪುತ್ತೂರು ರವರು ಭಾಷಾಂತರಿಸಿದ, ಉಮರ್ ಇಬ್ನ್ ಅಹ್ಮದ್ ಮದನಿ , ಅಹ್ಮದ್ ಎಸ್ ಎಮ್ ಮತ್ತು ಅಬೂಬಕರ್ ನಝೀರ್ ಸಲಫಿಯವರು ಪರಿಶೀಲಿಸಿದ &lt;br/>  &lt;b>ಆದರಣೀಯ ಖುರ್ ಆನ್ ಹಾಗೂ ಅದರ ಕನ್ನಡ ಅರ್ಥಾನುವಾದ &lt;br/> &lt;i>ಪ್ರಕಾಶಕರು :ಅಲ್  ಮಲಿಕ್  ಫಹದ್ ಪವಿತ್ರ  ಖುರ್ ಆನ್  ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್ , ಮದೀನಾ, ಸೌದಿ ಅರೇಬಿಯಾ  &lt;i/> &lt;/b> &lt;br/>ದಿಂದ ತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ.&lt;br/>
-  </string>
+  <string name="no_email_app_found" translatable="false">No email app found.</string>
+  <string name="sponsored_by" translatable="false">Sponsored by</string>
 </resources>

@@ -234,14 +234,22 @@
       app:iconSpaceReserved="false">
 
     <Preference
+        android:key="about_us_email"
         android:summary="@string/about_us_email"
         android:title="@string/about_us"
-        app:iconSpaceReserved="false">
-      <intent
-          android:action="android.intent.action.SENDTO"
-          android:data="@string/about_us_email_url" />
-      />
-    </Preference>
-
+        app:iconSpaceReserved="false" />
   </PreferenceCategory>
+
+  <Preference
+      android:layout="@layout/pref_divider"
+      android:selectable="false"
+      app:iconSpaceReserved="false" />
+
+  <!-- Sponsor footer -->
+  <Preference
+      android:key="sponsorFooter"
+      android:layout="@layout/pref_sponsor_footer"
+      android:selectable="false"
+      app:iconSpaceReserved="false" />
+
 </PreferenceScreen>
