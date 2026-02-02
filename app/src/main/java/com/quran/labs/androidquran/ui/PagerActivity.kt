@@ -107,6 +107,7 @@ import com.quran.labs.androidquran.ui.listener.AudioBarListener
 import com.quran.labs.androidquran.ui.util.ToastCompat.makeText
 import com.quran.labs.androidquran.ui.util.TranslationsSpinnerAdapter
 import com.quran.labs.androidquran.util.AudioUtils
+import com.quran.labs.androidquran.util.LanguageDialogHelper
 import com.quran.labs.androidquran.util.QuranAppUtils
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranScreenInfo
@@ -1226,6 +1227,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val jumpDialog = JumpFragment()
       jumpDialog.show(fm, JumpFragment.TAG)
       return true
+    } else if (itemId == R.id.language) {
+      showLanguageDialog()
+      return true
     }
     return super.onOptionsItemSelected(item)
   }
@@ -1952,6 +1956,10 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       progressDialog?.dismiss()
     }
     progressDialog = null
+  }
+
+  private fun showLanguageDialog() {
+    LanguageDialogHelper.show(this, quranSettings)
   }
 
   private fun showSlider(sliderPage: Int) {

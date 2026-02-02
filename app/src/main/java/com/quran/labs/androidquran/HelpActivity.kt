@@ -31,6 +31,7 @@ class HelpActivity : AppCompatActivity() {
     if (actionBar != null) {
       actionBar.setDisplayShowHomeEnabled(true)
       actionBar.setDisplayHomeAsUpEnabled(true)
+      actionBar.setTitle(R.string.app_name)
     }
 
     setContentView(R.layout.help)

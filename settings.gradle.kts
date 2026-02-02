@@ -49,8 +49,11 @@ include(":feature:recitation")
 include(":pages:madani")
 include(":pages:data:madani")
 include(":pages:data:warsh")
+include(":pages:data:tajweed")
 include(":pages:common:madani")
 include(":pages:common:warsh")
+include(":pages:common:tajweed")
+include(":pages:tajweed")
 include(":autoquran")
 
 if (File(rootDir, "extras/settings-extra.gradle").exists()) {

@@ -54,6 +54,15 @@
       app:actionViewClass="androidx.appcompat.widget.SearchView"
       app:showAsAction="ifRoom|collapseActionView" />
   <item
+      android:id="@+id/page_type"
+      android:title="@string/prefs_page_type_title"
+      app:showAsAction="never" />
+  <item
+      android:id="@+id/language"
+      android:icon="@drawable/baseline_language_24"
+      android:title="@string/prefs_language_title"
+      app:showAsAction="ifRoom" />
+  <item
       android:id="@+id/jump"
       android:title="@string/menu_jump"
       app:showAsAction="never" />

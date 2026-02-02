@@ -55,6 +55,7 @@ import com.quran.labs.androidquran.ui.fragment.TagBookmarkDialog
 import com.quran.labs.androidquran.ui.fragment.TagBookmarkDialog.OnBookmarkTagsUpdateListener
 import com.quran.labs.androidquran.ui.helpers.JumpDestination
 import com.quran.labs.androidquran.util.AudioUtils
+import com.quran.labs.androidquran.util.LanguageDialogHelper
 import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.SlidingTabLayout
@@ -342,6 +343,12 @@ class QuranActivity : AppCompatActivity(),
       R.id.settings -> {
         startActivity(Intent(this, QuranPreferenceActivity::class.java))
       }
+      R.id.language -> {
+        showLanguageDialog()
+      }
+      R.id.page_type -> {
+        startActivity(Intent(this, com.quran.labs.androidquran.pageselect.PageSelectActivity::class.java))
+      }
       R.id.last_page -> {
         jumpToLastPage()
       }
@@ -460,6 +467,10 @@ class QuranActivity : AppCompatActivity(),
       val jumpDialog = JumpFragment()
       jumpDialog.show(fm, JumpFragment.TAG)
     }
+  }
+
+  private fun showLanguageDialog() {
+    LanguageDialogHelper.show(this, settings)
   }
 
   fun addTag() {

@@ -29,7 +29,7 @@ constructor(
   Map<@JvmSuppressWildcards String, @JvmSuppressWildcards PageProvider>
 ) :
   Presenter<PageSelectActivity> {
-  private val baseUrl = "https://quran.app/data/pagetypes/snips"
+  private val baseUrl = "https://quran-files.hisnulmuslimdua.com/data/pagetypes/snips"
   private val compositeDisposable = CompositeDisposable()
   private val downloadingSet = mutableSetOf<String>()
   private var currentView: PageSelectActivity? = null
@@ -42,7 +42,9 @@ constructor(
       File(outputPath, ".nomedia").createNewFile()
     }
 
-    val data = pageTypes.map {
+    val data = pageTypes.toList()
+      .sortedByDescending { (key, _) -> key }
+      .toMap().map {
       val provider = it.value
       val previewImage = File(outputPath, "${it.key}.png")
       val downloadedImage = if (previewImage.exists()) {

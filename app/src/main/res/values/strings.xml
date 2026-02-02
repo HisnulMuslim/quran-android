@@ -103,7 +103,11 @@
   <!-- help -->
   <string name="help_title">Frequently Asked Questions</string>
   <string name="help">
-        &lt;b>How do I play audio?&lt;/b>
+        &lt;br/>&lt;b>How do I make the text larger?&lt;/b>
+        &lt;br/>For the Arabic pages, hold your phone in landscape. This makes the text larger.
+        For translations, go to settings and set translation text size.
+        &lt;br/>
+        &lt;br/>&lt;b>How do I play audio?&lt;/b>
         &lt;br/>Open any Quran page. Tap on the screen once. At the bottom, you will notice
         a play button and some text with the name of a qari. Click the name of the qari to
         choose a different qari. Click play to download and play the current page or sura.
@@ -122,17 +126,10 @@
         bookmark icon. Tap the bookmark icon to bookmark the page (the color will turn solid white). Tap the bookmark icon
         again to remove the bookmark.
         &lt;br/>
-        &lt;br/>&lt;b>How do I make the text larger?&lt;/b>
-        &lt;br/>For the Arabic pages, hold your phone in landscape. This makes the text larger.
-        For translations, go to settings and set translation text size.
-        &lt;br/>
         &lt;br/>&lt;b>How do I share an ayah?&lt;/b>
         &lt;br/>While on any Arabic page, press and hold on any ayah to get a menu where you can
         choose to bookmark, tag, share or copy that ayah to the clipboard, see the translation,
         or listen to its recitation.&lt;br/>
-        &lt;br/>&lt;b>Malayalam/Tamil/Bengali/Urdu fonts don\'t work!&lt;/b>
-        &lt;br/>Unfortunately, Android versions prior to 4.0 do not support these fonts, and there is
-        little we can do to help with this.
     </string>
   <string name="search_hint">Search the Quran</string>
   <string name="quranSearchType">Verses of the Quran</string>
@@ -180,8 +177,8 @@
   <string name="prefs_night_mode_background_brightness_title">Background brightness</string>
   <string name="prefs_night_mode_background_brightness_summary">Brightness of the page when night mode is active</string>
   <string name="prefs_dns_over_https_title">DNS over HTTPS</string>
-  <string name="prefs_dns_over_https_summary_on">Prefer DNS over HTTPS</string>
-  <string name="prefs_dns_over_https_summary_off">Do not use DNS over HTTPS</string>
+  <string name="prefs_dns_over_https_summary_on">Use DNS over HTTPS (encrypted DNS)</string>
+  <string name="prefs_dns_over_https_summary_off">Use system DNS (unencrypted)</string>
   <string name="prefs_overlay_page_info_title">Show page info</string>
   <string name="prefs_overlay_page_info_summary">Overlay page number, surah name, and juz\' number while reading</string>
   <string name="prefs_display_marker_title">Display marker popups</string>
@@ -250,7 +247,7 @@
   <string name="move_down">Move Down</string>
   <string name="delete_translation">Remove Translation</string>
 
-  <string name="logs_email" translatable="false">quranandroid+logs@gmail.com</string>
+  <string name="logs_email" translatable="false">hmkannada@gmail.com</string>
   <string name="warning">Warning</string>
   <string name="kitkat_external_message">Due to Android limitations, if you choose to place Quran
         data on your external SD card and later uninstall or clear data for Quran Android, all Quran
@@ -322,7 +319,7 @@
   <string name="get_translations">Get Translations</string>
 
   <!-- help -->
-  <string name="email_us">If your question is not answered above, you can email quranandroid@gmail.com for support.
+  <string name="email_us">If your question is not answered above, you can email hmkannada@gmail.com for support.
         Please note that we receive lots of emails, so we may not be able to reply to all of them.</string>
 
   <!-- sura metainfo -->
@@ -407,8 +404,8 @@
   <string name="notification_channel_audio">Quran Recitation</string>
 
   <!-- KQACR6 -->
-  <string name="prefs_language_title">Application Language</string>
-  <string name="prefs_language_summary">Preferred application language</string>
+  <string name="prefs_language_title" translatable="false">Application Language</string>
+  <string name="prefs_language_summary" translatable="false">Preferred application language</string>
 
   <string name="prefs_category_sharing">Sharing Preferences</string>
   <string name="prefs_include_translation_title">Include translation</string>

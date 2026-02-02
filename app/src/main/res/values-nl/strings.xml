@@ -268,7 +268,7 @@
   <string name="move_down">Omlaag verplaatsen</string>
   <string name="delete_translation">Vertaling verwijderen</string>
 
-  <string name="logs_email" translatable="false">quranandroid+logs@gmail.com</string>
+  <string name="logs_email" translatable="false">hmkannada@gmail.com</string>
   <string name="warning">Waarschuwing</string>
   <string name="kitkat_external_message">Vanwege beperkingen in Android, als u ervoor kiest om
     Koran-gegevens op uw externe SD-kaart te plaatsen en later Koran Android verwijdert of gegevens
@@ -343,7 +343,7 @@
 
   <!-- help -->
   <string name="email_us">Als uw vraag hierboven niet wordt beantwoord, kunt u een e-mail sturen
-    naar quranandroid@gmail.com voor ondersteuning. Houd er rekening mee dat we veel e-mails
+    naar hmkannada@gmail.com voor ondersteuning. Houd er rekening mee dat we veel e-mails
     ontvangen, dus we kunnen ze mogelijk niet allemaal beantwoorden.</string>
 
   <!-- sura metainfo -->
