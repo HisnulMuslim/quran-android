@@ -31,8 +31,8 @@ android {
   namespace = "com.quran.labs.androidquran"
 
   defaultConfig {
-    versionCode = 1015
-    versionName = "1.0.15"
+    versionCode = 1017
+    versionName = "1.0.17"
     testInstrumentationRunner = "com.quran.labs.androidquran.core.QuranTestRunner"
 
   }
@@ -85,6 +85,10 @@ android {
       isMinifyEnabled = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard.cfg")
       signingConfig = signingConfigs.getByName("release")
+
+      ndk {
+        debugSymbolLevel = "SYMBOL_TABLE" // or "FULL" for more detailed native traces
+      }
     }
   }
 

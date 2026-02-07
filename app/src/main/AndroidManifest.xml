@@ -64,6 +64,8 @@
         android:exported="false"/>
     <activity android:name=".HelpActivity"
         android:exported="false"/>
+    <activity android:name=".TajweedActivity"
+        android:exported="false"/>
     <activity
         android:name=".ui.PagerActivity"
         android:launchMode="singleTop"

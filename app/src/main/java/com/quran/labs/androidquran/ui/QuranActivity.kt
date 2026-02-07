@@ -36,6 +36,7 @@ import androidx.viewpager.widget.ViewPager
 import com.quran.labs.androidquran.AboutUsActivity
 import com.quran.labs.androidquran.HelpActivity
 import com.quran.labs.androidquran.QuranApplication
+import com.quran.labs.androidquran.TajweedActivity
 import com.quran.labs.androidquran.QuranPreferenceActivity
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.SearchActivity
@@ -351,6 +352,9 @@ class QuranActivity : AppCompatActivity(),
       }
       R.id.last_page -> {
         jumpToLastPage()
+      }
+      R.id.tajweed -> {
+        startActivity(Intent(this, TajweedActivity::class.java))
       }
       R.id.help -> {
         startActivity(Intent(this, HelpActivity::class.java))

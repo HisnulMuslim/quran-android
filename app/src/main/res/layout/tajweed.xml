@@ -13,13 +13,13 @@
       >
 
     <TextView
-        android:id="@+id/txtHelpTitle"
+        android:id="@+id/txtTajweedTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/accent_color_dark"
         android:maxLines="1"
-        android:text="@string/help_title"
+        android:text="@string/tajweed_rules_title"
         android:textStyle="bold"
         android:paddingBottom="8dp"
         />
@@ -29,19 +29,10 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/accent_color_dark"
-        android:id="@+id/txtHelp"
+        android:id="@+id/txtTajweed"
         android:textSize="16sp"
         android:paddingBottom="8dp"
         android:lineSpacingExtra="4dip"
-        />
-
-    <TextView
-        android:id="@+id/email_us"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autoLink="email"
-        android:linksClickable="false"
-        android:text="@string/email_us"
         />
   </LinearLayout>
 </ScrollView>

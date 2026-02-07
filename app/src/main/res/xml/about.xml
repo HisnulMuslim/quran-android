@@ -52,7 +52,7 @@
           android:data="@string/about_quranicaudio_url"/>
     </Preference>
 
-    <Preference
+    <!--<Preference
         android:summary="@string/about_quran_ksu_summary"
         android:title="@string/about_quran_ksu"
         app:iconSpaceReserved="false"
@@ -62,7 +62,7 @@
           android:data="@string/about_quran_ksu_url"/>
     </Preference>
 
-    <!--<Preference
+    <Preference
         android:summary="@string/about_furqan_summary"
         android:title="@string/about_furqan"
         app:iconSpaceReserved="false"

@@ -33,6 +33,7 @@
   <string name="menu_translation">Show Translation</string>
   <string name="menu_back_to_page">Show Quran</string>
   <string name="menu_help">Help</string>
+  <string name="menu_tajweed">Tajweed Rules</string>
   <string name="menu_search">Search</string>
   <string name="menu_get_translations">Get Translations</string>
   <string name="menu_jump">@string/gotoPage</string>
@@ -99,6 +100,84 @@
   <string name="about_contributors">Contributors</string>
   <string name="about_contributors_summary">A list of people who contributed to the development of Quran for Android</string>
   <string name="about_contributors_url" translatable="false">https://github.com/quran/quran_android/blob/main/CONTRIBUTORS.md</string>
+
+  <!-- tajweed -->
+  <string name="tajweed_rules_title">Tajweed Rules</string>
+  <string name="tajweed_content">
+        &lt;br/>&lt;b>What is Tajweed?&lt;/b>
+        &lt;br/>Tajweed is the set of rules governing the proper pronunciation of the Quran during recitation.
+        &lt;br/>
+        &lt;br/>&lt;b>Color Coding in Tajweed&lt;/b>
+        &lt;br/>Different colors are used to indicate various Tajweed rules:
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#00AA00\">●&lt;/font> &lt;b>Green - Ikhfa (إخفاء):&lt;/b> Hidden/Concealed pronunciation
+        &lt;br/>Example: &lt;big>مِ&lt;font color=\"#00AA00\">نْ&lt;/font> تَحْتِهَا&lt;/big> - The noon saakin is hidden before ت
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#0000FF\">●&lt;/font> &lt;b>Blue - Idgham without Ghunna (إدغام بلا غنة):&lt;/b> Merging without nasalization
+        &lt;br/>Example: &lt;big>مِ&lt;font color=\"#0000FF\">نْ&lt;/font> رَبِّهِمْ&lt;/big> - The noon merges into ر or ل
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#FF0000\">●&lt;/font> &lt;b>Red - Idgham with Ghunna (إدغام بغنة):&lt;/b> Merging with nasalization
+        &lt;br/>Example: &lt;big>مِ&lt;font color=\"#FF0000\">نْ&lt;/font> مَالٍ&lt;/big> - Merging with nasal sound (letters ي ن م و)
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#AA00AA\">●&lt;/font> &lt;b>Purple - Qalqalah (قلقلة):&lt;/b> Echoing/Bouncing sound
+        &lt;br/>Example: &lt;big>قَ&lt;font color=\"#AA00AA\">دْ&lt;/font>&lt;/big> - Letters ق ط ب ج د bounce when stopped on
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#FFA500\">●&lt;/font> &lt;b>Orange - Iqlab (إقلاب):&lt;/b> Converting to Meem
+        &lt;br/>Example: &lt;big>مِ&lt;font color=\"#FFA500\">نْ&lt;/font> بَعْدِ&lt;/big> - Noon or Tanween converts to meem before ب
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#808080\">●&lt;/font> &lt;b>Gray - Ikhfa Shafawi (إخفاء شفوي):&lt;/b> Labial concealment
+        &lt;br/>Example: &lt;big>هُ&lt;font color=\"#808080\">مْ&lt;/font> بِهِ&lt;/big> - Meem saakin hidden before ب
+        &lt;br/>
+        &lt;br/>&lt;font color=\"#FF1493\">●&lt;/font> &lt;b>Pink - Madd (مد):&lt;/b> Prolongation (2-6 counts)
+        &lt;br/>Example: &lt;big>قَ&lt;font color=\"#FF1493\">ا&lt;/font>لُوا&lt;/big> - Elongation of vowels
+        &lt;br/>
+        &lt;br/>&lt;b>Basic Tajweed Rules:&lt;/b>
+        &lt;br/>
+        &lt;br/>&lt;b>1. Noon Saakin and Tanween Rules:&lt;/b>
+        &lt;br/>• Izhar (إظهار) - Clear pronunciation
+        &lt;br/>• Idgham (إدغام) - Merging
+        &lt;br/>• Iqlab (إقلاب) - Converting to Meem
+        &lt;br/>• Ikhfa (إخفاء) - Hiding
+        &lt;br/>
+        &lt;br/>&lt;b>2. Meem Saakin Rules:&lt;/b>
+        &lt;br/>• Ikhfa Shafawi (إخفاء شفوي) - Labial hiding
+        &lt;br/>• Idgham Shafawi (إدغام شفوي) - Labial merging
+        &lt;br/>• Izhar Shafawi (إظهار شفوي) - Labial clarity
+        &lt;br/>
+        &lt;br/>&lt;b>3. Qalqalah (قلقلة):&lt;/b>
+        &lt;br/>Applies to letters: ق ط ب ج د
+        &lt;br/>Creates a slight bouncing sound when stopped on these letters.
+        &lt;br/>
+        &lt;br/>&lt;b>4. Madd (مد):&lt;/b>
+        &lt;br/>• Madd Tabee\'ee - Natural prolongation (2 counts)
+        &lt;br/>• Madd Waajib - Compulsory prolongation (4-6 counts)
+        &lt;br/>• Madd Jaa\'iz - Permissible prolongation (2-4-6 counts)
+        &lt;br/>• Madd Laazim - Necessary prolongation (6 counts)
+        &lt;br/>
+        &lt;br/>&lt;b>5. Raa\' (ر) Rules:&lt;/b>
+        &lt;br/>Can be pronounced with Tafkheem (thick) or Tarqeeq (thin) depending on context.
+        &lt;br/>
+        &lt;br/>&lt;b>6. Laam (ل) Rules:&lt;/b>
+        &lt;br/>• Laam Shamsiyyah - Sun letters (assimilated)
+        &lt;br/>• Laam Qamariyyah - Moon letters (pronounced)
+        &lt;br/>
+        &lt;br/>&lt;b>7. Waqf Signs (Stop Signs):&lt;/b>
+        &lt;br/>These symbols indicate where to pause during recitation:
+        &lt;br/>
+        &lt;br/>&#x200E; &#x2067;مـ&#x2069;  : Compulsory stop
+        &lt;br/>&#x200E; &#x2067;لا&#x2069;  : Do not stop
+        &lt;br/>&#x200E; &#x2067;ج&#x2069;  : Permissible stop
+        &lt;br/>&#x200E; &#x2067;ز&#x2069;  : Better to continue
+        &lt;br/>&#x200E; &#x2067;صلى&#x2069;  : Better to stop
+        &lt;br/>&#x200E; &#x2067;قلى&#x2069;  : Better to continue
+        &lt;br/>&#x200E; &#x2067;∴&#x2069;  : Stop at one of the two places, not both
+        &lt;br/>&#x200E; &#x2067;⁙&#x2069;  : Continuing is better at both places
+        &lt;br/>&#x200E; &#x2067;س&#x2069;  : Silent stop - Brief pause without breathing
+        &lt;br/>&#x200E; &#x2067;ق&#x2069;  : Stop or continue - Both are equal
+        &lt;br/>&#x200E; &#x2067;۞&#x2069;  : Ruku\' (section) marker
+        &lt;br/>
+        &lt;br/>Learning and applying these rules improves the beauty and accuracy of Quranic recitation.
+    </string>
 
   <!-- help -->
   <string name="help_title">Frequently Asked Questions</string>

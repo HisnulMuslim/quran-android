@@ -42,7 +42,7 @@ class TajweedPageProvider : PageProvider {
 
   override fun getPreviewDescription() = R.string.tajweed_description
 
-  override fun getDefaultQariId(): Int = 0
+  override fun getDefaultQariId(): Int = 4
 
   override fun getQaris(): List<Qari> {
     return listOf(

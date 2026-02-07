@@ -62,6 +62,7 @@ import com.quran.data.model.selection.withXScroll
 import com.quran.labs.androidquran.BuildConfig
 import com.quran.labs.androidquran.HelpActivity
 import com.quran.labs.androidquran.QuranApplication
+import com.quran.labs.androidquran.TajweedActivity
 import com.quran.labs.androidquran.QuranPreferenceActivity
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.SearchActivity
@@ -1212,6 +1213,10 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       return true
     } else if (itemId == R.id.settings) {
       val i = Intent(this, QuranPreferenceActivity::class.java)
+      startActivity(i)
+      return true
+    } else if (itemId == R.id.tajweed) {
+      val i = Intent(this, TajweedActivity::class.java)
       startActivity(i)
       return true
     } else if (itemId == R.id.help) {

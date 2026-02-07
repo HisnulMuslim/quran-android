@@ -42,7 +42,7 @@ class MadaniPageProvider : PageProvider {
 
   override fun getPreviewDescription() = R.string.madani_description
 
-  override fun getDefaultQariId(): Int = 0
+  override fun getDefaultQariId(): Int = 4
 
   override fun getQaris(): List<Qari> {
     /*KQACR16 added list of Qari TODO do not upload this to git as per original developer */

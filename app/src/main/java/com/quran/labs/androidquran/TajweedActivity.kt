@@ -4,27 +4,24 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import com.quran.labs.androidquran.util.openSupportEmail
 
-class HelpActivity : AppCompatActivity() {
+class TajweedActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // override these to always be dark since the app doesn't really
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
     enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
+      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
     )
 
     super.onCreate(savedInstanceState)
@@ -33,10 +30,10 @@ class HelpActivity : AppCompatActivity() {
     if (actionBar != null) {
       actionBar.setDisplayShowHomeEnabled(true)
       actionBar.setDisplayHomeAsUpEnabled(true)
-      actionBar.setTitle(R.string.app_name)
+      actionBar.setTitle(R.string.tajweed_rules_title)
     }
 
-    setContentView(R.layout.help)
+    setContentView(R.layout.tajweed)
 
     val root = findViewById<ViewGroup>(R.id.root)
     ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
@@ -53,12 +50,8 @@ class HelpActivity : AppCompatActivity() {
       windowInsets
     }
 
-    val helpText = findViewById<TextView>(R.id.txtHelp)
-    helpText.text = HtmlCompat.fromHtml(getString(R.string.help), HtmlCompat.FROM_HTML_MODE_COMPACT)
-    val emailUs = findViewById<TextView>(R.id.email_us)
-    emailUs?.setOnClickListener {
-      openSupportEmail()
-    }
+    val tajweedText = findViewById<TextView>(R.id.txtTajweed)
+    tajweedText.text = HtmlCompat.fromHtml(getString(R.string.tajweed_content), HtmlCompat.FROM_HTML_MODE_COMPACT)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

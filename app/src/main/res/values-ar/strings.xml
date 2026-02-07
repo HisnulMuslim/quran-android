@@ -26,6 +26,87 @@
   <string name="menu_jump">انتقال سريع</string>
   <string name="gotoPage">أدخل رقم الصفحة</string>
 
+  <!-- tajweed -->
+  <string name="menu_tajweed">أحكام التجويد</string>
+  <string name="tajweed_rules_title">أحكام التجويد</string>
+  <string name="tajweed_content">
+    &lt;br/&gt;&lt;b&gt;ما هو التجويد؟&lt;/b&gt;
+    &lt;br/&gt;التجويد هو مجموعة القواعد التي تحكم النطق الصحيح للقرآن الكريم أثناء التلاوة.
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;الترميز اللوني في التجويد&lt;/b&gt;
+    &lt;br/&gt;تستخدم ألوان مختلفة للإشارة إلى أحكام التجويد المختلفة:
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#00AA00\"&gt;●&lt;/font&gt; &lt;b&gt;الأخضر - الإخفاء:&lt;/b&gt; النطق المخفي
+    &lt;br/&gt;مثال: &lt;big&gt;مِ&lt;font color=\"#00AA00\"&gt;نْ&lt;/font&gt; تَحْتِهَا&lt;/big&gt; - النون الساكنة تخفى قبل حرف ت
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#0000FF\"&gt;●&lt;/font&gt; &lt;b&gt;الأزرق - الإدغام بلا غنة:&lt;/b&gt; الإدغام بدون غنة
+    &lt;br/&gt;مثال: &lt;big&gt;مِ&lt;font color=\"#0000FF\"&gt;نْ&lt;/font&gt; رَبِّهِمْ&lt;/big&gt; - النون تدغم في حرف ر أو ل
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#FF0000\"&gt;●&lt;/font&gt; &lt;b&gt;الأحمر - الإدغام بغنة:&lt;/b&gt; الإدغام مع الغنة
+    &lt;br/&gt;مثال: &lt;big&gt;مِ&lt;font color=\"#FF0000\"&gt;نْ&lt;/font&gt; مَالٍ&lt;/big&gt; - الإدغام مع صوت الغنة (الحروف ي ن م و)
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#AA00AA\"&gt;●&lt;/font&gt; &lt;b&gt;البنفسجي - القلقلة:&lt;/b&gt; صوت الارتداد
+    &lt;br/&gt;مثال: &lt;big&gt;قَ&lt;font color=\"#AA00AA\"&gt;دْ&lt;/font&gt;&lt;/big&gt; - الحروف ق ط ب ج د ترتد عند الوقف عليها
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#FFA500\"&gt;●&lt;/font&gt; &lt;b&gt;البرتقالي - الإقلاب:&lt;/b&gt; القلب إلى ميم
+    &lt;br/&gt;مثال: &lt;big&gt;مِ&lt;font color=\"#FFA500\"&gt;نْ&lt;/font&gt; بَعْدِ&lt;/big&gt; - النون أو التنوين يقلب إلى ميم قبل حرف ب
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#808080\"&gt;●&lt;/font&gt; &lt;b&gt;الرمادي - الإخفاء الشفوي:&lt;/b&gt; الإخفاء الشفوي
+    &lt;br/&gt;مثال: &lt;big&gt;هُ&lt;font color=\"#808080\"&gt;مْ&lt;/font&gt; بِهِ&lt;/big&gt; - الميم الساكنة تخفى قبل حرف ب
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;font color=\"#FF1493\"&gt;●&lt;/font&gt; &lt;b&gt;الوردي - المد:&lt;/b&gt; المد (2-6 حركات)
+    &lt;br/&gt;مثال: &lt;big&gt;قَ&lt;font color=\"#FF1493\"&gt;ا&lt;/font&gt;لُوا&lt;/big&gt; - مد الحروف
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;أحكام التجويد الأساسية:&lt;/b&gt;
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;1. أحكام النون الساكنة والتنوين:&lt;/b&gt;
+    &lt;br/&gt;• الإظهار - النطق الواضح
+    &lt;br/&gt;• الإدغام - الإدغام
+    &lt;br/&gt;• الإقلاب - القلب إلى ميم
+    &lt;br/&gt;• الإخفاء - الإخفاء
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;2. أحكام الميم الساكنة:&lt;/b&gt;
+    &lt;br/&gt;• الإخفاء الشفوي - الإخفاء الشفوي
+    &lt;br/&gt;• الإدغام الشفوي - الإدغام الشفوي
+    &lt;br/&gt;• الإظهار الشفوي - الإظهار الشفوي
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;3. القلقلة:&lt;/b&gt;
+    &lt;br/&gt;تنطبق على الحروف: ق ط ب ج د
+    &lt;br/&gt;تحدث صوت ارتداد خفيف عند الوقف على هذه الحروف.
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;4. المد:&lt;/b&gt;
+    &lt;br/&gt;• المد الطبيعي - المد الطبيعي (حركتان)
+    &lt;br/&gt;• المد الواجب - المد الواجب (4-6 حركات)
+    &lt;br/&gt;• المد الجائز - المد الجائز (2-4-6 حركات)
+    &lt;br/&gt;• المد اللازم - المد اللازم (6 حركات)
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;5. أحكام الراء:&lt;/b&gt;
+    &lt;br/&gt;يمكن نطقها بالتفخيم (سميكة) أو الترقيق (رقيقة) حسب السياق.
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;6. أحكام اللام:&lt;/b&gt;
+    &lt;br/&gt;• اللام الشمسية - الحروف الشمسية (تدغم)
+    &lt;br/&gt;• اللام القمرية - الحروف القمرية (تنطق)
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;b&gt;7. علامات الوقف:&lt;/b&gt;
+    &lt;br/&gt;هذه الرموز تشير إلى مواضع الوقف أثناء التلاوة:
+    &lt;br/&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;مـ : وقف لازم&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;لا : لا تقف&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;ج : يجوز الوقف&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;ز : الوصل أولى&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;صلى : الوقف أولى&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;قلى : الوصل أولى&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;∴ : قف على أحد الموضعين، وليس كليهما&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;⁙ : الوصل أفضل في كلا الموضعين&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;س : سكتة - وقف قصير بدون تنفس&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;ق : قف أو صل - كلاهما سواء&lt;/span&gt;
+    &lt;br/&gt;&lt;span dir="rtl"&gt;۞ : علامة الركوع&lt;/span&gt;
+    &lt;br/&gt;
+    &lt;br/&gt;تعلم هذه الأحكام وتطبيقها يحسن جمال ودقة تلاوة القرآن الكريم.
+
+  </string>
+
+  <!-- help -->
   <string name="help_title">الأسئلة المتداولة</string>
   <string name="help">
         &lt;b&gt;كيف يتمّ تشغيل الصّوت؟&lt;/b&gt;
