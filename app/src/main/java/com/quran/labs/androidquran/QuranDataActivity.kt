@@ -30,6 +30,8 @@ import com.quran.labs.androidquran.service.util.PermissionUtil
 import com.quran.labs.androidquran.service.util.QuranDownloadNotifier.ProgressIntent
 import com.quran.labs.androidquran.service.util.ServiceIntentHelper
 import com.quran.labs.androidquran.ui.QuranActivity
+import com.quran.labs.androidquran.ui.ForceUpdateDialog
+import com.quran.labs.androidquran.util.ForceUpdateChecker
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranScreenInfo
 import com.quran.labs.androidquran.util.QuranSettings
@@ -85,22 +87,27 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
   private var disposable: Disposable? = null
   private var lastForceValue: Boolean = false
   private var didCheckPermissions: Boolean = false
+  private var forceUpdateDialog: ForceUpdateDialog? = null
+  private var userClickedUpdate: Boolean = false
+  private var shouldCheckUpdateOnResume: Boolean = false
+  private lateinit var forceUpdateChecker: ForceUpdateChecker
 
   private val scope = MainScope()
 
   public override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
     enableEdgeToEdge(
       statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
       navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
     )
     showSplashScreen()/*KQACR2*/
-    super.onCreate(savedInstanceState)
     val quranApp = application as QuranApplication
     quranApp.refreshLocale(this, false)
     quranApp.applicationComponent.inject(this)
     quranSettings = QuranSettings.getInstance(this)
     quranSettings.upgradePreferences(preferencesUpgrade)
+    forceUpdateChecker = ForceUpdateChecker(this)
   }
 
   /*KQACR2 NFN*/
@@ -160,9 +167,55 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
           }
         }
 
-    if (!didCheckPermissions) {
+    // Handle return from Play Store after clicking "Update Now"
+    if (shouldCheckUpdateOnResume) {
+      shouldCheckUpdateOnResume = false
+      userClickedUpdate = false
+      // User returned without updating - show dialog again instead of postponing
+      checkForceUpdate()
+    } else if (!didCheckPermissions) {
       didCheckPermissions = true
-      checkPermissions()
+      checkForceUpdate()
+    }
+  }
+
+  private fun checkForceUpdate() {
+    // Fetch remote config first, then check for updates
+    forceUpdateChecker.fetchRemoteConfig {
+      // Check if activity is still alive before proceeding
+      if (!isFinishing && !isDestroyed) {
+        val updateInfo = forceUpdateChecker.shouldShowUpdate()
+        if (updateInfo != null) {
+          showForceUpdateDialog(updateInfo)
+        } else {
+          checkPermissions()
+        }
+      }
+    }
+  }
+
+  private fun showForceUpdateDialog(updateInfo: com.quran.labs.androidquran.util.UpdateInfo) {
+    // Prevent dialog leak by checking activity state
+    if (forceUpdateDialog == null && !isFinishing && !isDestroyed) {
+      val dialog = ForceUpdateDialog(
+        this,
+        updateInfo,
+        onPostpone = {
+          // User clicked "Remind Me Later"
+          forceUpdateChecker.postponeUpdate()
+          forceUpdateDialog = null
+          checkPermissions()
+        },
+        onUpdateClicked = {
+          // User clicked "Update Now" - mark it and wait to see if they return
+          userClickedUpdate = true
+          shouldCheckUpdateOnResume = true
+          forceUpdateDialog = null
+          // For both forced and optional: wait for onResume to check if user actually updated
+        }
+      )
+      forceUpdateDialog = dialog
+      dialog.show()
     }
   }
 
@@ -181,6 +234,9 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
     errorDialog?.dismiss()
     errorDialog = null
     hideMigrationDialog()
+
+    forceUpdateDialog?.dismiss()
+    forceUpdateDialog = null
 
     super.onPause()
   }

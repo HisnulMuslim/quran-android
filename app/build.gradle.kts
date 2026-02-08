@@ -13,10 +13,13 @@ plugins {
 // providing apks for open source distribution stores.
 val useFirebase = !project.hasProperty("disableFirebase")
 
-// only want to apply the Firebase plugin if we're building a release build. moving this to the
-// release build type won't work, since debug builds would also implicitly get the plugin.
-if (getGradle().startParameter.taskRequests.toString().contains("Release") && useFirebase) {
+// Apply Firebase google-services plugin for all builds if Firebase is enabled
+// But only apply Crashlytics plugin for release builds
+if (useFirebase) {
   apply(plugin = "com.google.gms.google-services")
+}
+
+if (getGradle().startParameter.taskRequests.toString().contains("Release") && useFirebase) {
   apply(plugin = "com.google.firebase.crashlytics")
 }
 
@@ -204,6 +207,10 @@ dependencies {
   add("betaImplementation", project(":feature:analytics-noop"))
   if (useFirebase) {
     releaseImplementation(project(":feature:firebase-analytics"))
+
+    // Add Firebase Remote Config for all build types
+    implementation(libs.firebase.config.ktx)
+    implementation(libs.firebase.analytics.ktx)
   } else {
     releaseImplementation(project(":feature:analytics-noop"))
   }

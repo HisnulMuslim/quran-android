@@ -40,6 +40,15 @@
   <string name="gotoPage">Go to page</string>
   <string name="please_wait">Please wait…</string>
 
+  <!-- force update -->
+  <string name="update_available_title">Update Available</string>
+  <string name="update_available_message">A new version of the app is available. Please update to continue using the app.</string>
+  <string name="update_available_optional_message">A new version of the app is available with improvements and bug fixes.</string>
+  <string name="update_now">Update Now</string>
+  <string name="update_postpone">Remind Me Later</string>
+  <string name="update_version_info">Current: v%1$s | Latest: v%2$s</string>
+  <string name="update_forced_message">This update is required to continue using the app.</string>
+
   <!-- about -->
   <string name="about_description">The Holy Qur’an — a free Kannada Qur’an application designed for Android smartphones. &lt;br/>&lt;br/>This application has been developed using the open-source Android project &lt;a href="https://quran.com/">QURAN.COM  &lt;/a>.May Allah reward them with the best of rewards.&lt;br/>&lt;br/>
     The Kannada translation was translated by Muhammad Hamza Puttur and reviewed by Umar ibn Ahmad Madani, Ahmad S. M., and Abu Bakr Nazeer Salafi. &lt;br/>&lt;br/>  &lt;b>The Noble Qur’an along with its Kannada translation &lt;br/>

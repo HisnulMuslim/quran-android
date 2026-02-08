@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+  <ImageView
+      android:id="@+id/update_icon"
+      android:layout_width="80dp"
+      android:layout_height="80dp"
+      android:layout_gravity="center_horizontal"
+      android:layout_marginBottom="16dp"
+      android:src="@drawable/icon"
+      android:contentDescription="@string/app_name" />
+
+  <TextView
+      android:id="@+id/update_title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/update_available_title"
+      android:textSize="20sp"
+      android:textStyle="bold"
+      android:gravity="center"
+      android:layout_marginBottom="12dp"
+      android:textColor="?android:attr/textColorPrimary" />
+
+  <TextView
+      android:id="@+id/update_message"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/update_available_message"
+      android:textSize="14sp"
+      android:gravity="center"
+      android:layout_marginBottom="8dp"
+      android:textColor="?android:attr/textColorSecondary" />
+
+  <TextView
+      android:id="@+id/update_version_info"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textSize="12sp"
+      android:gravity="center"
+      android:layout_marginBottom="24dp"
+      android:textColor="?android:attr/textColorSecondary" />
+
+  <LinearLayout
+      android:id="@+id/button_container"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="center">
+
+    <Button
+        android:id="@+id/btn_postpone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/update_postpone"
+        android:layout_marginEnd="8dp"
+        style="?android:attr/borderlessButtonStyle" />
+
+    <Button
+        android:id="@+id/btn_update"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/update_now"
+        android:layout_marginStart="8dp"
+        style="@style/Widget.AppCompat.Button.Colored" />
+
+  </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <!-- Minimum required version code for force update -->
+    <!-- Set this to 0 to disable force updates -->
+    <entry>
+        <key>android_min_version</key>
+        <value>0</value>
+    </entry>
+
+    <!-- Latest available version code for optional update -->
+    <!-- Set this to the current version to disable optional updates -->
+    <entry>
+        <key>android_latest_version</key>
+        <value>1017</value>
+    </entry>
+
+    <!-- Number of days to postpone an optional update (default: 1 day) -->
+    <entry>
+        <key>android_update_postpone_days</key>
+        <value>1</value>
+    </entry>
+</defaultsMap>
