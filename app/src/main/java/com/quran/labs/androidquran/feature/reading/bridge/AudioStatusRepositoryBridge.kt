@@ -46,6 +46,7 @@ class AudioStatusRepositoryBridge(
           AudioBarEvent.Rewind -> audioBarListener.onPreviousPressed()
           is AudioBarEvent.SetRepeat -> audioBarListener.setRepeatCount(event.repeat)
           is AudioBarEvent.SetSpeed -> audioBarListener.setPlaybackSpeed(event.speed)
+          is AudioBarEvent.SetSleepTimer -> audioBarListener.setSleepTimer(event.minutes)
           AudioBarEvent.ShowSettings -> audioBarListener.onAudioSettingsPressed()
           AudioBarEvent.Stop -> audioBarListener.onStopPressed()
           AudioBarEvent.EndSession -> audioBarRecitationListener.onEndRecitationSessionPressed()

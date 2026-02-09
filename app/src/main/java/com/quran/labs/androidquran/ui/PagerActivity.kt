@@ -1632,7 +1632,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         lastAudioRequest.enforceBounds,
         speed,
         lastAudioRequest.shouldStream,
-        lastAudioRequest.audioPathInfo
+        lastAudioRequest.audioPathInfo,
+        lastAudioRequest.sleepTimerMinutes
       )
 
       val i = Intent(this, AudioService::class.java)
@@ -1730,7 +1731,31 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         lastAudioRequest.enforceBounds,
         lastAudioRequest.playbackSpeed,
         lastAudioRequest.shouldStream,
-        lastAudioRequest.audioPathInfo
+        lastAudioRequest.audioPathInfo,
+        lastAudioRequest.sleepTimerMinutes
+      )
+
+      val i = Intent(this, AudioService::class.java)
+      i.setAction(AudioService.ACTION_UPDATE_SETTINGS)
+      i.putExtra(AudioService.EXTRA_PLAY_INFO, updatedAudioRequest)
+      startService(i)
+    }
+  }
+
+  override fun setSleepTimer(minutes: Int) {
+    val lastAudioRequest = audioStatusRepositoryBridge.audioRequest()
+    if (lastAudioRequest != null) {
+      val updatedAudioRequest = AudioRequest(
+        lastAudioRequest.start,
+        lastAudioRequest.end,
+        lastAudioRequest.qari,
+        lastAudioRequest.repeatInfo,
+        lastAudioRequest.rangeRepeatInfo,
+        lastAudioRequest.enforceBounds,
+        lastAudioRequest.playbackSpeed,
+        lastAudioRequest.shouldStream,
+        lastAudioRequest.audioPathInfo,
+        minutes
       )
 
       val i = Intent(this, AudioService::class.java)

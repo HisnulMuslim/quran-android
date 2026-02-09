@@ -124,7 +124,7 @@ private fun AudioBarPlayingPreview() {
   QuranTheme {
     Surface {
       AudioBar(
-        AudioBarState.Playing(repeat = 1, speed = 1.5f),
+        AudioBarState.Playing(repeat = 1, speed = 1.5f, sleepTimer = 0),
         AudioBarUiEvents(),
         modifier = Modifier.height(48.dp)
       )

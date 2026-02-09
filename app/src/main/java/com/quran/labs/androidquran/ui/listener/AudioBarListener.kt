@@ -11,6 +11,7 @@ interface AudioBarListener {
   fun setPlaybackSpeed(speed: Float)
   fun onCancelPressed(stopDownload: Boolean)
   fun setRepeatCount(repeatCount: Int)
+  fun setSleepTimer(minutes: Int)
   fun onAcceptPressed()
   fun onAudioSettingsPressed()
   fun onShowQariList()

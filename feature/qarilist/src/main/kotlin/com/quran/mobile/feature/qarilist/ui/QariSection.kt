@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
@@ -16,7 +17,7 @@ fun QariSection(@StringRes sectionHeader: Int) {
   Text(
     text = stringResource(sectionHeader),
     style = MaterialTheme.typography.titleMedium,
-    color = MaterialTheme.colorScheme.onSecondaryContainer,
+    color = Color.White,
     modifier = Modifier
       .fillMaxWidth()
       .background(MaterialTheme.colorScheme.secondaryContainer)

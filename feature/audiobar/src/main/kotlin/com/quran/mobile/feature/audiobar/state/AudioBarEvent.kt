@@ -16,6 +16,7 @@ sealed class AudioBarEvent {
   data object ShowSettings : AudioBarEvent()
   data class SetRepeat(val repeat: Int) : AudioBarEvent()
   data class SetSpeed(val speed: Float) : AudioBarEvent()
+  data class SetSleepTimer(val minutes: Int) : AudioBarEvent()
 
   // recitation
   data object Record : AudioBarEvent()

@@ -4,16 +4,19 @@ internal sealed class AudioBarState {
   sealed class ActivePlayback : AudioBarState() {
     abstract val repeat: Int
     abstract val speed: Float
+    abstract val sleepTimer: Int
   }
 
   data class Playing(
     override val repeat: Int,
-    override val speed: Float
+    override val speed: Float,
+    override val sleepTimer: Int
   ) : ActivePlayback()
 
   data class Paused(
     override val repeat: Int,
-    override val speed: Float
+    override val speed: Float,
+    override val sleepTimer: Int
   ) : ActivePlayback()
 
   data class Stopped(
@@ -68,6 +71,7 @@ internal sealed class AudioBarUiEvent(val audioBarEvent: AudioBarEvent) {
     data object FastForward : CommonPlaybackEvent(AudioBarEvent.FastForward)
     data class SetSpeed(val speed: Float) : CommonPlaybackEvent(AudioBarEvent.SetSpeed(speed))
     data class SetRepeat(val repeat: Int) : CommonPlaybackEvent(AudioBarEvent.SetRepeat(repeat))
+    data class SetSleepTimer(val minutes: Int) : CommonPlaybackEvent(AudioBarEvent.SetSleepTimer(minutes))
     data object ShowSettings : CommonPlaybackEvent(AudioBarEvent.ShowSettings)
   }
 

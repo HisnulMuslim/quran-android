@@ -133,12 +133,14 @@ class AudioBarPresenter @Inject constructor(
 
           PlaybackStatus.PLAYING -> AudioBarState.Playing(
             audioStatus.audioRequest.repeatInfo,
-            audioStatus.audioRequest.playbackSpeed
+            audioStatus.audioRequest.playbackSpeed,
+            audioStatus.audioRequest.sleepTimerMinutes
           )
 
           PlaybackStatus.PAUSED -> AudioBarState.Paused(
             audioStatus.audioRequest.repeatInfo,
-            audioStatus.audioRequest.playbackSpeed
+            audioStatus.audioRequest.playbackSpeed,
+            audioStatus.audioRequest.sleepTimerMinutes
           )
         }
       }
@@ -216,6 +218,14 @@ class AudioBarPresenter @Inject constructor(
         if (currentAudioBarValue is AudioBarState.Playing) {
           internalAudioBarFlow.value = currentAudioBarValue.copy(speed = event.speed)
         }
+      } else if (event is AudioBarUiEvent.CommonPlaybackEvent.SetSleepTimer) {
+        // pre-emptively update the ui with the sleep timer even before the service gets it
+        val currentAudioBarValue = internalAudioBarFlow.value
+        if (currentAudioBarValue is AudioBarState.Playing) {
+          internalAudioBarFlow.value = currentAudioBarValue.copy(sleepTimer = event.minutes)
+        } else if (currentAudioBarValue is AudioBarState.Paused) {
+          internalAudioBarFlow.value = currentAudioBarValue.copy(sleepTimer = event.minutes)
+        }
       }
       emit(event.audioBarEvent)
     }
@@ -227,7 +237,8 @@ class AudioBarPresenter @Inject constructor(
         if (audioStatus is AudioStatus.Playback) {
           internalAudioBarFlow.value = AudioBarState.Paused(
             audioStatus.audioRequest.repeatInfo,
-            audioStatus.audioRequest.playbackSpeed
+            audioStatus.audioRequest.playbackSpeed,
+            audioStatus.audioRequest.sleepTimerMinutes
           )
         }
       }

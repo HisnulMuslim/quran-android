@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Pause
@@ -138,6 +139,20 @@ internal fun AudioBar(
         sink(AudioBarUiEvent.CommonPlaybackEvent.SetSpeed(it))
       }
 
+      RepeatableButton(
+        icon = QuranIcons.Bedtime,
+        contentDescription = "",
+        values = SLEEP_TIMER_VALUES,
+        value = state.sleepTimer,
+        defaultValue = 0,
+        modifier = Modifier
+          .width(40.dp)
+          .weight(1f),
+        format = { if (it > 0) "${it}m" else "" }
+      ) {
+        sink(AudioBarUiEvent.CommonPlaybackEvent.SetSleepTimer(it))
+      }
+
       IconButton(
         modifier = Modifier
           .width(40.dp)
@@ -151,6 +166,7 @@ internal fun AudioBar(
 
 private val REPEAT_VALUES = listOf(0, 1, 2, 3, -1)
 private val SPEED_VALUES = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)
+private val SLEEP_TIMER_VALUES = listOf(0, 5, 10, 15, 30, 45, 60)
 
 @Preview
 @Composable
@@ -159,7 +175,8 @@ private fun PlayingAudioBarPreview() {
     PlayingAudioBar(
       state = AudioBarState.Playing(
         repeat = 0,
-        speed = 1.0f
+        speed = 1.0f,
+        sleepTimer = 0
       ),
       eventSink = {},
       playbackEventSink = {}
@@ -174,7 +191,8 @@ private fun PausedAudioBarPreview() {
     PausedAudioBar(
       state = AudioBarState.Paused(
         repeat = 1,
-        speed = 0.5f
+        speed = 0.5f,
+        sleepTimer = 15
       ),
       eventSink = {},
       pausedEventSink = {}

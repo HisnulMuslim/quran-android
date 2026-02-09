@@ -141,6 +141,11 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
   // should we stop (after preparing is done) or not
   private var shouldStop = false
 
+  // sleep timer
+  private var sleepTimerRunnable: Runnable? = null
+  private val mainHandler = Handler(Looper.getMainLooper())
+  private var shouldStopAfterAyah = false
+
   // The ID we use for the notification (the onscreen alert that appears
   // at the notification area at the top of the screen as an icon -- and
   // as text as well if the user expands the notification area).
@@ -379,6 +384,14 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
           processUpdatePlaybackSpeed(playInfo.playbackSpeed)
           serviceHandler.sendEmptyMessageDelayed(MSG_UPDATE_AUDIO_POS, 200)
         }
+        // Restart sleep timer if it changed and we're playing
+        if (playInfo.sleepTimerMinutes != audioRequest?.sleepTimerMinutes && state == State.Playing) {
+          if (playInfo.sleepTimerMinutes > 0) {
+            startSleepTimer(playInfo.sleepTimerMinutes)
+          } else {
+            cancelSleepTimer()
+          }
+        }
         audioRequest = playInfo
         updateAudioPlaybackStatus()
       }
@@ -496,6 +509,14 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
         val nextSura = localAudioQueue.getCurrentSura()
         val nextAyah = localAudioQueue.getCurrentAyah()
 
+        // Check if sleep timer flag is set - stop after this ayah in gapless mode
+        if (shouldStopAfterAyah) {
+          Timber.d("Sleep timer: stopping after ayah change in gapless mode")
+          shouldStopAfterAyah = false
+          processStopRequest()
+          return
+        }
+
         if (!success) {
           processStopRequest()
           return
@@ -570,6 +591,38 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
     }
   }
 
+  private fun startSleepTimer(minutes: Int) {
+    cancelSleepTimer()
+    shouldStopAfterAyah = false
+    if (minutes > 0) {
+      sleepTimerRunnable = Runnable {
+        Timber.d("Sleep timer triggered, will stop after current ayah")
+        shouldStopAfterAyah = true
+        resetSleepTimerValue()
+      }
+      mainHandler.postDelayed(sleepTimerRunnable!!, minutes * 60 * 1000L)
+      Timber.d("Sleep timer started for $minutes minutes")
+    }
+  }
+
+  private fun cancelSleepTimer() {
+    sleepTimerRunnable?.let {
+      mainHandler.removeCallbacks(it)
+      sleepTimerRunnable = null
+      shouldStopAfterAyah = false
+      Timber.d("Sleep timer cancelled")
+    }
+  }
+
+  private fun resetSleepTimerValue() {
+    val currentRequest = audioRequest
+    if (currentRequest != null && currentRequest.sleepTimerMinutes > 0) {
+      audioRequest = currentRequest.copy(sleepTimerMinutes = 0)
+      updateAudioPlaybackStatus()
+      Timber.d("Sleep timer value reset to 0")
+    }
+  }
+
   private fun processPlayRequest() {
     val localAudioRequest = audioRequest
     val localAudioQueue = audioQueue
@@ -579,6 +632,11 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
       return
     }
     tryToGetAudioFocus()
+
+    // Start sleep timer if configured
+    if (localAudioRequest.sleepTimerMinutes > 0) {
+      startSleepTimer(localAudioRequest.sleepTimerMinutes)
+    }
 
     // actually play the file
     if (State.Stopped == state) {
@@ -610,6 +668,9 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
       serviceHandler.removeMessages(MSG_UPDATE_AUDIO_POS)
       player?.pause()
       setState(PlaybackStateCompat.STATE_PAUSED)
+      // Cancel sleep timer and reset value when manually paused
+      cancelSleepTimer()
+      resetSleepTimerValue()
       // on jellybean and above, stay in the foreground and
       // update the notification.
       relaxResources(releaseMediaPlayer = false, stopForeground = false)
@@ -704,6 +765,9 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
   private fun processStopRequest(force: Boolean = false) {
     setState(PlaybackStateCompat.STATE_STOPPED)
     serviceHandler.removeMessages(MSG_UPDATE_AUDIO_POS)
+    // Cancel sleep timer and reset value when stopped
+    cancelSleepTimer()
+    resetSleepTimerValue()
     if (State.Preparing == state) {
       shouldStop = true
       relaxResources(releaseMediaPlayer = false, stopForeground = true)
@@ -1080,6 +1144,14 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
 
   /** Called when media player is done playing current file.  */
   override fun onCompletion(player: MediaPlayer) {
+    // Check if sleep timer flag is set - stop after this ayah
+    if (shouldStopAfterAyah && !playerOverride) {
+      Timber.d("Sleep timer: stopping after ayah completion")
+      shouldStopAfterAyah = false
+      processStopRequest()
+      return
+    }
+
     // The media player finished playing the current file, so
     // we go ahead and start the next.
     if (playerOverride) {
@@ -1355,6 +1427,7 @@ class AudioService : Service(), OnCompletionListener, OnPreparedListener,
   override fun onDestroy() {
     compositeDisposable.clear()
     // Service is being killed, so make sure we release our resources
+    cancelSleepTimer()
     serviceHandler.removeCallbacksAndMessages(null)
     serviceLooper.quitSafely()
     unregisterReceiver(noisyAudioStreamReceiver)
