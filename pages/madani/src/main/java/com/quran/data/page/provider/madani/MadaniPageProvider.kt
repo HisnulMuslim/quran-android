@@ -34,7 +34,7 @@ class MadaniPageProvider : PageProvider {
 
   override fun getDatabasesBaseUrl() = "$baseUrl/databases/"
 
-  override fun getAudioDatabasesBaseUrl() =  "https://android.quran.com/data/databases/audio/"
+  override fun getAudioDatabasesBaseUrl() =  "https://quran-files.hisnulmuslimdua.com/data/databases/audio"
 
   override fun getImagesDirectoryName() = ""
 
@@ -45,7 +45,6 @@ class MadaniPageProvider : PageProvider {
   override fun getDefaultQariId(): Int = 4
 
   override fun getQaris(): List<Qari> {
-    /*KQACR16 added list of Qari TODO do not upload this to git as per original developer */
     return listOf(
       Qari(
         0,
@@ -63,14 +62,14 @@ class MadaniPageProvider : PageProvider {
         false,
         "husary"
       ),
-     /* Qari(
+      Qari(
         2,
         audioR.string.qari_basfar,
-        "https://mirrors.quranicaudio.com/everyayah/Abdullah_Basfar_192kbps/",
-        "2",
+        "https://download.quranicaudio.com/quran/abdullaah_basfar/",
+        "abdullah_basfar",
         false,
-        null
-      ),*/Qari(
+        "abdullah_basfar"
+      ),Qari(
         3,
         audioR.string.qari_sudais_gapless,
         "https://download.quranicaudio.com/quran/abdurrahmaan_as-sudays/",
@@ -115,7 +114,33 @@ class MadaniPageProvider : PageProvider {
         "https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/",
         "mishari_alafasy",
         false,
-        "mishari_alafasy")
+        "mishari_alafasy"),
+
+      Qari(
+        9,
+        audioR.string.qari_abdulaziz_zahrani_gapless,
+        "https://download.quranicaudio.com/quran/abdulaziz_bin_saleh_alzahrani/",
+        "abdulaziz_zahrani",
+        false,
+        "abdulaziz_zahrani"),
+
+      Qari(
+        10,
+        audioR.string.qari_qatami_gapless,
+        "https://download.quranicaudio.com/quran/nasser_bin_ali_alqatami/",
+        "qatami",
+        false,
+        "qatami"),
+
+      Qari(
+        11,
+        audioR.string.qari_idrees_abkar_gapless,
+        "https://download.quranicaudio.com/quran/idrees_abkar/",
+        "idrees_abkar",
+        false,
+        "idrees_abkar")
+
+
     )
   }
 

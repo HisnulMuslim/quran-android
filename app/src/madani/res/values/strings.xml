@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name" >ಪವಿತ್ರ ಕುರ್ ಆನ್</string>
-  <string name="app_label" translatable="false" >ಪವಿತ್ರ ಕುರ್‌ಆನ್ (Qur’an)</string>
+  <string name="app_label" translatable="false" >ಪವಿತ್ರ ಕುರ್‌ಆನ್ (Quran)</string>
   <string name="download_text" translatable="false">Download :</string>
   <string name="about_contact_us" translatable="false">Contact us </string>
   <string name="about_us" translatable="false">&#169;Kannada Quran Application</string>

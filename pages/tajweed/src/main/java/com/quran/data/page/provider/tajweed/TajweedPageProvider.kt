@@ -34,7 +34,7 @@ class TajweedPageProvider : PageProvider {
 
   override fun getDatabasesBaseUrl() = "$baseUrl/databases/"
 
-  override fun getAudioDatabasesBaseUrl() =  "https://android.quran.com/data/databases/audio/"
+  override fun getAudioDatabasesBaseUrl() =  "https://quran-files.hisnulmuslimdua.com/data/databases/audio"
 
   override fun getImagesDirectoryName() = "tajweed"
 
@@ -63,6 +63,13 @@ class TajweedPageProvider : PageProvider {
         "husary"
       ),
       Qari(
+        2,
+        audioR.string.qari_basfar,
+        "https://download.quranicaudio.com/quran/abdullaah_basfar/",
+        "abdullah_basfar",
+        false,
+        "abdullah_basfar"
+      ),Qari(
         3,
         audioR.string.qari_sudais_gapless,
         "https://download.quranicaudio.com/quran/abdurrahmaan_as-sudays/",
@@ -107,7 +114,31 @@ class TajweedPageProvider : PageProvider {
         "https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/",
         "mishari_alafasy",
         false,
-        "mishari_alafasy")
+        "mishari_alafasy"),
+
+      Qari(
+        9,
+        audioR.string.qari_abdulaziz_zahrani_gapless,
+        "https://download.quranicaudio.com/quran/abdulaziz_bin_saleh_alzahrani/",
+        "abdulaziz_zahrani",
+        false,
+        "abdulaziz_zahrani"),
+
+      Qari(
+        10,
+        audioR.string.qari_qatami_gapless,
+        "https://download.quranicaudio.com/quran/nasser_bin_ali_alqatami/",
+        "qatami",
+        false,
+        "qatami"),
+
+      Qari(
+        11,
+        audioR.string.qari_idrees_abkar_gapless,
+        "https://download.quranicaudio.com/quran/idrees_abkar/",
+        "idrees_abkar",
+        false,
+        "idrees_abkar")
     )
   }
 
