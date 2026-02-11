@@ -50,10 +50,13 @@ include(":pages:madani")
 include(":pages:data:madani")
 include(":pages:data:warsh")
 include(":pages:data:tajweed")
+include(":pages:data:new_madani_1439_lines")
 include(":pages:common:madani")
 include(":pages:common:warsh")
 include(":pages:common:tajweed")
+include(":pages:common:new_madani_1439_lines")
 include(":pages:tajweed")
+include(":pages:new_madani_1439_lines")
 include(":autoquran")
 
 if (File(rootDir, "extras/settings-extra.gradle").exists()) {
