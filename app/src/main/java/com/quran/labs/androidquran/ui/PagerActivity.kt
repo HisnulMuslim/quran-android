@@ -1215,11 +1215,11 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val i = Intent(this, QuranPreferenceActivity::class.java)
       startActivity(i)
       return true
-    } else if (itemId == R.id.tajweed) {
+    }/* else if (itemId == R.id.tajweed) {
       val i = Intent(this, TajweedActivity::class.java)
       startActivity(i)
       return true
-    } else if (itemId == R.id.help) {
+    }*/ else if (itemId == R.id.help) {
       val i = Intent(this, HelpActivity::class.java)
       startActivity(i)
       return true

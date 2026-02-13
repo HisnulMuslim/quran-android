@@ -72,10 +72,10 @@
       android:icon="@drawable/baseline_home_settings_28"
       android:title="@string/menu_settings"
       app:showAsAction="never" />
-  <item
+  <!--<item
       android:id="@+id/tajweed"
       android:title="@string/menu_tajweed"
-      app:showAsAction="never" />
+      app:showAsAction="never" />-->
   <item
       android:id="@+id/help"
       android:title="@string/menu_help"

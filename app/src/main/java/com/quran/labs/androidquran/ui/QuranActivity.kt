@@ -353,9 +353,9 @@ class QuranActivity : AppCompatActivity(),
       R.id.last_page -> {
         jumpToLastPage()
       }
-      R.id.tajweed -> {
+      /*R.id.tajweed -> {
         startActivity(Intent(this, TajweedActivity::class.java))
-      }
+      }*/
       R.id.help -> {
         startActivity(Intent(this, HelpActivity::class.java))
       }

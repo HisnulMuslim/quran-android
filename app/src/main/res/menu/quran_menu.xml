@@ -36,9 +36,9 @@
           android:icon="@drawable/ic_action_settings"
           android:title="@string/menu_settings"
           app:showAsAction="ifRoom" />
-    <item android:id="@+id/tajweed"
+    <!--<item android:id="@+id/tajweed"
           android:title="@string/menu_tajweed"
-          app:showAsAction="never"/>
+          app:showAsAction="never"/>-->
     <item android:id="@+id/help"
           android:title="@string/menu_help"
           app:showAsAction="never"/>
