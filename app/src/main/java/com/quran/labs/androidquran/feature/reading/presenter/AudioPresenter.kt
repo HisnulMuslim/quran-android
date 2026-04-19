@@ -179,7 +179,7 @@ constructor(private val quranDisplayData: QuranDisplayData,
     }
 
     val dbName = qari.databaseName + AudioUtils.ZIP_EXTENSION
-    return quranFileUtils.gaplessDatabaseRootUrl + "/" + dbName
+    return quranFileUtils.gaplessDatabaseRootUrl + dbName
   }
 
   override fun bind(what: PagerActivity) {

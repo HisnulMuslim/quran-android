@@ -1,5 +1,6 @@
 package com.quran.labs.androidquran.feature.audio
 
+import android.util.Log
 import com.quran.labs.androidquran.common.audio.model.QariItem
 import com.quran.labs.androidquran.feature.audio.api.AudioSetUpdate
 import com.quran.labs.androidquran.feature.audio.dao.LocalUpdate
@@ -23,7 +24,7 @@ object AudioUpdater {
     audioSetUpdate: AudioSetUpdate,
     qaris: List<QariItem>
   ): QariItem? {
-    return qaris.firstOrNull { it.url == audioSetUpdate.path }
+    return qaris.firstOrNull { it.path == audioSetUpdate.path }
   }
 
   private fun makeLocalUpdate(audioFileChecker: AudioFileChecker,
