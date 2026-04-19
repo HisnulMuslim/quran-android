@@ -8,7 +8,7 @@ anvil {
   generateDaggerFactories.set(true)
 }
 
-android.namespace = "com.quran.labs.androidquran.pages.madani"
+android.namespace = "com.quran.labs.androidquran.pages.newmadani"
 
 dependencies {
   implementation(project(":common:data"))
@@ -16,12 +16,8 @@ dependencies {
   implementation(project(":common:audio"))
   implementation(project(":common:upgrade"))
 
-  implementation(project(":pages:common:madani"))
-  api(project(":pages:data:madani"))
-
-  implementation(project(":pages:tajweed"))
-  implementation(project(":pages:new_madani_1439_lines"))
+  implementation(project(":pages:common:new_madani_1439_lines"))
+  api(project(":pages:data:new_madani_1439_lines"))
 
   implementation(libs.dagger.runtime)
-  implementation(libs.androidx.fragment.ktx)
 }

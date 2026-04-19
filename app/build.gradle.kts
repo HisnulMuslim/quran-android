@@ -153,6 +153,8 @@ dependencies {
   implementation(project(":common:data"))
   implementation(project(":common:di"))
   implementation(project(":common:download"))
+  implementation(project(":common:linebyline:data"))
+  implementation(project(":common:linebyline:ui"))
   implementation(project(":common:networking"))
   implementation(project(":common:pages"))
   implementation(project(":common:preference"))
@@ -167,6 +169,7 @@ dependencies {
   implementation(project(":feature:audio"))
   implementation(project(":feature:audiobar"))
   implementation(project(":feature:downloadmanager"))
+  implementation(project(":feature:linebyline"))
   implementation(project(":feature:qarilist"))
 
   // android auto support
