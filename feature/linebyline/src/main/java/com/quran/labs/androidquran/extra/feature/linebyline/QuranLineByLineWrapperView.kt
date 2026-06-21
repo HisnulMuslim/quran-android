@@ -54,7 +54,7 @@ class QuranLineByLineWrapperView(
               context.applicationContext,
               R.drawable.chapter_hdr
             ),
-            ayahNumberFormatter = NumberFormat.getIntegerInstance(Locale("ar")),
+            ayahNumberFormatter = NumberFormat.getIntegerInstance(Locale("ar", "SA")),
             onClick = quranLineByLinePresenter::onClick,
             onPagePositioned = quranLineByLinePresenter::onPagePositioned,
             onSelectionStart = quranLineByLinePresenter::startSelection,

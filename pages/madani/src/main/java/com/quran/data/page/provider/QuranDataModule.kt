@@ -6,7 +6,7 @@ import com.quran.common.upgrade.LocalDataUpgrade
 import com.quran.common.upgrade.PreferencesUpgrade
 import com.quran.data.constant.DependencyInjectionConstants
 import com.quran.data.page.provider.madani.MadaniPageProvider
-import com.quran.data.page.provider.newmadani.NewMadaniPageProvider
+import com.quran.data.page.provider.madani_1439.MadaniPageProvider1439
 import com.quran.data.page.provider.tajweed.TajweedPageProvider
 import com.quran.data.pageinfo.mapper.AyahMapper
 import com.quran.data.pageinfo.mapper.IdentityAyahMapper
@@ -90,7 +90,7 @@ object QuranDataModule {
   @IntoMap
   @StringKey("new_madani_1439_lines")
   fun provideNewMadaniPageSet(): PageProvider {
-    return NewMadaniPageProvider()
+    return MadaniPageProvider1439()
   }
 
   @JvmStatic

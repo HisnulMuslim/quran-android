@@ -64,13 +64,13 @@ fun QuranPageWrapper(
       } else {
         listOf(
           // header color
-          Color(0x25, 0x63, 0xeb),
+          Color(0x1E, 0x3A, 0x8A),
           // ring color
-          Color(0x25, 0x63, 0xeb),
+          Color(0x1D, 0x4E, 0xD8),
           // inner color
-          Color(0xef, 0xf6, 0xff),
+          Color(0xEF, 0xF6, 0xFF),
           // text color
-          Color(0x1d, 0x4e, 0xd8)
+          Color(0x1E, 0x3A, 0x8A)
         )
       }
     } else {
