@@ -10,7 +10,7 @@ object Constants {
   // Numerics
   const val DEFAULT_NIGHT_MODE_TEXT_BRIGHTNESS = 255
   const val DEFAULT_NIGHT_MODE_BACKGROUND_BRIGHTNESS = 0
-  const val DEFAULT_TEXT_SIZE = 17
+  const val DEFAULT_TEXT_SIZE = 18
 
   // 24 hour in ms
   const val MIN_TRANSLATION_REFRESH_TIME = 24 * 60 * 60 * 1000

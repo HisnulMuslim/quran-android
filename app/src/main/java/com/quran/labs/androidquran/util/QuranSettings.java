@@ -438,4 +438,12 @@ public class QuranSettings {
   public boolean isIncludeNotes() {
     return prefs.getBoolean(Constants.PREF_INCLUDE_NOTES, true);
   }
+
+  public boolean didAttemptTranslationDownload() {
+    return perInstallationPrefs.getBoolean("didAttemptTranslationDownload", false);
+  }
+
+  public void setDidAttemptTranslationDownload(boolean attempted) {
+    perInstallationPrefs.edit().putBoolean("didAttemptTranslationDownload", attempted).apply();
+  }
 }

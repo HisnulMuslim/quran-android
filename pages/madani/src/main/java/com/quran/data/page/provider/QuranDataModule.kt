@@ -38,6 +38,10 @@ object QuranDataModule {
         Log.d("QuranDataModule", "Creating PageViewFactory for line-by-line page")
         object : PageViewFactory {
           override fun providePage(pageNumber: Int, pageMode: com.quran.page.common.data.PageMode): Fragment? {
+            if (pageMode !is com.quran.page.common.data.PageMode.SingleArabicPage &&
+                pageMode !is com.quran.page.common.data.PageMode.DualScreenMode.Arabic) {
+              return null
+            }
             Log.d("QuranDataModule", "providePage called for page: $pageNumber")
             return try {
               val clazz = Class.forName("com.quran.labs.androidquran.extra.feature.linebyline.QuranLineByLineFragment")
@@ -67,7 +71,7 @@ object QuranDataModule {
   @Named(DependencyInjectionConstants.FALLBACK_PAGE_TYPE)
   @JvmStatic
   @Provides
-  fun provideFallbackPageType(): String = "madani"
+  fun provideFallbackPageType(): String = "madani_1439"
 
   @JvmStatic
   @Provides
@@ -88,7 +92,7 @@ object QuranDataModule {
   @JvmStatic
   @Provides
   @IntoMap
-  @StringKey("new_madani_1439_lines")
+  @StringKey("madani_1439")
   fun provideNewMadaniPageSet(): PageProvider {
     return MadaniPageProvider1439()
   }

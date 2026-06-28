@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--KQACR17 NF -->
 <resources>
-  <string name="app_name">ಪವಿತ್ರ ಕುರ್ ಆನ್</string>
+  <string name="app_name">ಪವಿತ್ರ ಕುರ್‌ಆನ್</string>
   <string name="downloadPrompt_title">ಅರಬಿ ಪುಟಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವಿರಾ?</string>
   <string name="downloadPrompt">ನೀವು ಈಗ ಕುರ್ ಆನಿನ ಮೂಲ ಅರಬಿ ಪುಟಗಳನ್ನು ಡೌನ್ ಲೋಡ್ ಮಾಡಬೇಕಾಗಿದೆ.
 ಇಲ್ಲದಿದ್ದರೆ, ನಿಮಗೆ ಅರಬಿ ಪುಟಗಳನ್ನು ವೀಕ್ಷಿಸಲಾಗುವುದಿಲ್ಲ. ನೀವು ಈಗ ಡೌನ್ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?
@@ -12,7 +12,7 @@
   <string name="downloadPrompt_no">ಇಲ್ಲ</string>
   <string name="downloading_message">ಫೈಲ್‌ಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವವರೆಗೆ ನಿರೀಕ್ಷಿಸಿ(resume supported).</string>
   <string name="extracting_title">ಸಂಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ&#8230;</string>
-  <string name="menu_about">ಪವಿತ್ರ ಕುರ್ ಆನ್  ಬಗ್ಗೆ</string>
+  <string name="menu_about">ಪವಿತ್ರ ಕುರ್‌ಆನ್  ಬಗ್ಗೆ</string>
   <string name="menu_other_apps">ನಮ್ಮ ಇತರ ಅಪ್ಲಿಕೇಶನ್ಗಳು</string>
   <string name="menu_settings">ಸೆಟ್ಟಿಂಗ್</string>
   <string name="menu_jump_last_page">ಕೊನೆಯ ಪುಟ</string>
@@ -26,7 +26,7 @@
   <string name="menu_show_recents" translatable="false">@string/recent_pages</string>
   <string name="menu_show_date">ದಿನಾಂಕವನ್ನು ತೋರಿಸಿ</string>
   <string name="menu_translation">ಅನುವಾದವನ್ನು ತೋರಿಸಿ</string>
-  <string name="menu_back_to_page">ಕುರ್ ಆನ್ ತೋರಿಸಿ</string>
+  <string name="menu_back_to_page">ಕುರ್‌ಆನ್ ತೋರಿಸಿ</string>
   <string name="menu_help">ಸಹಾಯ</string>
   <string name="menu_tajweed">ತಜ್ವೀದ್ ನಿಯಮಗಳು</string>
   <string name="menu_search">ಹುಡುಕಿ</string>
@@ -37,18 +37,18 @@
 
   <!-- about -->
   <string name="about_description" >
-    ಪವಿತ್ರ ಕುರ್ ಆನ್,ಇದು ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಮಾರ್ಟ್ ಫೋನ್ ಗಳಿಗಾಗಿರುವ ಉಚಿತ ಕನ್ನಡ ಕುರ್ ಆನ್ ಆಪ್ಲಿಕೇಷನ್ ಆಗಿದೆ. &lt;br/>&lt;br/> ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಓಪನ್ ಸೋರ್ಸ್ ಆಂಡ್ರಾಯ್ಡ್ ಪ್ರಾಜೆಕ್ಟ್    &lt;a href="https://quran.com/"> QURAN.COM &lt;/a> ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.ಅಲ್ಲಾಹು ಅವರಿಗೆ  ಶ್ರೇಷ್ಟವಾದದ್ದನ್ನು ದಯಪಾಲಿಸಲಿ. &lt;br/>&lt;br/>
+    ಪವಿತ್ರ ಕುರ್‌ಆನ್,ಇದು ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಮಾರ್ಟ್ ಫೋನ್ ಗಳಿಗಾಗಿರುವ ಉಚಿತ ಕನ್ನಡ ಕುರ್‌ಆನ್ ಆಪ್ಲಿಕೇಷನ್ ಆಗಿದೆ. &lt;br/>&lt;br/> ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಓಪನ್ ಸೋರ್ಸ್ ಆಂಡ್ರಾಯ್ಡ್ ಪ್ರಾಜೆಕ್ಟ್    &lt;a href="https://quran.com/"> QURAN.COM &lt;/a> ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.ಅಲ್ಲಾಹು ಅವರಿಗೆ  ಶ್ರೇಷ್ಟವಾದದ್ದನ್ನು ದಯಪಾಲಿಸಲಿ. &lt;br/>&lt;br/>
     ಕನ್ನಡ ಅರ್ಥಾನುವಾದವನ್ನು ಮುಹಮ್ಮದ್ ಹಂಝಾ ಪುತ್ತೂರು ರವರು ಭಾಷಾಂತರಿಸಿದ, ಉಮರ್ ಇಬ್ನ್ ಅಹ್ಮದ್ ಮದನಿ , ಅಹ್ಮದ್ ಎಸ್ ಎಮ್ ಮತ್ತು ಅಬೂಬಕರ್ ನಝೀರ್ ಸಲಫಿಯವರು ಪರಿಶೀಲಿಸಿದ &lt;br/>  &lt;b>ಆದರಣೀಯ ಖುರ್ ಆನ್ ಹಾಗೂ ಅದರ ಕನ್ನಡ ಅರ್ಥಾನುವಾದ &lt;br/> &lt;i>ಪ್ರಕಾಶಕರು :ಅಲ್  ಮಲಿಕ್  ಫಹದ್ ಪವಿತ್ರ  ಖುರ್ ಆನ್  ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್ , ಮದೀನಾ, ಸೌದಿ ಅರೇಬಿಯಾ  &lt;i/> &lt;/b> &lt;br/>ದಿಂದ ತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ.&lt;br/>
   </string>
   <string name="about_data_sources">ಡೇಟಾ ಮೂಲಗಳು</string>
-  <string name="about_images">ಕುರ್ ಆನ್ ಮೂಲ ಅರಬಿ ಪುಟಗಳು</string>
-  <string name="about_madani_images">ಕುರ್ ಆನ್ ಚಿತ್ರಗಳು ಕಿಂಗ್ ಫಹದ್ ಕುರ್ ಆನ್ ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್‌ನ ಫಾಂಟ್‌ಗಳನ್ನು ಆಧರಿಸಿವೆ</string>
+  <string name="about_images">ಕುರ್‌ಆನ್ ಮೂಲ ಅರಬಿ ಪುಟಗಳು</string>
+  <string name="about_madani_images">ಕುರ್‌ಆನ್ ಚಿತ್ರಗಳು ಕಿಂಗ್ ಫಹದ್ ಕುರ್‌ಆನ್ ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್‌ನ ಫಾಂಟ್‌ಗಳನ್ನು ಆಧರಿಸಿವೆ</string>
   <string name="about_madani_images_url" translatable="false">https://github.com/quran/quran.com-images</string>
   <string name="about_naskh_images">The Quran images for the Naskh app are taken (with permission) from SHL Info Systems</string>
   <string name="about_naskh_images_url" translatable="false">http://www.shlinfosystems.com</string>
   <string name="about_qaloon_images">Qaloon images are used with the permission of Nous Memes Editions Et Diffusion (Tunisia)</string>
-  <string name="about_quranicaudio" translatable="false">ಕುರ್ ಆನ್ ಆಡಿಯೋ</string>
-  <string name="about_quranicaudio_summary">ಅಂತರವಿಲ್ಲದ mp3 ಕುರ್ ಆನ್ ಪಠಣಗಳು</string>
+  <string name="about_quranicaudio" translatable="false">ಕುರ್‌ಆನ್ ಆಡಿಯೋ</string>
+  <string name="about_quranicaudio_summary">ಅಂತರವಿಲ್ಲದ mp3 ಕುರ್‌ಆನ್ ಪಠಣಗಳು</string>
   <string name="about_quranicaudio_url" translatable="false">https://quranicaudio.com</string>
   <string name="about_quran_ksu">ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಮುಷ್ ಹಫ್ ಯೋಜನೆ</string>
   <string name="about_quran_ksu_summary">ಕಿಂಗ್ ಸೌದ್ ಯೂನಿವರ್ಸಿಟಿ ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಮುಷ್ ಹಫ್ ಪ್ರಾಜೆಕ್ಟ್ ಅರೇಬಿಕ್ ತಫ್ಸೀರ್.</string>
@@ -56,7 +56,7 @@
   <string name="about_furqan" translatable="false">ಅಲ್-ಬಾಹಿತ್ ಅಲ್-ಕುರಾನಿ (tafsir.app)</string>
   <string name="about_furqan_summary">ಉತ್ ಮಾನ್ ಪಠ್ಯ</string>
   <string name="about_furqan_url" translatable="false">https://tafsir.app</string>
-  <string name="about_quran_enc" translatable="false">ಪವಿತ್ರ ಕುರ್ ಆನ್ ಎನ್ಸೈಕ್ಲೋಪೀಡಿಯಾ (QuranEnc)</string>
+  <string name="about_quran_enc" translatable="false">ಪವಿತ್ರ ಕುರ್‌ಆನ್ ಎನ್ಸೈಕ್ಲೋಪೀಡಿಯಾ (QuranEnc)</string>
   <string name="about_quran_enc_summary">ಅನೇಕ ಭಾಷೆಗಳ ಅನುವಾದಗಳು</string>
   <string name="about_quran_enc_url" translatable="false">https://quranenc.com</string>
   <string name="about_tanzil" translatable="false">Tanzil</string>
@@ -93,14 +93,14 @@
   <string name="about_sliding_panel_url" translatable="false">https://github.com/umano/AndroidSlidingUpPanel</string>
   <string name="about_others">ಇತರರು</string>
   <string name="about_contributors">ಕೊಡುಗೆದಾರರು</string>
-  <string name="about_contributors_summary">ಪವಿತ್ರ ಕುರ್ ಆನ್ ಅಪ್ಲಿಕೇಶನ್  ಅಭಿವೃದ್ಧಿಗೆ ಕೊಡುಗೆ ನೀಡಿದ ಜನರ ಪಟ್ಟಿ</string>
+  <string name="about_contributors_summary">ಪವಿತ್ರ ಕುರ್‌ಆನ್ ಅಪ್ಲಿಕೇಶನ್  ಅಭಿವೃದ್ಧಿಗೆ ಕೊಡುಗೆ ನೀಡಿದ ಜನರ ಪಟ್ಟಿ</string>
   <string name="about_contributors_url" translatable="false">https://github.com/quran/quran_android/blob/main/CONTRIBUTORS.md</string>
 
   <!-- tajweed -->
   <string name="tajweed_rules_title">ತಜ್ವೀದ್ ನಿಯಮಗಳು</string>
   <string name="tajweed_content">
         &lt;br/>&lt;b>ತಜ್ವೀದ್ ಎಂದರೇನು?&lt;/b>
-        &lt;br/>ತಜ್ವೀದ್ ಎನ್ನುವುದು ಕುರ್ ಆನ್ ಪಠಣ ಸಮಯದಲ್ಲಿ ಸರಿಯಾದ ಉಚ್ಛಾರಣೆಯನ್ನು ನಿಯಂತ್ರಿಸುವ ನಿಯಮಗಳ ಗುಂಪಾಗಿದೆ.
+        &lt;br/>ತಜ್ವೀದ್ ಎನ್ನುವುದು ಕುರ್‌ಆನ್ ಪಠಣ ಸಮಯದಲ್ಲಿ ಸರಿಯಾದ ಉಚ್ಛಾರಣೆಯನ್ನು ನಿಯಂತ್ರಿಸುವ ನಿಯಮಗಳ ಗುಂಪಾಗಿದೆ.
         &lt;br/>
         &lt;br/>&lt;b>ತಜ್ವೀದ್‌ನಲ್ಲಿ ಬಣ್ಣ ಕೋಡಿಂಗ್&lt;/b>
         &lt;br/>ವಿವಿಧ ತಜ್ವೀದ್ ನಿಯಮಗಳನ್ನು ಸೂಚಿಸಲು ವಿವಿಧ ಬಣ್ಣಗಳನ್ನು ಬಳಸಲಾಗುತ್ತದೆ:
@@ -181,25 +181,25 @@
         &lt;br/>ಅರೇಬಿಕ್ ಪುಟಗಳಿಗಾಗಿ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್‌ನಲ್ಲಿ ಹಿಡಿದುಕೊಳ್ಳಿ. ಇದು ಪಠ್ಯವನ್ನು ದೊಡ್ಡದಾಗಿ ಮಾಡುತ್ತದೆ. ಅನುವಾದಗಳಿಗಾಗಿ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ ಮತ್ತು ಅನುವಾದ ಪಠ್ಯದ ಗಾತ್ರವನ್ನು ಹೊಂದಿಸಿ.
         &lt;br/>
         &lt;br/>&lt;b>ಆಡಿಯೋ ಪ್ಲೇ ಮಾಡುವುದು ಹೇಗೆ?&lt;/b>
-        &lt;br/>ಯಾವುದೇ ಕುರ್ ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಕೆಳಭಾಗದಲ್ಲಿ, ನೀವು ಪ್ಲೇ ಬಟನ್ ಮತ್ತು ಕ್ವಾರಿ ಹೆಸರಿನ ಕೆಲವು ಪಠ್ಯವನ್ನು ಗಮನಿಸಬಹುದು.
+        &lt;br/>ಯಾವುದೇ ಕುರ್‌ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಕೆಳಭಾಗದಲ್ಲಿ, ನೀವು ಪ್ಲೇ ಬಟನ್ ಮತ್ತು ಕ್ವಾರಿ ಹೆಸರಿನ ಕೆಲವು ಪಠ್ಯವನ್ನು ಗಮನಿಸಬಹುದು.
 
   ಬೇರೆ ಖಾರಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಕ್ವಾರಿಯ ಹೆಸರನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ. ಪ್ರಸ್ತುತ ಪುಟ ಅಥವಾ ಸೂರಾವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಮತ್ತು ಪ್ಲೇ ಮಾಡಲು ಪ್ಲೇ ಕ್ಲಿಕ್ ಮಾಡಿ.
         &lt;br/>
         &lt;br/>&lt;b>ಅನುವಾದವನ್ನು ಹೇಗೆ ನೋಡಬಹುದು?&lt;/b>
-        &lt;br/>ಯಾವುದೇ ಕುರ್ ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಮೇಲ್ಭಾಗದಲ್ಲಿ, ನೀವು ಗ್ಲೋಬ್ ಐಕಾನ್ ಅನ್ನು ಗಮನಿಸಬಹುದು (ಅಥವಾ, ನೀವು ಅದನ್ನು ನೋಡದಿದ್ದರೆ, ಮೂರು ಚದರ ಚುಕ್ಕೆಗಳನ್ನು ಹೊಂದಿರುವ ಐಕಾನ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ) - ಇದನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಅನುವಾದವನ್ನು ವೀಕ್ಷಿಸಲು ಅನುವಾದವನ್ನು ಆಯ್ಕೆಮಾಡಿ.
+        &lt;br/>ಯಾವುದೇ ಕುರ್‌ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಮೇಲ್ಭಾಗದಲ್ಲಿ, ನೀವು ಗ್ಲೋಬ್ ಐಕಾನ್ ಅನ್ನು ಗಮನಿಸಬಹುದು (ಅಥವಾ, ನೀವು ಅದನ್ನು ನೋಡದಿದ್ದರೆ, ಮೂರು ಚದರ ಚುಕ್ಕೆಗಳನ್ನು ಹೊಂದಿರುವ ಐಕಾನ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ) - ಇದನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಅನುವಾದವನ್ನು ವೀಕ್ಷಿಸಲು ಅನುವಾದವನ್ನು ಆಯ್ಕೆಮಾಡಿ.
         &lt;br/>
         ನೀವು ಯಾವುದೇ ಅನುವಾದಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡದಿದ್ದರೆ, ನೀವು ಅನುವಾದಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದಾದ ಪರದೆಯೊಂದಕ್ಕೆ ಅದು ನಿಮ್ಮನ್ನು ಕರೆದೊಯ್ಯುತ್ತದೆ. ಅನುವಾದವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಮತ್ತು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ, ನಂತರ ಹಿಂತಿರುಗಿ ಮತ್ತು ಅನುವಾದವನ್ನು ವೀಕ್ಷಿಸಲು ಗ್ಲೋಬ್ ಐಕಾನ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ.
         &lt;br/>
         &lt;br/>&lt;b>ನಾನು ಪುಟವನ್ನು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡುವುದು ಹೇಗೆ ?&lt;/b>
-        &lt;br/>ಯಾವುದೇ ಕುರ್ ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಮೇಲಿನ ಬಲಭಾಗದಲ್ಲಿ, ನೀವು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ನೋಡುತ್ತೀರಿ. ಪುಟವನ್ನು ಗುರುತು ಮಾಡಲು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ ಬಣ್ಣವು ಘನ ಬಿಳಿ ಬಣ್ಣಕ್ಕೆ ತಿರುಗುತ್ತದೆ). ಗುರುತು ಅನ್ನು ತೆಗೆದುಹಾಕಲು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ..
+        &lt;br/>ಯಾವುದೇ ಕುರ್‌ಆನ್ ಪುಟವನ್ನು ತೆರೆಯಿರಿ. ಪರದೆಯ ಮೇಲೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ. ಮೇಲಿನ ಬಲಭಾಗದಲ್ಲಿ, ನೀವು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ನೋಡುತ್ತೀರಿ. ಪುಟವನ್ನು ಗುರುತು ಮಾಡಲು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ ಬಣ್ಣವು ಘನ ಬಿಳಿ ಬಣ್ಣಕ್ಕೆ ತಿರುಗುತ್ತದೆ). ಗುರುತು ಅನ್ನು ತೆಗೆದುಹಾಕಲು ಗುರುತು ಐಕಾನ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಟ್ಯಾಪ್ ಮಾಡಿ..
         &lt;br/>
-        &lt;br/>&lt;b>ನಾನು ಆಯತನ್ನು ಹೇಗೆ ಹಂಚಿಕೊಳ್ಳಲಿ?&lt;/b>
-        &lt;br/>ಆಯತನ್ನು ಗುರುತು ಮಾಡಲು, ಟ್ಯಾಗ್ ಮಾಡಲು, ಹಂಚಿಕೊಳ್ಳಲು ,ಕಾಪಿ ಮಾಡಲು , ಅನುವಾದವನ್ನು ನೋಡಲು ಅಥವಾ ಅದರ ಪಠಣವನ್ನು ಆಲಿಸಲು, ಆಯತನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಂಡು ಆಯ್ಕೆ ಮಾಡಬಹುದು .&lt;br/>
+        &lt;br/>&lt;b>ಹಲವು ಆಯತ್‌ಗಳನ್ನು ಹೇಗೆ ಆಯ್ಕೆ ಮಾಡಬಹುದು?&lt;/b>
+        &lt;br/>ಒಂದು ಅಥವಾ ಹೆಚ್ಚಿನ ಆಯತ್‌ಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಲು, ಮೊದಲು ಆರಂಭದ ಆಯತ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ. ನಂತರ ಆಯ್ಕೆಯನ್ನು ವಿಸ್ತರಿಸಲು ಅದೇ ಪುಟದಲ್ಲಿರುವ ಬಯಸಿದ ಆಯತ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ. ಆಯ್ಕೆ ಮಾಡಿದ ಆಯತ್‌ಗಳನ್ನು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಲು, ಟ್ಯಾಗ್ ಮಾಡಲು, ಹಂಚಿಕೊಳ್ಳಲು, ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲು, ಅನುವಾದವನ್ನು ವೀಕ್ಷಿಸಲು ಅಥವಾ ಪಠಣವನ್ನು ಆಲಿಸಲು ಮೆನು ಕಾಣಿಸುತ್ತದೆ.&lt;br/>
     </string>
   <string name="search_hint">ಹುಡುಕಿ...</string>
   <string name="quranSearchType">ಸೂಕ್ತಿ ಹುಡುಕಿ...</string>
   <string name="search_full_results">ಪೂರ್ಣ ಫಲಿತಾಂಶಗಳು</string>
-  <string name="search_entire_mushaf">ಸಂಪೂರ್ಣ ಕುರ್ ಆನ್ ಅನ್ನು ಹುಡುಕಿ</string>
+  <string name="search_entire_mushaf">ಸಂಪೂರ್ಣ ಕುರ್‌ಆನ್ ಅನ್ನು ಹುಡುಕಿ</string>
 
   <!-- Shown above search results when we receive a search request. -->
   <plurals name="search_results">
@@ -208,7 +208,7 @@
   </plurals>
 
   <!-- m permissions stuff -->
-  <string name="storage_permission_rationale"> ಕುರ್ ಆನ್ ಅಪ್ಲಿಕೇಶನ್  ತನ್ನ ಡೇಟಾವನ್ನು ಮೆಮೊರಿ ಕಾರ್ಡ್ ನಲ್ಲಿ  ಸಂಗ್ರಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಬಯಸುತ್ತದೆ. ಈ ಅನುಮತಿಯಿಲ್ಲದೆಯೂ   ಕುರ್ ಆನ್ ಅಪ್ಲಿಕೇಶನ್ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ, ಆದರೆ ನೀವು ಡೇಟಾವನ್ನು ತೆರವುಗೊಳಿಸಿದರೆ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದರೆ, ಎಲ್ಲಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಪುಟಗಳು, ಆಡಿಯೋ ಮತ್ತು ಡೇಟಾವನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ನೀವು  ಅನುಮತಿ ನೀಡಲು ಬಯಸುವಿರಾ ?</string>
+  <string name="storage_permission_rationale"> ಕುರ್‌ಆನ್ ಅಪ್ಲಿಕೇಶನ್  ತನ್ನ ಡೇಟಾವನ್ನು ಮೆಮೊರಿ ಕಾರ್ಡ್ ನಲ್ಲಿ  ಸಂಗ್ರಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಬಯಸುತ್ತದೆ. ಈ ಅನುಮತಿಯಿಲ್ಲದೆಯೂ   ಕುರ್‌ಆನ್ ಅಪ್ಲಿಕೇಶನ್ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ, ಆದರೆ ನೀವು ಡೇಟಾವನ್ನು ತೆರವುಗೊಳಿಸಿದರೆ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದರೆ, ಎಲ್ಲಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಪುಟಗಳು, ಆಡಿಯೋ ಮತ್ತು ಡೇಟಾವನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ನೀವು  ಅನುಮತಿ ನೀಡಲು ಬಯಸುವಿರಾ ?</string>
   <string name="storage_permission_please_restart">ಇದು ಕಾರ್ಯರೂಪಕ್ಕೆ ತರಲು ದಯವಿಟ್ಟು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ.</string>
 
   <!-- Search messages -->
@@ -258,12 +258,12 @@
   <string name="prefs_download_amount_title">ಡೌನ್‌ಲೋಡ್ ಆದ್ಯತೆ</string>
   <string name="prefs_download_amount_summary">ಅಂತರವಿಲ್ಲದ ಆಡಿಯೊಗಾಗಿ ಡೌನ್‌ಲೋಡ್ ಆದ್ಯತೆ</string>
   <string name="prefs_audio_manager" translatable="false">@string/audio_manager</string>
-  <string name="prefs_audio_manager_summary">ಕುರ್ ಆನ್ ಆಡಿಯೊ ಡೌನ್‌ಲೋಡ್ ಮತ್ತು  ನಿರ್ವಹಣೆ </string>
+  <string name="prefs_audio_manager_summary">ಕುರ್‌ಆನ್ ಆಡಿಯೊ ಡೌನ್‌ಲೋಡ್ ಮತ್ತು  ನಿರ್ವಹಣೆ </string>
   <string name="downloaded_translations">ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಅನುವಾದಗಳು</string>
   <string name="available_translations">ಡೌನ್‌ಲೋಡ್‌ ಮಾಡಲು ಲಭ್ಯವಿರುವ ಅನುವಾದಗಳು </string>
   <string name="dialog_ok">ಓಕೆ</string>
-  <string name="prefs_app_location_title">ಕುರ್ ಆನ್ ಡೇಟಾ ಡೈರೆಕ್ಟರಿ</string>
-  <string name="prefs_app_location_summary">ಕುರ್ ಆನ್ ಫೈಲ್‌ಗಳನ್ನು ಎಲ್ಲಿ ಸಂಗ್ರಹಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಿ</string>
+  <string name="prefs_app_location_title">ಕುರ್‌ಆನ್ ಡೇಟಾ ಡೈರೆಕ್ಟರಿ</string>
+  <string name="prefs_app_location_summary">ಕುರ್‌ಆನ್ ಫೈಲ್‌ಗಳನ್ನು ಎಲ್ಲಿ ಸಂಗ್ರಹಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಿ</string>
   <string name="prefs_send_logs_title">ದಾಖಲೆಗಳನ್ನು ಕಳುಹಿಸಿ</string>
   <string name="prefs_send_logs_summary">ಅಪ್ಲಿಕೇಶನ್ ದಾಖಲೆಗಳನ್ನು ಡೆವಲಪರ್‌ಗೆ  ಕಳುಹಿಸಿ</string>
   <string name="prefs_sdcard_internal">ಇಂಟರ್ನಲ್  ಮೆಮೊರಿ </string>
@@ -279,7 +279,7 @@
   <string name="prefs_dual_page_mode_enabled">ಲ್ಯಾಂಡ್ಸ್ಕೇಪ್ ಮೋಡ್ ನಲ್ಲಿ, ಎರಡು ಪುಟಗಳು ಅಕ್ಕಪಕ್ಕದಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ.</string>
   <string name="prefs_dual_page_mode_disabled">ಲ್ಯಾಂಡ್ಸ್ಕೇಪ್, ಕೇವಲ ಒಂದೇ ಪುಟ ಕಾಣಿಸುತ್ತದೆ.</string>
   <string name="prefs_category_advanced">ಸುಧಾರಿತ ಆಯ್ಕೆಗಳು</string>
-  <string name="prefs_category_advanced_summary">ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳನ್ನು ಆಮದು/ರಫ್ತು ಮಾಡಿ, ಕುರ್ ಆನ್ ಡೇಟಾ ಡೈರೆಕ್ಟರಿಯನ್ನು ಹೊಂದಿಸಿ, ಇತ್ಯಾದಿ.</string>
+  <string name="prefs_category_advanced_summary">ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳನ್ನು ಆಮದು/ರಫ್ತು ಮಾಡಿ, ಕುರ್‌ಆನ್ ಡೇಟಾ ಡೈರೆಕ್ಟರಿಯನ್ನು ಹೊಂದಿಸಿ, ಇತ್ಯಾದಿ.</string>
   <string name="prefs_import_title">ಆಮದು ಮಾಡಿ </string>
   <string name="prefs_import_summary">ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳು ಮತ್ತು ಟ್ಯಾಗ್‌ಗಳನ್ನು ಆಮದು ಮಾಡಿ</string>
   <string name="prefs_export_title">ರಫ್ತು ಮಾಡಿ</string>
@@ -308,7 +308,7 @@
 
   <string name="logs_email" translatable="false">pavitraquran.logs@gmail.com</string>
   <string name="warning">ಎಚ್ಚರಿಕೆ</string>
-  <string name="kitkat_external_message">ಆಂಡ್ರಾಯ್ಡ್  ಮಿತಿಗಳ ಕಾರಣದಿಂದಾಗಿ, ನಿಮ್ಮ ಬಾಹ್ಯ ಮೆಮೊರಿ  ಕಾರ್ಡ್‌ನಲ್ಲಿ ಕುರ್ ಆನ್ ಡೇಟಾವನ್ನು ಇಟ್ಟು ನಂತರ ಅಪ್ಲಿಕೇಶನ್  ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಅಥವಾ ಡೇಟಾವನ್ನು ತೆರವುಗೊಳಿಸಿದರೆ, ಎಲ್ಲಾ ಪುಟಗಳು ಮತ್ತು ಆಡಿಯೊವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ನೀವು ಅವುಗಳನ್ನು ಮತ್ತೆ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ. ನೀವು ಖಚಿತವಾಗಿ ಬಾಹ್ಯ ಮೆಮೊರಿ  ಕಾರ್ಡ್ ಅನ್ನು ಬಳಸಲು  ಬಯಸುವಿರಾ?</string>
+  <string name="kitkat_external_message">ಆಂಡ್ರಾಯ್ಡ್  ಮಿತಿಗಳ ಕಾರಣದಿಂದಾಗಿ, ನಿಮ್ಮ ಬಾಹ್ಯ ಮೆಮೊರಿ  ಕಾರ್ಡ್‌ನಲ್ಲಿ ಕುರ್‌ಆನ್ ಡೇಟಾವನ್ನು ಇಟ್ಟು ನಂತರ ಅಪ್ಲಿಕೇಶನ್  ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಅಥವಾ ಡೇಟಾವನ್ನು ತೆರವುಗೊಳಿಸಿದರೆ, ಎಲ್ಲಾ ಪುಟಗಳು ಮತ್ತು ಆಡಿಯೊವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ನೀವು ಅವುಗಳನ್ನು ಮತ್ತೆ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ. ನೀವು ಖಚಿತವಾಗಿ ಬಾಹ್ಯ ಮೆಮೊರಿ  ಕಾರ್ಡ್ ಅನ್ನು ಬಳಸಲು  ಬಯಸುವಿರಾ?</string>
   <string name="scoped_storage_message">ಆಂಡ್ರಾಯ್ಡ್ ನ ಭವಿಷ್ಯದ ಆವೃತ್ತಿಗಳಲ್ಲಿ , ಬಳಕೆದಾರರ ಗೌಪ್ಯತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು,  ಅಪ್ಲಿಕೇಶನ್ ಡೈರೆಕ್ಟರಿಗಳ ಹೊರಗೆ ಇರುವ  ಫೈಲ್‌ಗಳನ್ನು ಪಡೆಯಲು ಅನುಮತಿ ಕೊಡದಿರಬಹುದು . ಆದ್ದರಿಂದ ನೀವು ಖಚಿತವಾಗಿ  ಮೆಮೊರಿ ಕಾರ್ಡ್  ಬಳಸಲು ಬಯಸುವಿರಾ?</string>
   <string name="please_grant_permissions">ದಯವಿಟ್ಟು ಅಪ್ಲಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅನುಮತಿ ನೀಡಿ</string>
   <!-- Preferences End -->
@@ -443,8 +443,8 @@
   <string name="bookmarks_list_empty">ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳಿಲ್ಲ</string>
 
   <!-- audio updates -->
-  <string name="audio_updated_title">ಕುರ್ ಆನ್ ಆಡಿಯೋ ಫೈಲ್‌ಗಳ ನವೀಕರಣ</string>
-  <string name="audio_updated_text">ಹಲವಾರು ಕುರ್ ಆನ್  ಆಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ. ಹಾಗಾಗಿ ನಿಮ್ಮ
+  <string name="audio_updated_title">ಕುರ್‌ಆನ್ ಆಡಿಯೋ ಫೈಲ್‌ಗಳ ನವೀಕರಣ</string>
+  <string name="audio_updated_text">ಹಲವಾರು ಕುರ್‌ಆನ್  ಆಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ. ಹಾಗಾಗಿ ನಿಮ್ಮ
 ಆಡಿಯೋ ಫೈಲ್‌ಗಳನ್ನು ತೆಗೆದು ಹಾಕಲಾಗಿದೆ . ಆದ್ದರಿಂದ ನೀವು ಮುಂದಿನ ಬಾರಿ ಅವುಗಳನ್ನು ಪ್ಲೇ ಮಾಡಿದಾಗ ಹೊಸ ಆವೃತ್ತಿಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು.</string>
 
   <!-- format strings -->
@@ -452,12 +452,12 @@
 
   <!-- dual screen prefs -->
   <string name="prefs_category_dual_screen">ಡ್ಯುಯಲ್ ಮೋಡ್ ಪ್ರಾಶಸ್ತ್ಯಗಳು</string>
-  <string name="prefs_split_page_and_translation_title">ಡ್ಯುಯಲ್ ಮೋಡ್‌ನಲ್ಲಿ ಕುರ್ ಆನ್ ಮತ್ತು ಅನುವಾದ</string>
-  <string name="prefs_split_page_and_translation_summary">ಅನುವಾದಗಳೊಂದಿಗೆ ಡ್ಯುಯಲ್ ಪೇಜ್ ಮೋಡ್‌ನಲ್ಲಿ, ಕುರ್ ಆನ್ ಪುಟ ಮತ್ತು ಅನುವಾದವನ್ನು ತೋರಿಸಲಾಗುತ್ತದೆ</string>
+  <string name="prefs_split_page_and_translation_title">ಡ್ಯುಯಲ್ ಮೋಡ್‌ನಲ್ಲಿ ಕುರ್‌ಆನ್ ಮತ್ತು ಅನುವಾದ</string>
+  <string name="prefs_split_page_and_translation_summary">ಅನುವಾದಗಳೊಂದಿಗೆ ಡ್ಯುಯಲ್ ಪೇಜ್ ಮೋಡ್‌ನಲ್ಲಿ, ಕುರ್‌ಆನ್ ಪುಟ ಮತ್ತು ಅನುವಾದವನ್ನು ತೋರಿಸಲಾಗುತ್ತದೆ</string>
 
   <!-- notification channel names [CHAR LIMIT=40] -->
-  <string name="notification_channel_download">ಕುರ್ ಆನ್ ಡೌನ್‌ಲೋಡ್‌ಗಳು</string>
-  <string name="notification_channel_audio">ಕುರ್ ಆನ್ ಪಠಣಗಳು</string>
+  <string name="notification_channel_download">ಕುರ್‌ಆನ್ ಡೌನ್‌ಲೋಡ್‌ಗಳು</string>
+  <string name="notification_channel_audio">ಕುರ್‌ಆನ್ ಪಠಣಗಳು</string>
 
   <!-- KQACR6 -->
   <!--<string name="prefs_language_title">ಅಪ್ಲಿಕೇಶನ್ ಭಾಷೆ</string>
@@ -465,14 +465,14 @@
 
   <string name="prefs_category_sharing">ಆಯತ್ ಹಂಚಿಕೊಳ್ಳುವ ಆದ್ಯತೆಗಳು</string>
   <string name="prefs_include_translation_title">ಅನುವಾದವನ್ನು ಸೇರಿಸಿ</string>
-  <string name="prefs_include_translation_summary">ಹಂಚಿಕೊಂಡ ಅಥವಾ ನಕಲಿಸಿದ ಪಠ್ಯದಲ್ಲಿ ಅನುವಾದಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ.</string>
-  <string name="prefs_include_inline_ayah_numbers_title">ಆಯತ್ ಸಂಖ್ಯೆ ತೋರಿಸಿ</string>
-  <string name="prefs_include_inline_ayah_numbers_summary">ಹಂಚಿಕೊಂಡ ಅಥವಾ ನಕಲಿಸಿದ ಪಠ್ಯದಲ್ಲಿ ಆಯತ್ ಸಂಖ್ಯೆಯನ್ನು ತೋರಿಸಿ </string>
+  <string name="prefs_include_translation_summary">ಹಂಚಿಕೊಳ್ಳುವಾಗ ಅಥವಾ ನಕಲಿಸುವಾಗ ಅನುವಾದವನ್ನು ಸೇರಿಸಿ</string>
+  <string name="prefs_include_inline_ayah_numbers_title">ಆಯತ್ ಸಂಖ್ಯೆಗಳನ್ನು ಸೇರಿಸಿ</string>
+  <string name="prefs_include_inline_ayah_numbers_summary">ಹಂಚಿಕೊಂಡ ಅಥವಾ ನಕಲಿಸಿದ ಪಠ್ಯದೊಂದಿಗೆ ಆಯತ್ ಸಂಖ್ಯೆಗಳನ್ನು ಸೇರಿಸಿ</string>
   <string name="prefs_include_notes_title">ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ</string>
-  <string name="prefs_include_notes_summary">ಹಂಚಿಕೊಂಡ ಅಥವಾ ನಕಲಿಸಿದ ಪಠ್ಯದಲ್ಲಿ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ</string>
-  <string name="prefs_inline_translation_title">ಪ್ರತಿ ಆಯತ್ತಿನ ನಂತರ ಅನುವಾದವನ್ನು ತೋರಿಸಿ.</string>
-  <string name="prefs_inline_translation_summary_on">ಪ್ರತಿ ಆಯತ್ತಿನ ನಂತರ ಅನುವಾದವನ್ನು ತೋರಿಸಲಾಗುವುದು.</string>
-  <string name="prefs_inline_translation_summary_off">ಎಲ್ಲಾ ಆಯತ್ತುಗಳು ಮೊದಲು ಅರಬಿ ಭಾಷೆಯಲ್ಲಿ ಕಾಣಿಸಿಕೊಂಡು, ನಂತರ ಸಂಪೂರ್ಣ ಅನುವಾದ ನೀಡಲಾಗುವುದು.</string>
+  <string name="prefs_include_notes_summary">ಹಂಚಿಕೊಳ್ಳುವಾಗ ಅಥವಾ ನಕಲಿಸುವಾಗ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ</string>
+  <string name="prefs_inline_translation_title">ಪ್ರತಿ ಆಯತ್ತಿನ ನಂತರ ಅನುವಾದವನ್ನು ತೋರಿಸಿ</string>
+  <string name="prefs_inline_translation_summary_on">ಪ್ರತಿ ಆಯತ್ತಿನ ನಂತರ ಅನುವಾದವನ್ನು ತೋರಿಸಲಾಗುವುದು</string>
+  <string name="prefs_inline_translation_summary_off">ಎಲ್ಲಾ ಆಯತ್ತುಗಳು ಮೊದಲು ಅರಬಿ ಭಾಷೆಯಲ್ಲಿ ಕಾಣಿಸಿಕೊಂಡು, ನಂತರ ಸಂಪೂರ್ಣ ಅನುವಾದ ನೀಡಲಾಗುವುದು</string>
   <!-- KQACR6 -->
 
 </resources>

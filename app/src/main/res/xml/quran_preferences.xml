@@ -227,14 +227,14 @@
         app:iconSpaceReserved="false"/>
 
     <com.quran.labs.androidquran.ui.preference.SeekBarAyahTextSizePreference
-        android:defaultValue="17"
+        android:defaultValue="18"
         android:key="@string/prefs_ayah_text_size"
         android:max="40"
         android:persistent="true"
         android:title="@string/prefs_ayah_text_title"/>
 
     <com.quran.labs.androidquran.ui.preference.SeekBarTranslationTextSizePreference
-      android:defaultValue="17"
+      android:defaultValue="18"
       android:key="@string/prefs_translation_text_size"
       android:max="40"
       android:persistent="true"

@@ -17,6 +17,7 @@ import com.quran.data.core.QuranInfo
 import com.quran.data.model.SuraAyah
 import com.quran.data.model.VerseRange
 import com.quran.labs.androidquran.QuranApplication
+import com.quran.labs.androidquran.presenter.translation.TranslationManagerPresenter
 import com.quran.labs.androidquran.extension.closeQuietly
 import com.quran.labs.androidquran.service.download.DownloadStrategy
 import com.quran.labs.androidquran.service.download.GaplessDownloadStrategy
@@ -32,6 +33,10 @@ import com.quran.labs.androidquran.util.UrlUtil
 import com.quran.labs.androidquran.util.ZipUtils
 import com.quran.labs.androidquran.util.ZipUtils.ZipListener
 import com.quran.mobile.common.download.DownloadInfoStreams
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.firstOrNull
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -75,6 +80,9 @@ class QuranDownloadService : Service(), ZipListener<NotificationDetails> {
 
   @Inject
   lateinit var downloadInfoStreams: DownloadInfoStreams
+
+  @Inject
+  lateinit var translationManagerPresenter: TranslationManagerPresenter
 
   private inner class ServiceHandler(looper: Looper) : Handler(looper) {
     override fun handleMessage(msg: Message) {
@@ -343,6 +351,34 @@ class QuranDownloadService : Service(), ZipListener<NotificationDetails> {
           recentlyFailedDownloads[url] = lastIntent
         }
       }
+
+      if (result && details.type == DOWNLOAD_TYPE_TRANSLATION) {
+        val dbFilename = if (outputFile.endsWith(".zip")) {
+          outputFile.substring(0, outputFile.length - 4)
+        } else {
+          outputFile
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+          try {
+            val translations = translationManagerPresenter.getTranslations(false).firstOrNull() ?: emptyList()
+            val item = translations.find { it.translation.fileName == dbFilename }
+            if (item != null) {
+              val updated = item.withLocalVersionAndDisplayOrder(
+                item.translation.currentVersion,
+                if (item.displayOrder == -1) 1 else item.displayOrder
+              )
+              translationManagerPresenter.updateItem(updated)
+            }
+            val active = quranSettings.activeTranslations.toMutableSet()
+            active.add(dbFilename)
+            quranSettings.activeTranslations = active
+            quranSettings.setHaveUpdatedTranslations(false)
+          } catch (e: Exception) {
+            Timber.e(e, "Error activating downloaded translation")
+          }
+        }
+      }
+
       lastSentIntent = null
     }
   }

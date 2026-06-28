@@ -46,6 +46,10 @@ import com.quran.labs.androidquran.model.bookmark.RecentPageModel
 import com.quran.labs.androidquran.presenter.data.QuranIndexEventLogger
 import com.quran.labs.androidquran.presenter.translation.TranslationManagerPresenter
 import com.quran.labs.androidquran.service.AudioService
+import com.quran.labs.androidquran.service.QuranDownloadService
+import com.quran.labs.androidquran.service.util.ServiceIntentHelper.getDownloadIntent
+import com.quran.labs.androidquran.util.QuranFileUtils
+import java.io.File
 import com.quran.labs.androidquran.ui.fragment.AddTagDialog
 import com.quran.labs.androidquran.ui.fragment.AddTagDialog.Companion.newInstance
 import com.quran.labs.androidquran.ui.fragment.BookmarksFragment
@@ -112,6 +116,8 @@ class QuranActivity : AppCompatActivity(),
   lateinit var quranIndexEventLogger: QuranIndexEventLogger
   @Inject
   lateinit var extraScreens: Set<@JvmSuppressWildcards ExtraScreenProvider>
+  @Inject
+  lateinit var quranFileUtils: QuranFileUtils
 
   public override fun onCreate(savedInstanceState: Bundle?) {
     val quranApp = application as QuranApplication
@@ -210,6 +216,7 @@ class QuranActivity : AppCompatActivity(),
     }
     updateTranslationsListAsNeeded()
     quranIndexEventLogger.logAnalytics()
+    checkAndAutoDownloadTranslation()
   }
 
   public override fun onResume() {
@@ -448,6 +455,30 @@ class QuranActivity : AppCompatActivity(),
   private fun launchTranslationActivity() {
     val i = Intent(this, TranslationManagerActivity::class.java)
     startActivity(i)
+  }
+
+  private fun checkAndAutoDownloadTranslation() {
+    val databaseDir = quranFileUtils.getQuranDatabaseDirectory()
+    val dbFile = File(databaseDir, "quran.kannada.hamzah.db")
+    
+    if (!settings.didAttemptTranslationDownload() && !dbFile.exists()) {
+      settings.setDidAttemptTranslationDownload(true)
+      
+      val url = "https://quran-files.hisnulmuslimdua.com/data/databases/quran.kannada.hamzah.db.zip"
+      val destination = databaseDir.absolutePath
+      val notificationTitle = "Kannada Translation"
+      val intent = getDownloadIntent(
+        this, url,
+        destination, notificationTitle, "TRANSLATION_DOWNLOAD_KEY",
+        QuranDownloadService.DOWNLOAD_TYPE_TRANSLATION
+      )
+      intent.putExtra(QuranDownloadService.EXTRA_OUTPUT_FILE_NAME, "quran.kannada.hamzah.db.zip")
+      try {
+        startService(intent)
+      } catch (e: Exception) {
+        Timber.e(e, "Failed to start translation auto-download service")
+      }
+    }
   }
 
   override fun jumpTo(page: Int) {

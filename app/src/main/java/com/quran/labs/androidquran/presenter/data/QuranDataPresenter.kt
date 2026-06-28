@@ -95,6 +95,13 @@ class QuranDataPresenter @Inject internal constructor(
                 }
                 activity?.onPagesChecked(it)
                 checkPagesDisposable = null
+              }, Consumer { e ->
+                Timber.e(e, "Error checking pages")
+                val width = quranScreenInfo.widthParam
+                val tabletWidth = quranScreenInfo.tabletWidthParam
+                val fallbackStatus = QuranDataStatus(width, tabletWidth, false, false, null, pages)
+                activity?.onPagesChecked(fallbackStatus)
+                checkPagesDisposable = null
               })
       scheduleAudioUpdater()
     }
