@@ -91,7 +91,15 @@ public class AyahNumberView extends View {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    canvas.drawRect(padding, padding, padding + boxWidth, padding + boxHeight, boxPaint);
+    float left = padding;
+    float top = padding;
+    float right = padding + boxWidth;
+    float bottom = padding + boxHeight;
+    float cornerRadius = boxHeight / 2f;
+    boxPaint.setAntiAlias(true);
+    boxPaint.setStyle(Paint.Style.FILL);
+    canvas.drawRoundRect(left, top, right, bottom, cornerRadius, cornerRadius, boxPaint);
+
     if (this.textLayout != null) {
       int startY = padding + ((boxHeight - this.textLayout.getHeight()) / 2);
       canvas.translate(padding, startY);

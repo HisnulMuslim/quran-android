@@ -32,6 +32,7 @@ import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.AyahNumberView
 import com.quran.labs.androidquran.view.DividerView
+import com.quran.mobile.translation.model.LocalTranslation
 import kotlin.math.ln1p
 import kotlin.math.min
 
@@ -55,8 +56,14 @@ internal class TranslationAdapter(
   private var suraHeaderColor: Int = 0
   private var ayahSelectionColor: Int = 0
   private var isNightMode: Boolean = false
+  private var localTranslations: Array<LocalTranslation>? = null
+
+  fun setLocalTranslations(translations: Array<LocalTranslation>?) {
+    this.localTranslations = translations
+  }
 
   private var highlightedAyah: Int = 0
+  private val highlightedAyahs = mutableSetOf<Int>()
   private var highlightedRowCount: Int = 0
   private var highlightedStartPosition: Int = 0
   private var highlightType: HighlightType? = null
@@ -120,8 +127,34 @@ internal class TranslationAdapter(
     highlightAyah(ayahId, true, highlightType)
   }
 
+  fun isAyahHighlighted(ayahId: Int): Boolean {
+    return highlightedAyah == ayahId || highlightedAyahs.contains(ayahId)
+  }
+
+  fun highlightAyat(ayahIds: Set<Int>, highlightedType: HighlightType) {
+    val toUpdate = mutableSetOf<Int>()
+    data.forEachIndexed { index, row ->
+      if (highlightedAyahs.contains(row.ayahInfo.ayahId)) {
+        toUpdate.add(index)
+      }
+    }
+    highlightedAyahs.clear()
+    highlightedAyahs.addAll(ayahIds)
+    highlightType = highlightedType
+    data.forEachIndexed { index, row ->
+      if (highlightedAyahs.contains(row.ayahInfo.ayahId)) {
+        toUpdate.add(index)
+      }
+    }
+    recyclerView.handler.post {
+      toUpdate.forEach { index ->
+        notifyItemChanged(index, HIGHLIGHT_CHANGE)
+      }
+    }
+  }
+
   fun highlightedAyahInfo(): QuranAyahInfo? {
-    return data.firstOrNull { it.ayahInfo.ayahId == highlightedAyah }?.ayahInfo
+    return data.firstOrNull { isAyahHighlighted(it.ayahInfo.ayahId) }?.ayahInfo
   }
 
   private fun adapterInfoForAyah(sura: Int, ayah: Int): Pair<Int, Int> {
@@ -185,16 +218,21 @@ internal class TranslationAdapter(
   }
 
   fun unhighlight() {
-    if (highlightedAyah > 0 && highlightedRowCount > 0) {
-      val start = highlightedStartPosition
-      val count = highlightedRowCount
-      recyclerView.handler.post {
-        notifyItemRangeChanged(start, count)
+    val toUpdate = mutableSetOf<Int>()
+    data.forEachIndexed { index, row ->
+      if (highlightedAyah == row.ayahInfo.ayahId || highlightedAyahs.contains(row.ayahInfo.ayahId)) {
+        toUpdate.add(index)
       }
     }
     highlightedAyah = 0
+    highlightedAyahs.clear()
     highlightedRowCount = 0
     highlightedStartPosition = -1
+    recyclerView.handler.post {
+      toUpdate.forEach { index ->
+        notifyItemChanged(index, HIGHLIGHT_CHANGE)
+      }
+    }
   }
 
   fun refresh(quranSettings: QuranSettings) {
@@ -231,9 +269,9 @@ internal class TranslationAdapter(
 
   private fun handleClick(view: View) {
     val position = recyclerView.getChildAdapterPosition(view)
-    if (highlightedAyah != 0 && position != RecyclerView.NO_POSITION) {
+    if ((highlightedAyah != 0 || highlightedAyahs.isNotEmpty()) && position != RecyclerView.NO_POSITION) {
       val ayahInfo = data[position].ayahInfo
-      if (ayahInfo.ayahId != highlightedAyah && highlightType == HighlightTypes.SELECTION) {
+      if (!isAyahHighlighted(ayahInfo.ayahId) && highlightType == HighlightTypes.SELECTION) {
         onVerseSelectedListener.onVerseSelected(ayahInfo)
         return
       }
@@ -245,7 +283,6 @@ internal class TranslationAdapter(
     val position = recyclerView.getChildAdapterPosition(view)
     if (position != RecyclerView.NO_POSITION) {
       val ayahInfo = data[position].ayahInfo
-      highlightAyah(ayahInfo.ayahId, true, HighlightTypes.SELECTION)
       onVerseSelectedListener.onVerseSelected(ayahInfo)
       return true
     }
@@ -499,7 +536,7 @@ internal class TranslationAdapter(
 
   private fun updateHighlight(row: TranslationViewRow, holder: RowViewHolder) {
     // toggle highlighting of the ayah, but not for sura headers and basmallah
-    val isHighlighted = row.ayahInfo.ayahId == highlightedAyah
+    val isHighlighted = isAyahHighlighted(row.ayahInfo.ayahId)
     if (row.type != TranslationViewRow.Type.SURA_HEADER &&
       row.type != TranslationViewRow.Type.BASMALLAH &&
       row.type != TranslationViewRow.Type.SPACER

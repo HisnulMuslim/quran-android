@@ -31,6 +31,22 @@ class AyahTranslationTrackerItem(
     }
   }
 
+  override fun onHighlightAyat(page: Int, ayahKeys: Set<String>, type: HighlightType) {
+    if (this.page == page) {
+      val ids = ayahKeys.mapNotNull { key ->
+        val parts = key.split(":")
+        if (parts.size == 2) {
+          val sura = parts[0].toIntOrNull()
+          val ayah = parts[1].toIntOrNull()
+          if (sura != null && ayah != null) {
+            quranInfo.getAyahId(sura, ayah)
+          } else null
+        } else null
+      }.toSet()
+      ayahView.highlightAyat(ids, type)
+    }
+  }
+
   override fun onUnHighlightAyahType(type: HighlightType) {
     ayahView.unhighlightAyat(type)
   }

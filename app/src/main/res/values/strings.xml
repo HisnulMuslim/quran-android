@@ -509,4 +509,9 @@
   <!-- KQACR6 -->
 
 
+  <string name="adjust_font_sizes">Adjust Font Sizes</string>
+  <string name="arabic_font_size">Arabic Font Size: %1$d</string>
+  <string name="translation_font_size">Translation Font Size: %1$d</string>
+  <string name="menu_font_size">Font Size</string>
+
 </resources>

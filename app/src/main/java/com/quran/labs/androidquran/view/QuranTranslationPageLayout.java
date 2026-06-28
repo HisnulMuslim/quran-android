@@ -43,7 +43,7 @@ public class QuranTranslationPageLayout extends QuranPageLayout {
       final int backgroundBrightness = quranSettings.getNightModeBackgroundBrightness();
       setBackgroundColor(Color.rgb(backgroundBrightness, backgroundBrightness, backgroundBrightness));
     } else {
-      setBackgroundColor(0xFFFFFBF0);
+      setBackgroundColor(0xFFFFFDF9);
     }
   }
 

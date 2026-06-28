@@ -475,4 +475,9 @@
   <string name="prefs_inline_translation_summary_off">ಎಲ್ಲಾ ಆಯತ್ತುಗಳು ಮೊದಲು ಅರಬಿ ಭಾಷೆಯಲ್ಲಿ ಕಾಣಿಸಿಕೊಂಡು, ನಂತರ ಸಂಪೂರ್ಣ ಅನುವಾದ ನೀಡಲಾಗುವುದು</string>
   <!-- KQACR6 -->
 
+  <string name="adjust_font_sizes">ಪಠ್ಯದ ಗಾತ್ರ ಹೊಂದಿಸಿ</string>
+  <string name="arabic_font_size">ಅರೇಬಿಕ್ ಪಠ್ಯದ ಗಾತ್ರ: %1$d</string>
+  <string name="translation_font_size">ಅನುವಾದ ಪಠ್ಯದ ಗಾತ್ರ: %1$d</string>
+  <string name="menu_font_size">ಪಠ್ಯದ ಗಾತ್ರ</string>
+
 </resources>

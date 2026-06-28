@@ -152,7 +152,11 @@ public class QuranSettings {
 
   public int getTranslationTextSize() {
     return prefs.getInt(Constants.PREF_TRANSLATION_TEXT_SIZE,
-        Constants.DEFAULT_TEXT_SIZE);
+        Constants.DEFAULT_TRANSLATION_TEXT_SIZE);
+  }
+
+  public void setTranslationTextSize(int size) {
+    prefs.edit().putInt(Constants.PREF_TRANSLATION_TEXT_SIZE, size).apply();
   }
 
   public boolean getPreferDnsOverHttps() {

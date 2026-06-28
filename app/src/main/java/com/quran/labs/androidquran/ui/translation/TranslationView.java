@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import dev.chrisbanes.insetter.Insetter;
 
@@ -173,6 +174,7 @@ public class TranslationView extends FrameLayout implements View.OnClickListener
     }
 
     localTranslations = translations;
+    translationAdapter.setLocalTranslations(translations);
     translationAdapter.setData(rows);
     translationAdapter.notifyDataSetChanged();
   }
@@ -205,6 +207,12 @@ public class TranslationView extends FrameLayout implements View.OnClickListener
 
     if (shouldHandleHighlightType(highlightType)) {
       translationAdapter.setHighlightedAyah(ayahId, highlightType);
+    }
+  }
+
+  public void highlightAyat(Set<Integer> ayahIds, HighlightType highlightType) {
+    if (shouldHandleHighlightType(highlightType)) {
+      translationAdapter.highlightAyat(ayahIds, highlightType);
     }
   }
 
@@ -321,31 +329,15 @@ public class TranslationView extends FrameLayout implements View.OnClickListener
    * update the RecyclerView cannot be called amidst scrolling or computing of a layout).
    */
   private void updateAyahToolBarPosition() {
-    final SelectionIndicator position = getToolbarPosition();
-    if (position instanceof SelectionIndicator.SelectedPointPosition) {
-      final SelectionIndicator.SelectedPointPosition selectedPointPosition =
-          (SelectionIndicator.SelectedPointPosition) position;
-      if (selectedPointPosition.getY() > getHeight() || selectedPointPosition.getY() < 0) {
-        hideMenu();
-      } else {
-        pageController.onScrollChanged(0);
-      }
-    }
+    pageController.onScrollChanged(0);
   }
 
   @Override
   public void onVerseSelected(@NonNull QuranAyahInfo ayahInfo) {
     final SuraAyah suraAyah = new SuraAyah(ayahInfo.sura, ayahInfo.ayah);
-    if (selectedAyah != null) {
-      final boolean isUnselectingSelectedVerse = selectedAyah.equals(suraAyah);
+    if (selectedAyah != null && selectedAyah.equals(suraAyah)) {
       hideMenu();
-      if (isUnselectingSelectedVerse) {
-        return;
-      }
-    } else {
-      // hide the menu because the previous page might have had
-      // something selected here (which would break selection).
-      hideMenu();
+      return;
     }
 
     pageController.handleLongPress(suraAyah);

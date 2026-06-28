@@ -1167,6 +1167,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
     val quran = menu.findItem(R.id.goto_quran)
     val translation = menu.findItem(R.id.goto_translation)
+    val fontSizeSelection = menu.findItem(R.id.font_size_selection)
     if (quran != null && translation != null) {
       if (!showingTranslation) {
         quran.isVisible = false
@@ -1175,6 +1176,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         quran.isVisible = true
         translation.isVisible = false
       }
+    }
+    if (fontSizeSelection != null) {
+      fontSizeSelection.isVisible = showingTranslation
     }
 
     val nightMode = menu.findItem(R.id.night_mode)
@@ -1194,6 +1198,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       return true
     } else if (itemId == R.id.goto_quran) {
       switchToQuran()
+      return true
+    } else if (itemId == R.id.font_size_selection) {
+      showFontSizeDialog()
       return true
     } else if (itemId == R.id.goto_translation) {
       if (translations != null) {
@@ -1885,36 +1892,6 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       return
     }
 
-    val translationNames = lastActivatedLocalTranslations
-    if (showingTranslation && translationNames.isNotEmpty()) {
-      // temporarily required so "lastSelectedTranslationAyah" isn't null
-      // the real solution is to move this sharing logic out of PagerActivity
-      // in the future and avoid this back and forth with the translation fragment.
-
-      updateLocalTranslations(start)
-      val quranAyahInfo = lastSelectedTranslationAyah
-
-      Toast.makeText(
-        this@PagerActivity,
-        "ಬಹು ಆಯತ್'ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಅರೇಬಿಕ್ ಪರದೆಯಲ್ಲಿ ದೀರ್ಘ ಒತ್ತಿರಿ.",/*TODO language translation*/
-        Toast.LENGTH_LONG
-      ).show()
-
-     /* if (quranAyahInfo != null) {
-        val shareText = shareUtil.getShareText(this, quranAyahInfo, translationNames)
-        if (isCopy) {
-          shareUtil.copyToClipboard(this, shareText)
-        } else {
-          shareUtil.shareViaIntent(
-            this,
-            shareText,
-            com.quran.labs.androidquran.common.toolbar.R.string.share_ayah_text
-          )
-        }
-      }*/
-
-     // return
-    }
     /*KQACR7 start*/
     val verses = 1 + abs(
       quranInfo.getAyahId(start.sura, start.ayah) - quranInfo.getAyahId(end.sura, end.ayah)
@@ -2060,6 +2037,77 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
     override fun onPanelAnchored(panel: View) {
     }
+  }
+
+  private fun showFontSizeDialog() {
+    val quranSettings = QuranSettings.getInstance(this)
+    val currentTranslationSize = quranSettings.translationTextSize
+    val currentArabicSize = quranSettings.ayahTextSize
+    
+    val container = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      val padding = (24 * resources.displayMetrics.density).toInt()
+      setPadding(padding, padding, padding, padding)
+    }
+    
+    // Arabic Size
+    val arabicLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.arabic_font_size, currentArabicSize)
+      textSize = 18f
+      gravity = android.view.Gravity.LEFT
+      setTextColor(androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark))
+      setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
+    }
+    
+    val arabicSeekBar = android.widget.SeekBar(this).apply {
+      max = 32 // 8 to 40
+      progress = currentArabicSize - 8
+      setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+          val newSize = progress + 8
+          arabicLabel.text = getString(R.string.arabic_font_size, newSize)
+          quranSettings.ayahTextSize = newSize
+          refreshQuranPages()
+        }
+        override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+        override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+      })
+    }
+    
+    // Translation Size
+    val translationLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.translation_font_size, currentTranslationSize)
+      textSize = 18f
+      gravity = android.view.Gravity.LEFT
+      setTextColor(androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark))
+      setPadding(0, (16 * resources.displayMetrics.density).toInt(), 0, (8 * resources.displayMetrics.density).toInt())
+    }
+    
+    val translationSeekBar = android.widget.SeekBar(this).apply {
+      max = 32 // 8 to 40
+      progress = currentTranslationSize - 8
+      setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+          val newSize = progress + 8
+          translationLabel.text = getString(R.string.translation_font_size, newSize)
+          quranSettings.translationTextSize = newSize
+          refreshQuranPages()
+        }
+        override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+        override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+      })
+    }
+    
+    container.addView(arabicLabel)
+    container.addView(arabicSeekBar)
+    container.addView(translationLabel)
+    container.addView(translationSeekBar)
+    
+    AlertDialog.Builder(this, R.style.QuranDialog)
+      .setTitle(R.string.adjust_font_sizes)
+      .setView(container)
+      .setPositiveButton(android.R.string.ok, null)
+      .show()
   }
 
   companion object {

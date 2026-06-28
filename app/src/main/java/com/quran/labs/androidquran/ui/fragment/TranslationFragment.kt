@@ -173,18 +173,50 @@ class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
             translationView.getToolbarPosition(suraAyah.sura, suraAyah.ayah)
           )
         )
+      } else if (ayahSelection is AyahSelection.AyahRange) {
+        readingEventPresenter.onAyahSelection(
+          AyahSelection.AyahRange(
+            ayahSelection.startSuraAyah,
+            ayahSelection.endSuraAyah,
+            translationView.getToolbarPosition(ayahSelection.endSuraAyah.sura, ayahSelection.endSuraAyah.ayah)
+          )
+        )
       }
     }
   }
 
   override fun handleLongPress(suraAyah: SuraAyah) {
     if (isVisible) {
-      readingEventPresenter.onAyahSelection(
-        AyahSelection.Ayah(
-          suraAyah,
-          translationView.getToolbarPosition(suraAyah.sura, suraAyah.ayah)
-        )
-      )
+      val current = readingEventPresenter.currentAyahSelection()
+      val updatedAyahSelection = updateAyahRange(suraAyah, current)
+      readingEventPresenter.onAyahSelection(updatedAyahSelection)
+    }
+  }
+
+  private fun updateAyahRange(selectedAyah: SuraAyah, ayahSelection: AyahSelection): AyahSelection {
+    val (startAyah, endAyah) = when (ayahSelection) {
+      is AyahSelection.None -> selectedAyah to null
+      is AyahSelection.Ayah -> {
+        if (selectedAyah > ayahSelection.suraAyah) {
+          ayahSelection.suraAyah to selectedAyah
+        } else {
+          selectedAyah to ayahSelection.suraAyah
+        }
+      }
+      is AyahSelection.AyahRange -> {
+        if (selectedAyah > ayahSelection.startSuraAyah) {
+          ayahSelection.startSuraAyah to selectedAyah
+        } else {
+          selectedAyah to ayahSelection.startSuraAyah
+        }
+      }
+    }
+
+    val toolBarPosition = translationView.getToolbarPosition(selectedAyah.sura, selectedAyah.ayah)
+    return if (endAyah == null) {
+      AyahSelection.Ayah(startAyah, toolBarPosition)
+    } else {
+      AyahSelection.AyahRange(startAyah, endAyah, toolBarPosition)
     }
   }
 

@@ -5,5 +5,5 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 fun Modifier.pageGradient(startWithWidth: Boolean): Modifier {
-  return background(Color(0xff, 0xfb, 0xf0))
+  return background(Color(0xff, 0xfd, 0xf9))
 }

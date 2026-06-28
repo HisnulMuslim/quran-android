@@ -411,4 +411,9 @@
   <string name="prefs_inline_translation_summary_on">ستُعرَض الترجمة بعد كل آية</string>
   <string name="prefs_inline_translation_summary_off">ستظهر جميع الآيات أولًا بالعربية، ثم يليها الترجمة الكاملة</string>
 
+  <string name="adjust_font_sizes">تعديل حجم الخط</string>
+  <string name="arabic_font_size">حجم الخط العربي: %1$d</string>
+  <string name="translation_font_size">حجم خط الترجمة: %1$d</string>
+  <string name="menu_font_size">حجم الخط</string>
+
 </resources>
