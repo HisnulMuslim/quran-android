@@ -192,6 +192,13 @@ dependencies {
 
   // compose
   implementation(libs.compose.ui)
+  implementation(libs.compose.foundation)
+  implementation(libs.compose.material3)
+  implementation(libs.compose.material.icons)
+  implementation(libs.androidx.activity.compose)
+
+  // qr code generation
+  implementation("com.google.zxing:core:3.5.3")
 
   // okio
   implementation(libs.okio)

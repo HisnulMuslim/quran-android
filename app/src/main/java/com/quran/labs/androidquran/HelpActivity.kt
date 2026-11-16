@@ -14,6 +14,8 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.quran.labs.androidquran.util.applyGreenStatusBarInsets
+import com.quran.labs.androidquran.util.enableGreenStatusBarEdgeToEdge
 import com.quran.labs.androidquran.util.openSupportEmail
 
 class HelpActivity : AppCompatActivity() {
@@ -22,10 +24,7 @@ class HelpActivity : AppCompatActivity() {
     // override these to always be dark since the app doesn't really
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
-    )
+    enableGreenStatusBarEdgeToEdge()
 
     super.onCreate(savedInstanceState)
 
@@ -39,19 +38,7 @@ class HelpActivity : AppCompatActivity() {
     setContentView(R.layout.help)
 
     val root = findViewById<ViewGroup>(R.id.root)
-    ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-      val insets = windowInsets.getInsets(
-        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-      )
-      root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = insets.top
-        bottomMargin = insets.bottom
-        leftMargin = insets.left
-        rightMargin = insets.right
-      }
-
-      windowInsets
-    }
+    applyGreenStatusBarInsets(root)
 
     val helpText = findViewById<TextView>(R.id.txtHelp)
     helpText.text = HtmlCompat.fromHtml(getString(R.string.help), HtmlCompat.FROM_HTML_MODE_COMPACT)

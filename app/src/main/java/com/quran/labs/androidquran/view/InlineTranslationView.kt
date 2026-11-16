@@ -114,7 +114,7 @@ class InlineTranslationView @JvmOverloads constructor(
     val suraNumber = ayah.sura
     val ayahNumber = ayah.ayah
     val ayahHeader = TextView(context)
-    ayahHeader.setTextColor(ContextCompat.getColor(context, R.color.accent_color_dark))
+    ayahHeader.setTextColor(ContextCompat.getColor(context, R.color.accent_color))
     ayahHeader.textSize = ayahFontSize.toFloat()
     ayahHeader.setTypeface(null, Typeface.BOLD)
     ayahHeader.text = context.resources.getString(R.string.sura_ayah, suraNumber, ayahNumber)
@@ -123,7 +123,10 @@ class InlineTranslationView @JvmOverloads constructor(
    /* ayahView.setTextAppearance(context, textStyle)
     ayahView.setTextColor(Color.WHITE)*/
     TextViewCompat.setTextAppearance(ayahView, textStyle)
+    ayahView.setTextColor(ContextCompat.getColor(context, R.color.title_color))
     ayahView.textSize = translationFontSize.toFloat()
+    val settings = QuranSettings.getInstance(context)
+    ayahView.setLineSpacing(0f, settings.translationLineSpacing)
 
     // translation
     val showHeader = translations.size > 1

@@ -265,20 +265,22 @@ class AyahTrackerPresenter @Inject constructor(
   ): Boolean {
     if (eventType === DOUBLE_TAP) {
       readingEventPresenter.onAyahSelection(AyahSelection.None)
-    } else if (eventType == LONG_PRESS ||
-      readingEventPresenter.currentAyahSelection() != AyahSelection.None
-    ) {
-      // press or long press when an ayah is selected
+    } else if (eventType == LONG_PRESS) {
       if (ayahCoordinatesError) {
         checkCoordinateData(activity)
       } else {
-        // either a press or a long press, but we're in selection mode
         handleAyahSelection(event, eventType, page)
       }
-    } else if (eventType == SINGLE_TAP && recitationEventPresenter.hasRecitationSession()) {
-      handleTap(event, eventType, page)
+    } else if (eventType == SINGLE_TAP) {
+      if (readingEventPresenter.currentAyahSelection() != AyahSelection.None) {
+        readingEventPresenter.onAyahSelection(AyahSelection.None)
+      }
+      if (recitationEventPresenter.hasRecitationSession()) {
+        handleTap(event, eventType, page)
+      } else {
+        readingEventPresenter.onClick()
+      }
     } else {
-      // normal click
       readingEventPresenter.onClick()
     }
     return true
@@ -291,11 +293,7 @@ class AyahTrackerPresenter @Inject constructor(
   ) {
     val result = getAyahForPosition(page, ev.x, ev.y)
     if (result != null) {
-      if (eventType == SINGLE_TAP) {
-        readingEventPresenter.onAyahSelection(
-          AyahSelection.Ayah(result, getToolBarPosition(result.sura, result.ayah))
-        )
-      } else if (eventType == LONG_PRESS) {
+      if (eventType == LONG_PRESS) {
         handleLongPress(result)
       }
     }
@@ -321,6 +319,12 @@ class AyahTrackerPresenter @Inject constructor(
 
   private fun handleLongPress(selectedSuraAyah: SuraAyah) {
     val current = readingEventPresenter.currentAyahSelection()
+    val alreadyIncluded = when (current) {
+      is AyahSelection.None -> false
+      is AyahSelection.Ayah -> current.suraAyah == selectedSuraAyah
+      is AyahSelection.AyahRange -> selectedSuraAyah in current.startSuraAyah..current.endSuraAyah
+    }
+    if (alreadyIncluded) return
     val updatedAyahSelection = updateAyahRange(selectedSuraAyah, current)
     readingEventPresenter.onAyahSelection(updatedAyahSelection)
   }
@@ -329,23 +333,23 @@ class AyahTrackerPresenter @Inject constructor(
     val (startAyah, endAyah) = when (ayahSelection) {
       is AyahSelection.None -> selectedAyah to null
       is AyahSelection.Ayah -> {
-        if (selectedAyah > ayahSelection.suraAyah) {
+        if (selectedAyah == ayahSelection.suraAyah) {
+          selectedAyah to null
+        } else if (selectedAyah > ayahSelection.suraAyah) {
           ayahSelection.suraAyah to selectedAyah
         } else {
           selectedAyah to ayahSelection.suraAyah
         }
       }
       is AyahSelection.AyahRange -> {
-        if (selectedAyah > ayahSelection.startSuraAyah) {
-          ayahSelection.startSuraAyah to selectedAyah
-        } else {
-          selectedAyah to ayahSelection.startSuraAyah
-        }
+        val newStart = if (selectedAyah < ayahSelection.startSuraAyah) selectedAyah else ayahSelection.startSuraAyah
+        val newEnd = if (selectedAyah > ayahSelection.endSuraAyah) selectedAyah else ayahSelection.endSuraAyah
+        newStart to newEnd
       }
     }
 
     val toolBarPosition = getToolBarPosition(selectedAyah.sura, selectedAyah.ayah)
-    return if (endAyah == null) {
+    return if (endAyah == null || startAyah == endAyah) {
       AyahSelection.Ayah(startAyah, toolBarPosition)
     } else {
       AyahSelection.AyahRange(startAyah, endAyah, toolBarPosition)

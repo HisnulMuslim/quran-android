@@ -34,6 +34,8 @@ import com.quran.labs.androidquran.presenter.translation.TranslationManagerPrese
 import com.quran.labs.androidquran.service.QuranDownloadService
 import com.quran.labs.androidquran.service.util.DefaultDownloadReceiver
 import com.quran.labs.androidquran.service.util.DefaultDownloadReceiver.SimpleDownloadListener
+import com.quran.labs.androidquran.util.applyGreenStatusBarInsets
+import com.quran.labs.androidquran.util.enableGreenStatusBarEdgeToEdge
 import com.quran.labs.androidquran.service.util.QuranDownloadNotifier
 import com.quran.labs.androidquran.service.util.ServiceIntentHelper.getDownloadIntent
 import com.quran.labs.androidquran.ui.adapter.DownloadedItemActionListener
@@ -91,10 +93,7 @@ class TranslationManagerActivity : AppCompatActivity(), SimpleDownloadListener,
     // override these to always be dark since the app doesn't really
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
-    )
+    enableGreenStatusBarEdgeToEdge()
 
     (application as QuranApplication).applicationComponent.inject(this)
     setContentView(R.layout.translation_manager)
@@ -107,19 +106,7 @@ class TranslationManagerActivity : AppCompatActivity(), SimpleDownloadListener,
     ab?.setDisplayHomeAsUpEnabled(true)
 
     val root = findViewById<ViewGroup>(R.id.root)
-    ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-      val insets = windowInsets.getInsets(
-        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-      )
-      root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = insets.top
-        bottomMargin = insets.bottom
-        leftMargin = insets.left
-        rightMargin = insets.right
-      }
-
-      windowInsets
-    }
+    applyGreenStatusBarInsets(root)
 
     translationRecycler = findViewById(R.id.translation_recycler)
     val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
@@ -204,11 +191,9 @@ class TranslationManagerActivity : AppCompatActivity(), SimpleDownloadListener,
         )
       )
 
-      // update active translations and add this item to it
+      // update active translations to select only this newly downloaded translation
       val settings = QuranSettings.getInstance(this)
-      val activeTranslations = settings.activeTranslations
-      activeTranslations.add(downloadingItem.translation.fileName)
-      settings.activeTranslations = activeTranslations
+      settings.activeTranslations = mutableSetOf(downloadingItem.translation.fileName)
     }
     this.downloadingItem = null
     generateListItems()
@@ -396,10 +381,18 @@ class TranslationManagerActivity : AppCompatActivity(), SimpleDownloadListener,
           val updatedItem = selectedItem.withTranslationRemoved()
           updateTranslationItem(updatedItem)
 
-          // remove from active translations
+          // remove from active translations and fall back to Kannada or first remaining translation
           val settings = QuranSettings.getInstance(this)
-          val activeTranslations = settings.activeTranslations
+          val activeTranslations = settings.activeTranslations.toMutableSet()
           activeTranslations.remove(selectedItem.translation.fileName)
+          if (activeTranslations.isEmpty()) {
+            val remaining = sortedDownloadedItems()
+            val fallback = remaining.firstOrNull { it.translation.fileName == "quran.kannada.hamzah.db" }
+              ?: remaining.firstOrNull()
+            if (fallback != null) {
+              activeTranslations.add(fallback.translation.fileName)
+            }
+          }
           settings.activeTranslations = activeTranslations
           generateListItems()
         }

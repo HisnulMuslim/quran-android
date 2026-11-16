@@ -28,6 +28,16 @@
         android:title="@string/prefs_language_title"
         app:iconSpaceReserved="false"/>
 
+    <ListPreference
+        android:defaultValue="auto"
+        android:dialogTitle="@string/prefs_app_theme_title"
+        android:entries="@array/app_theme_entries"
+        android:entryValues="@array/app_theme_values"
+        android:key="appTheme"
+        android:title="@string/prefs_app_theme_title"
+        app:useSimpleSummaryProvider="true"
+        app:iconSpaceReserved="false"/>
+
 
 
     <!--<CheckBoxPreference
@@ -37,7 +47,7 @@
         android:title="@string/prefs_new_background_title"
         app:iconSpaceReserved="false"/>-->
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:disableDependentsState="false"
         android:key="@string/prefs_lock_orientation"
@@ -47,7 +57,7 @@
         android:title="@string/prefs_lock_orientation_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:dependency="@string/prefs_lock_orientation"
         android:key="@string/prefs_landscape_orientation"
         android:persistent="true"
@@ -56,14 +66,14 @@
         android:title="@string/prefs_landscape_orientation_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:key="@string/prefs_sura_translated_name"
         android:persistent="true"
         android:summary="@string/prefs_sura_translated_name_summary"
         android:title="@string/prefs_sura_translated_name_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:key="@string/prefs_night_mode"
         android:persistent="true"
         android:summary="@string/prefs_night_mode_summary"
@@ -93,7 +103,7 @@
       android:key="@string/prefs_sharing_category_key"
       android:title="@string/prefs_category_sharing"
       app:iconSpaceReserved="false">
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_include_translation"
         android:persistent="true"
@@ -101,7 +111,7 @@
         android:title="@string/prefs_include_translation_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:dependency="@string/prefs_include_translation"
         android:key="@string/prefs_inline_translation"
@@ -111,7 +121,7 @@
         android:title="@string/prefs_inline_translation_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="@string/prefs_include_inline_ayah_numbers"
         android:persistent="true"
@@ -119,7 +129,7 @@
         android:title="@string/prefs_include_inline_ayah_numbers_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_show_notes"
         android:persistent="true"
@@ -155,7 +165,7 @@
       android:persistent="true"
       android:title="@string/prefs_translation_text_title"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_overlay_page_info"
         android:persistent="true"
@@ -163,7 +173,7 @@
         android:title="@string/prefs_overlay_page_info_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_display_marker_popup"
         android:persistent="true"
@@ -171,7 +181,7 @@
         android:title="@string/prefs_display_marker_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_highlight_bookmarks"
         android:persistent="true"
@@ -179,7 +189,7 @@
         android:title="@string/prefs_highlight_bookmarks_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="@string/prefs_volume_key_navigation"
         android:persistent="true"
@@ -193,7 +203,7 @@
       android:title="@string/prefs_category_dual_screen"
       app:iconSpaceReserved="false">
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="@bool/use_tablet_interface_by_default"
         android:disableDependentsState="false"
         android:key="@string/prefs_dual_page_enabled"
@@ -203,7 +213,7 @@
         android:title="@string/prefs_dual_page_mode_title"
         app:iconSpaceReserved="false" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:dependency="@string/prefs_dual_page_enabled"
         android:key="@string/prefs_split_page_and_translation"
@@ -224,7 +234,7 @@
         android:title="@string/prefs_translations"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="@string/prefs_ayah_before_translation"
         android:persistent="true"
@@ -232,7 +242,7 @@
         android:title="@string/prefs_ayah_before_translation_title"
         app:iconSpaceReserved="false"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="@string/prefs_use_dyslexic_font"
         android:persistent="true"
@@ -247,7 +257,7 @@
       android:title="@string/prefs_category_download"
       app:iconSpaceReserved="false">
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="@string/prefs_prefer_streaming"
         android:persistent="true"

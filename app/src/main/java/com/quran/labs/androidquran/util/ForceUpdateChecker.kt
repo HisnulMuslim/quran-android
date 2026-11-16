@@ -30,19 +30,30 @@ class ForceUpdateChecker(private val context: Context) {
    * Fetch remote config values from Firebase
    */
   fun fetchRemoteConfig(onComplete: () -> Unit) {
+    val completed = java.util.concurrent.atomic.AtomicBoolean(false)
+    val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    val finishOnce = Runnable {
+      if (completed.compareAndSet(false, true)) {
+        onComplete()
+      }
+    }
+    handler.postDelayed(finishOnce, 2500L)
+
     try {
       remoteConfig.fetchAndActivate()
         .addOnCompleteListener { task ->
+          handler.removeCallbacks(finishOnce)
           if (task.isSuccessful) {
             Timber.d(" Remote config fetched successfully")
           } else {
             Timber.e("  Remote config fetch failed")
           }
-          onComplete()
+          finishOnce.run()
         }
     } catch (e: Exception) {
+      handler.removeCallbacks(finishOnce)
       Timber.e(e, " Error fetching remote config")
-      onComplete()
+      finishOnce.run()
     }
   }
 

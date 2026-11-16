@@ -9,7 +9,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
-      android:padding="10dip"
+      android:padding="16dp"
       >
 
     <TextView
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/accent_color_dark"
+        android:textColor="@color/title_color"
         android:maxLines="1"
         android:text="@string/help_title"
         android:textStyle="bold"
@@ -28,10 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/accent_color_dark"
+        android:textColor="@color/title_color"
         android:id="@+id/txtHelp"
         android:textSize="16sp"
-        android:paddingBottom="8dp"
+        android:paddingBottom="12dp"
         android:lineSpacingExtra="4dip"
         />
 
@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:autoLink="email"
         android:linksClickable="false"
+        android:textColor="@color/accent_color"
         android:text="@string/email_us"
         />
   </LinearLayout>

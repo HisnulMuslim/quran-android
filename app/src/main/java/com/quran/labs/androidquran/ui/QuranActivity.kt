@@ -33,6 +33,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
+import kotlinx.coroutines.launch
 import com.quran.labs.androidquran.AboutUsActivity
 import com.quran.labs.androidquran.HelpActivity
 import com.quran.labs.androidquran.QuranApplication
@@ -118,6 +119,8 @@ class QuranActivity : AppCompatActivity(),
   lateinit var extraScreens: Set<@JvmSuppressWildcards ExtraScreenProvider>
   @Inject
   lateinit var quranFileUtils: QuranFileUtils
+  @Inject
+  lateinit var translationsDataSource: com.quran.mobile.translation.data.TranslationsDataSource
 
   public override fun onCreate(savedInstanceState: Bundle?) {
     val quranApp = application as QuranApplication
@@ -127,8 +130,8 @@ class QuranActivity : AppCompatActivity(),
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
     enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
+      statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
     )
     super.onCreate(savedInstanceState)
     quranApp.applicationComponent
@@ -143,10 +146,25 @@ class QuranActivity : AppCompatActivity(),
     isRtl = isRtl()
 
     val root = findViewById<ViewGroup>(R.id.root)
+    val contentFrame = findViewById<android.widget.FrameLayout>(android.R.id.content)
+    val statusBarScrim = android.view.View(this).apply {
+      setBackgroundColor(ContextCompat.getColor(this@QuranActivity, R.color.home_toolbar_background))
+    }
+    contentFrame.addView(
+      statusBarScrim,
+      android.widget.FrameLayout.LayoutParams(
+        android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+        0,
+        android.view.Gravity.TOP
+      )
+    )
     ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
       val insets = windowInsets.getInsets(
         WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
       )
+      statusBarScrim.updateLayoutParams {
+        height = insets.top
+      }
       root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         topMargin = insets.top
         bottomMargin = insets.bottom
@@ -346,6 +364,16 @@ class QuranActivity : AppCompatActivity(),
     return true
   }
 
+  override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+    val nightModeItem = menu.findItem(R.id.night_mode)
+    if (nightModeItem != null) {
+      val isDark = settings.isAppInDarkMode
+      nightModeItem.isChecked = isDark
+      nightModeItem.setIcon(if (isDark) R.drawable.ic_night_mode else R.drawable.ic_day_mode)
+    }
+    return super.onPrepareOptionsMenu(menu)
+  }
+
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (val itemId = item.itemId) {
       R.id.settings -> {
@@ -353,6 +381,15 @@ class QuranActivity : AppCompatActivity(),
       }
       R.id.language -> {
         showLanguageDialog()
+      }
+      R.id.night_mode -> {
+        val targetDark = !settings.isAppInDarkMode
+        val nextAppTheme = if (targetDark) "dark" else "light"
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+          .edit()
+          .putString(com.quran.labs.androidquran.data.Constants.PREF_APP_THEME, nextAppTheme)
+          .apply()
+        QuranApplication.applyAppTheme(nextAppTheme)
       }
       R.id.page_type -> {
         startActivity(Intent(this, com.quran.labs.androidquran.pageselect.PageSelectActivity::class.java))
@@ -457,26 +494,78 @@ class QuranActivity : AppCompatActivity(),
     startActivity(i)
   }
 
+  private fun copyAssetDatabaseIfMissing(databaseDir: File, fileName: String) {
+    val dbFile = File(databaseDir, fileName)
+    if (dbFile.exists()) return
+    val availableAssets = assets.list("") ?: return
+    if (!availableAssets.contains(fileName)) return
+
+    if (!databaseDir.exists()) {
+      databaseDir.mkdirs()
+    }
+    val tempFile = File(databaseDir, "$fileName.tmp")
+    assets.open(fileName).use { input ->
+      tempFile.outputStream().use { output ->
+        input.copyTo(output)
+      }
+    }
+    if (!dbFile.exists()) {
+      tempFile.renameTo(dbFile)
+    } else {
+      tempFile.delete()
+    }
+  }
+
   private fun checkAndAutoDownloadTranslation() {
     val databaseDir = quranFileUtils.getQuranDatabaseDirectory()
-    val dbFile = File(databaseDir, "quran.kannada.hamzah.db")
-    
-    if (!settings.didAttemptTranslationDownload() && !dbFile.exists()) {
-      settings.setDidAttemptTranslationDownload(true)
-      
-      val url = "https://quran-files.hisnulmuslimdua.com/data/databases/quran.kannada.hamzah.db.zip"
-      val destination = databaseDir.absolutePath
-      val notificationTitle = "Kannada Translation"
-      val intent = getDownloadIntent(
-        this, url,
-        destination, notificationTitle, "TRANSLATION_DOWNLOAD_KEY",
-        QuranDownloadService.DOWNLOAD_TYPE_TRANSLATION
-      )
-      intent.putExtra(QuranDownloadService.EXTRA_OUTPUT_FILE_NAME, "quran.kannada.hamzah.db.zip")
+
+    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
       try {
-        startService(intent)
+        copyAssetDatabaseIfMissing(databaseDir, "quran.kannada.hamzah.db")
+        copyAssetDatabaseIfMissing(
+          databaseDir,
+          com.quran.labs.androidquran.data.QuranDataProvider.QURAN_ARABIC_DATABASE
+        )
+
+        val existing = translationsDataSource.translations().value.orEmpty()
+        val staleIds = existing
+          .filter { it.filename == "quran.kannada.hamzah.db" && it.id != 1L }
+          .map { it.id }
+        if (staleIds.isNotEmpty()) {
+          translationsDataSource.removeTranslationsById(staleIds)
+        }
+
+        if (existing.none {
+            it.id == 1L &&
+              it.filename == "quran.kannada.hamzah.db" &&
+              it.version >= 15 &&
+              it.minimumVersion >= 5
+          }) {
+          translationsDataSource.updateTranslations(
+            listOf(
+              com.quran.mobile.translation.model.LocalTranslation(
+                id = 1,
+                filename = "quran.kannada.hamzah.db",
+                name = "ಕಿಂಗ್ ಫಹದ್ ಕುರ್ ಆನ್ ಪ್ರಿಂಟಿಂಗ್ ಕಾಂಪ್ಲೆಕ್ಸ್ . ಮದೀನಾ, ಸೌದಿ ಅರೇಬಿಯಾ",
+                translator = "ಹಂಝಾ ಪುತ್ತೂರು ",
+                translatorForeign = null,
+                url = "https://quran-files.hisnulmuslimdua.com/data/databases/quran.kannada.hamzah.db.zip",
+                languageCode = "kn",
+                version = 15,
+                minimumVersion = 5,
+                displayOrder = 1
+              )
+            )
+          )
+        }
+
+        if (settings.activeTranslations.isEmpty()) {
+          settings.activeTranslations = setOf("quran.kannada.hamzah.db")
+        }
+        settings.setHaveUpdatedTranslations(false)
+        settings.setDidAttemptTranslationDownload(true)
       } catch (e: Exception) {
-        Timber.e(e, "Failed to start translation auto-download service")
+        Timber.e(e, "Failed to install bundled databases")
       }
     }
   }

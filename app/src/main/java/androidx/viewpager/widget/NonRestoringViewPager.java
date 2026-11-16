@@ -64,6 +64,15 @@ public class NonRestoringViewPager extends ViewPager {
   }
 
   @Override
+  public boolean onInterceptTouchEvent(MotionEvent ev) {
+    try {
+      return super.onInterceptTouchEvent(ev);
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  @Override
   public boolean onTouchEvent(MotionEvent ev) {
     try {
       return super.onTouchEvent(ev);

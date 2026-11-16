@@ -1,9 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+  <LinearLayout
+      android:id="@+id/continue_reading_card"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="12dp"
+      android:layout_marginEnd="12dp"
+      android:layout_marginTop="10dp"
+      android:layout_marginBottom="4dp"
+      android:paddingStart="16dp"
+      android:paddingEnd="14dp"
+      android:paddingTop="12dp"
+      android:paddingBottom="12dp"
+      android:background="@drawable/continue_reading_card_bg"
+      android:foreground="?attr/selectableItemBackground"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:visibility="gone"
+      tools:visibility="visible">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+      <TextView
+          android:id="@+id/continue_reading_label"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/continue_reading"
+          android:textAllCaps="true"
+          android:letterSpacing="0.06"
+          android:textColor="@color/sura_details_color"
+          android:textSize="11sp"
+          android:textStyle="bold" />
+      <TextView
+          android:id="@+id/continue_reading_title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="2dp"
+          android:ellipsize="end"
+          android:maxLines="1"
+          android:textColor="@color/title_color"
+          android:textSize="16sp"
+          android:textStyle="bold"
+          tools:text="Al-Baqarah • Page 2, Juz' 1" />
+    </LinearLayout>
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_baseline_arrow_upright_24"
+        app:tint="@color/sura_details_color"
+        android:contentDescription="@string/continue_reading" />
+  </LinearLayout>
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"

@@ -140,6 +140,12 @@ class QuranListAdapter(
       metadata.visibility = View.VISIBLE
       metadata.text = item.metadata
       tags.visibility = View.GONE
+      if (item.arabicSuraName.isNullOrEmpty()) {
+        arabicSuraName?.visibility = View.GONE
+      } else {
+        arabicSuraName?.text = item.arabicSuraName
+        arabicSuraName?.visibility = View.VISIBLE
+      }
 
 
       when {
@@ -245,6 +251,7 @@ class QuranListAdapter(
     val image: ImageView = itemView.findViewById(R.id.rowIcon)
     val tags: TagsViewGroup = itemView.findViewById(R.id.tags)
     val date: TextView? = itemView.findViewById(R.id.show_date)
+    val arabicSuraName: TextView? = itemView.findViewById(R.id.arabicSuraName)
   }
 
   interface QuranTouchListener {

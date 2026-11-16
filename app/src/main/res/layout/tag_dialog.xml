@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="24dp"
-    android:background="@drawable/dialog_shape">>
+    android:padding="24dp">
   <com.google.android.material.textfield.TextInputEditText
       android:id="@+id/tag_name"
       android:layout_width="match_parent"

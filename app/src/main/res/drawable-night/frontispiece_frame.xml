@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer Border -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="14dp" />
+            <stroke android:width="1.5dp" android:color="#4080CBC4" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <!-- Inner Border Inset by 5dp -->
+    <item
+        android:top="5dp"
+        android:bottom="5dp"
+        android:left="5dp"
+        android:right="5dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="10dp" />
+            <stroke android:width="1.5dp" android:color="#7080CBC4" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</layer-list>
+

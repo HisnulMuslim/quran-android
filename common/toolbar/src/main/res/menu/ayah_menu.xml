@@ -23,7 +23,7 @@
     </item>
     <!--KQACR13-->
     <item android:id="@+id/cab_translate_ayah"
-          android:icon="@drawable/icon_kannada_toolbar"
+          android:icon="@drawable/ic_globe"
           android:title="@string/translation_ayah" />
     <item android:id="@+id/cab_play_from_here"
           android:icon="@drawable/ic_play"

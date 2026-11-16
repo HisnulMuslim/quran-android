@@ -33,7 +33,8 @@ class TranslationPresenter @Inject internal constructor(
         withContext(Dispatchers.IO) {
           getVerses(
             quranSettings.wantArabicInTranslationView(),
-            getTranslations(quranSettings), quranInfo.getVerseRangeForPage(it)
+            if (quranSettings.isIncludeTranslation()) getTranslations(quranSettings) else emptyList(),
+            quranInfo.getVerseRangeForPage(it)
           )
         }
       }

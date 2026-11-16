@@ -149,13 +149,10 @@ public abstract class QuranPageLayout extends QuranPageWrapperLayout
   }
 
   private int getBorderWidth(Drawable drawable) {
-    if (drawable == lineDrawable)
+    if (drawable == lineDrawable) {
       return lineDrawable.getIntrinsicWidth();
-
-    // enlarge the book side indicator to a sensible device-independent width
-    return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-        13f,
-        getResources().getDisplayMetrics());
+    }
+    return 0;
   }
 
   @Override
@@ -184,14 +181,20 @@ public abstract class QuranPageLayout extends QuranPageWrapperLayout
       if (leftBorder != BorderMode.LINE || !shouldHideLine) {
         Drawable left = leftBorder == BorderMode.LINE ? lineDrawable :
             leftBorder == BorderMode.LIGHT ? leftPageBorder : leftPageBorderNight;
-        left.setBounds(0, 0, getBorderWidth(left), height);
-        left.draw(canvas);
+        int borderWidth = getBorderWidth(left);
+        if (borderWidth > 0) {
+          left.setBounds(0, 0, borderWidth, height);
+          left.draw(canvas);
+        }
       }
 
       if (rightBorder != BorderMode.HIDDEN) {
         Drawable right = rightBorder == BorderMode.LIGHT ? rightPageBorder : rightPageBorderNight;
-        right.setBounds(width - getBorderWidth(right), 0, width, height);
-        right.draw(canvas);
+        int borderWidth = getBorderWidth(right);
+        if (borderWidth > 0) {
+          right.setBounds(width - borderWidth, 0, width, height);
+          right.draw(canvas);
+        }
       }
     }
   }
@@ -260,10 +263,19 @@ public abstract class QuranPageLayout extends QuranPageWrapperLayout
     if (nightMode) {
       int bgColor = quranSettings.getNightModeBackgroundBrightness();
       setBackgroundColor(Color.rgb(bgColor,bgColor,bgColor));
-    } else if (quranSettings.useNewBackground()) {
-      setBackgroundDrawable((pageNumber % 2 == 0 ? leftGradient : rightGradient));
     } else {
-      setBackgroundColor(ContextCompat.getColor(context, R.color.page_background_image));
+      int theme = quranSettings.getReadingTheme();
+      if (theme == QuranSettings.THEME_LIGHT) {
+        setBackgroundColor(Color.WHITE);
+      } else if (theme == QuranSettings.THEME_SAGE) {
+        setBackgroundColor(0xFFEEF5F0);
+      } else if (theme == QuranSettings.THEME_SLATE) {
+        setBackgroundColor(0xFF1E242B);
+      } else if (quranSettings.useNewBackground()) {
+        setBackgroundDrawable((pageNumber % 2 == 0 ? leftGradient : rightGradient));
+      } else {
+        setBackgroundColor(ContextCompat.getColor(context, R.color.page_background_image));
+      }
     }
   }
 

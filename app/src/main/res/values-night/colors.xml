@@ -1,7 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <color name="toolbar">@color/accent_color_dark</color><!--KQACR21-->
+  <color name="accent_color">#80CBC4</color>
   <color name="toolbar_text">#ffffffff</color>
   <color name="toolbar_icon_tint">#ffffffff</color>
   <color name="toolbar_secondary_text">#ffffffff</color>
+  <color name="frontispiece_accent">#80CBC4</color>
+  <color name="frontispiece_accent_dim">#4080CBC4</color>
+  <color name="page_background">#121212</color>
+  <color name="dark_background">#121212</color>
+  <color name="secondary_dark_background">#1E1E1E</color>
+  <color name="header_background">#181818</color>
+  <color name="home_toolbar_background">#0A1A14</color>
+  <color name="header_text_color">#80CBC4</color>
+  <color name="title_color">#ECECEC</color>
+  <color name="sura_number_color">#80CBC4</color>
+  <color name="sura_details_color">#A5B8B3</color>
+  <color name="sura_background">#121212</color>
+  <color name="sura_number_badge_bg">#1F1F1F</color>
+  <color name="continue_reading_card_bg">#1C1C1C</color>
+  <color name="continue_reading_card_stroke">#2E2E2E</color>
+  <color name="translation_translator_color">#80CBC4</color>
+  <color name="translation_bookmark_tint">#80CBC4</color>
+  <color name="panel_label">#80CBC4</color>
+  <color name="ayah_bookmark_color">#80CBC4</color>
+  <color name="toolbar_background_main">#022B24</color>
+  <color name="splash_screen_background">#121212</color>
+  <color name="state_activated">#333333</color>
+  <color name="state_pressed">#2A2A2A</color>
 </resources>

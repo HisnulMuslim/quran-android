@@ -25,11 +25,17 @@ class InlineTranslationPresenter @Inject constructor(
 ) {
   private var cachedTranslations = emptyList<LocalTranslation>()
   private var lastVerseRange: VerseRange? = null
+  private var customTranslationFilenames: List<String>? = null
+
+  fun setCustomTranslations(filenames: List<String>?) {
+    customTranslationFilenames = filenames
+  }
 
   suspend fun refresh(verseRange: VerseRange) {
     val ayahHasBeenChanged = verseRange != lastVerseRange
     val result = withContext(Dispatchers.IO) {
-      getVerses(false, getTranslations(quranSettings), verseRange)
+      val active = customTranslationFilenames ?: getTranslations(quranSettings)
+      getVerses(false, active, verseRange)
     }
     translationScreen?.setVerses(result.translations, result.ayahInformation, ayahHasBeenChanged)
     lastVerseRange = verseRange

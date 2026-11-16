@@ -11,8 +11,7 @@ fun AyahSelection.mergeWith(
     is AyahSelection.Ayah -> mergeAyahWithAyah(this, ayahSelection)
     is AyahSelection.AyahRange -> mergeAyahIntoAyahRange(
       ayahSelection,
-      this,
-      selectionStartAyah
+      this
     )
     AyahSelection.None -> ayahSelection
   }
@@ -36,15 +35,10 @@ private fun mergeAyahWithAyah(firstAyah: AyahSelection.Ayah, secondAyah: AyahSel
 
 private fun mergeAyahIntoAyahRange(
   ayah: AyahSelection.Ayah,
-  ayahRange: AyahSelection.AyahRange,
-  selectionStartAyah: SuraAyah,
+  ayahRange: AyahSelection.AyahRange
 ): AyahSelection {
   val suraAyah = ayah.suraAyah
-  return if (suraAyah < selectionStartAyah) {
-    ayahRange.copy(startSuraAyah = suraAyah)
-  } else if (suraAyah > selectionStartAyah) {
-    ayahRange.copy(endSuraAyah = suraAyah)
-  } else {
-    ayah
-  }
+  val newStart = if (suraAyah < ayahRange.startSuraAyah) suraAyah else ayahRange.startSuraAyah
+  val newEnd = if (suraAyah > ayahRange.endSuraAyah) suraAyah else ayahRange.endSuraAyah
+  return ayahRange.copy(startSuraAyah = newStart, endSuraAyah = newEnd)
 }

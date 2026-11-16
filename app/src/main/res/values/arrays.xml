@@ -22,4 +22,15 @@
         <item>en</item>
         <item>ar</item>
     </string-array>
+  <string-array name="app_theme_entries">
+    <item>@string/prefs_app_theme_auto</item>
+    <item>@string/prefs_app_theme_light</item>
+    <item>@string/prefs_app_theme_dark</item>
+  </string-array>
+
+  <string-array name="app_theme_values" translatable="false">
+    <item>auto</item>
+    <item>light</item>
+    <item>dark</item>
+  </string-array>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="Quran" parent="Theme.AppCompat.Light">
+  <style name="Quran" parent="Theme.AppCompat.DayNight">
     <item name="colorAccent">@color/accent_color</item>
     <item name="spinnerStyle">?attr/actionDropDownStyle</item>
     <item name="spinnerDropDownItemStyle">@style/SherlockDropDownItem</item>
@@ -19,7 +19,7 @@
     <!--custom end-->
   </style>
 
-  <style name="QuranToolBar" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="QuranToolBar" parent="Theme.AppCompat.DayNight.NoActionBar">
     <item name="android:windowBackground">@color/page_background</item>
     <item name="colorAccent">@color/accent_color</item>
     <item name="windowActionModeOverlay">true</item>
@@ -34,7 +34,7 @@
 
 
 
-  <style name="QuranDialog" parent="Theme.AppCompat.Light.Dialog">
+  <style name="QuranDialog" parent="Theme.AppCompat.DayNight.Dialog">
     <item name="android:background">@color/page_background</item>
     <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
     <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
@@ -44,7 +44,7 @@
 
   <!--custom theme start-->
 
-  <style name="QuranToolBarSplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="QuranToolBarSplashScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
     <item name="android:colorBackground">@color/splash_screen_background</item>
     <item name="android:forceDarkAllowed">false</item>
   </style>

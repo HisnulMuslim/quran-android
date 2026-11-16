@@ -2,11 +2,15 @@ package com.quran.labs.androidquran.ui.fragment
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.quran.mobile.common.ui.core.R as UiCoreR
+import java.util.Locale
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +43,8 @@ class SuraListFragment : Fragment() {
   lateinit var quranSettings: QuranSettings
 
   private lateinit var recyclerView: RecyclerView
+  private var continueReadingCard: View? = null
+  private var continueReadingTitle: TextView? = null
   private var numberOfPages = 0
   private var showSuraTranslatedName = false
   private var disposable: Disposable? = null
@@ -55,6 +61,8 @@ class SuraListFragment : Fragment() {
     savedInstanceState: Bundle?
   ): View {
     val view: View = inflater.inflate(R.layout.quran_list, container, false)
+    continueReadingCard = view.findViewById(R.id.continue_reading_card)
+    continueReadingTitle = view.findViewById(R.id.continue_reading_title)
     recyclerView = view.findViewById(R.id.recycler_view)
     recyclerView.apply {
       layoutManager = LinearLayoutManager(context)
@@ -81,8 +89,21 @@ class SuraListFragment : Fragment() {
             if (recentPage != Constants.NO_PAGE) {
               val sura = quranDisplayData.safelyGetSuraOnPage(recentPage)
               val juz = quranInfo.getJuzFromPage(recentPage)
+              val suraName = quranDisplayData.getSuraName(activity, sura, false, false)
+              val pageAndJuzStr = activity.getString(
+                R.string.page_description,
+                QuranUtils.getLocalizedNumber(activity, recentPage),
+                QuranUtils.getLocalizedNumber(activity, juz)
+              )
+              continueReadingTitle?.text = "$suraName • $pageAndJuzStr"
+              continueReadingCard?.visibility = View.VISIBLE
+              continueReadingCard?.setOnClickListener {
+                (activity as? QuranActivity)?.jumpTo(recentPage)
+              }
               val position = sura + juz - 1
               recyclerView.scrollToPosition(position)
+            } else {
+              continueReadingCard?.visibility = View.GONE
             }
           }
 
@@ -111,6 +132,15 @@ class SuraListFragment : Fragment() {
     val activity: Activity = requireActivity()
     val wantPrefix = activity.resources.getBoolean(R.bool.show_surat_prefix)
     val wantTranslation = quranSettings.isShowSuraTranslatedName
+    val showArabicOnRight = !quranSettings.isArabicNames && Locale.getDefault().language != "ar"
+    val arabicSuraNames = if (showArabicOnRight) {
+      val arConfig = Configuration(activity.resources.configuration).apply {
+        setLocale(Locale("ar"))
+      }
+      activity.createConfigurationContext(arConfig).resources.getStringArray(UiCoreR.array.sura_names)
+    } else {
+      null
+    }
     for (juz in 1..JUZ2_COUNT) {
       val headerTitle = activity.getString(
         R.string.juz2_description,
@@ -131,6 +161,9 @@ class SuraListFragment : Fragment() {
           .withMetadata(quranDisplayData.getSuraListMetaString(activity, sura))
           .withSura(sura)
           .withPage(quranInfo.getPageNumberForSura(sura))
+        if (arabicSuraNames != null && sura in 1..arabicSuraNames.size) {
+          builder.withArabicSuraName(arabicSuraNames[sura - 1])
+        }
         elements[pos++] = builder.build()
         sura++
       }

@@ -37,9 +37,22 @@ open class QuranApplication : Application(), QuranApplicationComponentProvider, 
     initializeWorkManager()
     bookmarksWidgetSubscriber.subscribeBookmarksWidgetIfNecessary()
 
-    // KQACR12 set light mode as the default for now
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+    applyAppTheme(
+      androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        .getString(com.quran.labs.androidquran.data.Constants.PREF_APP_THEME, "auto")
+    )
 
+  }
+
+  companion object {
+    fun applyAppTheme(theme: String?) {
+      val mode = when (theme) {
+        "light" -> AppCompatDelegate.MODE_NIGHT_NO
+        "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+      }
+      AppCompatDelegate.setDefaultNightMode(mode)
+    }
   }
 
   open fun setupTimber() {

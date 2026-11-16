@@ -17,3 +17,16 @@ class UthmaniSpan(context: Context) : MetricAffectingSpan() {
     paint.typeface = typeFace
   }
 }
+
+class HafsAyahNumberSpan(context: Context) : MetricAffectingSpan() {
+
+  private val typeFace = TypefaceManager.getHafsAyahNumberTypeface(context)
+
+  override fun updateDrawState(ds: TextPaint) {
+    ds.typeface = typeFace
+  }
+
+  override fun updateMeasureState(paint: TextPaint) {
+    paint.typeface = typeFace
+  }
+}

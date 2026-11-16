@@ -233,10 +233,19 @@ public class QuranPageFragment extends Fragment implements PageController,
   }
 
   @Override
+  public void handleSingleTap(@NonNull SuraAyah suraAyah) {
+    handleLongPress(suraAyah);
+  }
+
+  @Override
   public void handleLongPress(@NonNull SuraAyah suraAyah) {
     if (isVisible()) {
       ayahTrackerPresenter.onLongPress(suraAyah);
     }
+  }
+
+  @Override
+  public void handleAyahRange(@NonNull SuraAyah start, @NonNull SuraAyah end) {
   }
 
   @Override

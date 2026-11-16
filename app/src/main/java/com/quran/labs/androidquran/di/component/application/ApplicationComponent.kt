@@ -73,6 +73,7 @@ interface ApplicationComponent : QuranApplicationComponent {
   fun inject(searchActivity: SearchActivity)
   fun inject(pageSelectActivity: PageSelectActivity)
   fun inject(showJumpFragmentActivity: ShowJumpFragmentActivity)
+  fun inject(exporter: com.quran.labs.androidquran.ui.shareimage.AyahVideoExporter)
 
   // fragments
   fun inject(bookmarksFragment: BookmarksFragment)

@@ -99,6 +99,10 @@
           android:resource="@xml/searchable"/>
     </activity>
 
+    <activity android:name=".ui.shareimage.ShareAyahImageActivity"
+        android:exported="false"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
     <activity android:name=".QuranForwarderActivity"
         android:exported="true">
       <intent-filter>

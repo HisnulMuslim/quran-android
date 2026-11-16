@@ -191,33 +191,28 @@
   <!-- help -->
   <string name="help_title">Frequently Asked Questions</string>
   <string name="help">
-        &lt;br/>&lt;b>How do I make the text larger?&lt;/b>
-        &lt;br/>For the Arabic pages, hold your phone in landscape. This makes the text larger.
-        For translations, go to settings and set translation text size.
+        &lt;br/>&lt;b>How do I change text size, fonts, and reading theme?&lt;/b>
+        &lt;br/>While reading, tap the &lt;b>Reading Options (TT)&lt;/b> icon in the top toolbar to adjust
+        Arabic and translation font sizes, font styles, line spacing, display mode (Both, Arabic Only,
+        or Translation Only), and reading themes (Light, Sepia, Sage, Slate, or Night). On Mushaf
+        pages, rotating your phone to landscape also makes the page larger.
         &lt;br/>
         &lt;br/>&lt;b>How do I play audio?&lt;/b>
-        &lt;br/>Open any Quran page. Tap on the screen once. At the bottom, you will notice
-        a play button and some text with the name of a qari. Click the name of the qari to
-        choose a different qari. Click play to download and play the current page or sura.
+        &lt;br/>Open any Surah or page and tap the screen once if the bars are hidden. At the bottom,
+        tap the play button to listen, or tap the reciter\'s name to choose a different Qari.
         &lt;br/>
-        &lt;br/>&lt;b>How do I view translation?&lt;/b>
-        &lt;br/>Open any Quran page. Tap on the screen once. In the top, you will notice a
-        globe icon (or, if you don\'t see it, click an icon with three square dots) - click
-        this and choose translation to view the translation.
-        &lt;br/>
-        If you do not have any translations downloaded, it will take
-        you to a screen where you can download translations. Choose and download a translation,
-        then return back and tap the globe icon again to view the translation.
+        &lt;br/>&lt;b>How do I switch between Translation and Mushaf views?&lt;/b>
+        &lt;br/>Tap the Mushaf / Globe icon in the top toolbar to switch between Translation view and
+        Mushaf view. In Translation view, tap the translator name in the top bar to switch active
+        translations or choose More Translations to download additional ones.
         &lt;br/>
         &lt;br/>&lt;b>How do I bookmark a page?&lt;/b>
-        &lt;br/>Open any Quran page. Tap on the screen once. In the top right, you will see a
-        bookmark icon. Tap the bookmark icon to bookmark the page (the color will turn solid white). Tap the bookmark icon
-        again to remove the bookmark.
+        &lt;br/>Tap the bookmark icon in the top toolbar to save or remove a bookmark for the current page.
         &lt;br/>
-        &lt;br/>&lt;b>How do I share an ayah?&lt;/b>
-        &lt;br/>While on any Arabic page, press and hold on any ayah to get a menu where you can
-        choose to bookmark, tag, share or copy that ayah to the clipboard, see the translation,
-        or listen to its recitation.&lt;br/>
+        &lt;br/>&lt;b>How do I share or compare an ayah?&lt;/b>
+        &lt;br/>Tap or press and hold any ayah (and optionally select a range) to open the ayah menu,
+        where you can bookmark, tag, compare translations, play audio, copy, or share the ayah as
+        plain text or a customizable Quran image card.&lt;br/>
     </string>
   <string name="search_hint">Search the Quran</string>
   <string name="quranSearchType">Verses of the Quran</string>
@@ -315,7 +310,7 @@
   <string name="prefs_export_summary">Export a copy of bookmarks and tags</string>
   <string name="prefs_export_csv_title">Export CSV</string>
   <string name="prefs_export_csv_summary">Export a copy of bookmarks and tags in CSV</string>
-  <string name="prefs_page_type_title">Page Type (experimental)</string>
+  <string name="prefs_page_type_title">Mushaf Style</string>
   <string name="prefs_page_type_summary">Select the type of reading pages</string>
   <string name="prefs_sura_translated_name_summary">Show the translation of surah name</string>
   <string name="prefs_sura_translated_name_title">Surah translated name</string>
@@ -459,6 +454,11 @@
   <string name="undo">Undo</string>
 
   <string name="recent_pages">Recent pages</string>
+  <string name="continue_reading">Continue Reading</string>
+  <string name="prefs_app_theme_title">App Theme</string>
+  <string name="prefs_app_theme_auto">System default</string>
+  <string name="prefs_app_theme_light">Light</string>
+  <string name="prefs_app_theme_dark">Dark</string>
   <plurals name="plural_recent_pages" translatable="false">
     <item quantity="one">@string/menu_jump_last_page</item>
     <item quantity="other">@string/recent_pages</item>
@@ -509,9 +509,40 @@
   <!-- KQACR6 -->
 
 
-  <string name="adjust_font_sizes">Adjust Font Sizes</string>
+  <string name="adjust_font_sizes">Reading Options</string>
   <string name="arabic_font_size">Arabic Font Size: %1$d</string>
   <string name="translation_font_size">Translation Font Size: %1$d</string>
-  <string name="menu_font_size">Font Size</string>
+  <string name="menu_font_size">Reading Options</string>
+  <string name="show_arabic_text">Show Arabic Text</string>
+  <string name="show_translation">Show Translation</string>
+  <string name="display_mode">Display Mode</string>
+  <string name="mode_both">Both</string>
+  <string name="mode_arabic">Arabic Only</string>
+  <string name="mode_translation">Translation Only</string>
+  <string name="line_spacing">Line Spacing: %1$s</string>
+  <string name="reading_theme">Reading Theme</string>
+  <string name="theme_light">Light</string>
+  <string name="theme_sepia">Sepia</string>
+  <string name="theme_night">Night</string>
+  <string name="theme_sage">Sage</string>
+  <string name="theme_slate">Slate</string>
+  <string name="arabic_font">Arabic Font</string>
+  <string name="translation_font">Translation Font</string>
+  <string name="translation_font_system">System</string>
+  <string name="translation_font_sans">Sans</string>
+  <string name="translation_font_serif">Serif</string>
+  <string name="translation_font_bold">Bold</string>
+  <string name="font_hafs_bold">Hafs Bold</string>
+  <string name="font_hafs_classic">Hafs Classic</string>
+  <string name="font_kitab">Kitab</string>
+  <string name="reset_to_default">Reset to Default</string>
+  <string name="compare_all">Compare (All)</string>
+  <string name="share_ayah_sheet_title">Share Ayah</string>
+  <string name="share_as_image_title">Share as Image</string>
+  <string name="share_as_image_subtitle">Create a customizable Quran card with themes, backgrounds &amp; QR code</string>
+  <string name="share_as_video_title">Share as Video</string>
+  <string name="share_as_video_subtitle">Export Quran card with audio recitation for Reels &amp; Status</string>
+  <string name="share_as_text_title">Share as Text</string>
+  <string name="share_as_text_subtitle">Share Arabic, translation &amp; reference as plain text</string>
 
 </resources>

@@ -78,8 +78,20 @@ public class QuranSettings {
     return prefs.getBoolean(Constants.PREF_PREFER_STREAMING, false);
   }
 
+  public boolean isAppInDarkMode() {
+    int defaultNightMode = androidx.appcompat.app.AppCompatDelegate.getDefaultNightMode();
+    if (defaultNightMode == androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES) {
+      return true;
+    } else if (defaultNightMode == androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO) {
+      return false;
+    }
+    int nightModeFlags = appContext.getResources().getConfiguration().uiMode
+        & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+    return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+  }
+
   public boolean isNightMode() {
-    return prefs.getBoolean(Constants.PREF_NIGHT_MODE, false);
+    return getReadingTheme() == THEME_NIGHT;
   }
 
   public boolean useNewBackground() {
@@ -118,6 +130,10 @@ public class QuranSettings {
 
   public boolean wantArabicInTranslationView() {
     return prefs.getBoolean(Constants.PREF_AYAH_BEFORE_TRANSLATION, true);
+  }
+
+  public void setWantArabicInTranslationView(boolean want) {
+    prefs.edit().putBoolean(Constants.PREF_AYAH_BEFORE_TRANSLATION, want).apply();
   }
 
   public boolean wantDyslexicFontInTranslationView() {
@@ -407,7 +423,7 @@ public class QuranSettings {
   }
 
   public boolean getWasShowingTranslation() {
-    return perInstallationPrefs.getBoolean(Constants.PREF_WAS_SHOWING_TRANSLATION, false);
+    return perInstallationPrefs.getBoolean(Constants.PREF_WAS_SHOWING_TRANSLATION, true);
   }
 
   public boolean didCheckPartialImages(String pageType) {
@@ -431,6 +447,10 @@ public class QuranSettings {
     return prefs.getBoolean(Constants.PREF_INCLUDE_TRANSLATION, true);
   }
 
+  public void setIncludeTranslation(boolean include) {
+    prefs.edit().putBoolean(Constants.PREF_INCLUDE_TRANSLATION, include).apply();
+  }
+
   public boolean isInlineTranslation() {
     return  prefs.getBoolean(Constants.PREF_INLINE_TRANSLATION, false);
   }
@@ -449,5 +469,106 @@ public class QuranSettings {
 
   public void setDidAttemptTranslationDownload(boolean attempted) {
     perInstallationPrefs.edit().putBoolean("didAttemptTranslationDownload", attempted).apply();
+  }
+
+  public static final int THEME_LIGHT = 0;
+  public static final int THEME_SEPIA = 1;
+  public static final int THEME_NIGHT = 2;
+  public static final int THEME_SAGE = 3;
+  public static final int THEME_SLATE = 4;
+
+  public static final String FONT_HAFS_BOLD = "uthmanic_hafs_ver13.ttf";
+  public static final String FONT_HAFS_CLASSIC = "uthmanic_hafs_ver12.otf";
+  public static final String FONT_KITAB = "kitab.ttf";
+  public static final String FONT_NASKH = "UthmanTN1Ver10.otf";
+  public static final String FONT_SYSTEM = "system";
+
+  public static final int DISPLAY_MODE_BOTH = 0;
+  public static final int DISPLAY_MODE_ARABIC_ONLY = 1;
+  public static final int DISPLAY_MODE_TRANSLATION_ONLY = 2;
+
+  public int getTranslationViewMode() {
+    boolean arabic = wantArabicInTranslationView();
+    boolean translation = isIncludeTranslation();
+    if (arabic && !translation) {
+      return DISPLAY_MODE_ARABIC_ONLY;
+    }
+    if (!arabic && translation) {
+      return DISPLAY_MODE_TRANSLATION_ONLY;
+    }
+    return DISPLAY_MODE_BOTH;
+  }
+
+  public void setTranslationViewMode(int mode) {
+    if (mode == DISPLAY_MODE_ARABIC_ONLY) {
+      setWantArabicInTranslationView(true);
+      setIncludeTranslation(false);
+    } else if (mode == DISPLAY_MODE_TRANSLATION_ONLY) {
+      setWantArabicInTranslationView(false);
+      setIncludeTranslation(true);
+    } else {
+      setWantArabicInTranslationView(true);
+      setIncludeTranslation(true);
+    }
+  }
+
+  public int getReadingTheme() {
+    if (isAppInDarkMode()) {
+      int darkTheme = prefs.getInt("lastDarkTheme", THEME_NIGHT);
+      if (darkTheme != THEME_NIGHT && darkTheme != THEME_SLATE) {
+        return THEME_NIGHT;
+      }
+      return darkTheme;
+    } else {
+      int lightTheme = prefs.getInt("lastDayTheme", THEME_LIGHT);
+      if (lightTheme != THEME_LIGHT && lightTheme != THEME_SEPIA && lightTheme != THEME_SAGE) {
+        return THEME_LIGHT;
+      }
+      return lightTheme;
+    }
+  }
+
+  public void setReadingTheme(int theme) {
+    prefs.edit().putInt("readingTheme", theme).apply();
+    if (theme == THEME_NIGHT || theme == THEME_SLATE) {
+      prefs.edit()
+          .putInt("lastDarkTheme", theme)
+          .putBoolean(Constants.PREF_NIGHT_MODE, theme == THEME_NIGHT)
+          .apply();
+    } else {
+      prefs.edit()
+          .putInt("lastDayTheme", theme)
+          .putBoolean(Constants.PREF_NIGHT_MODE, false)
+          .apply();
+    }
+  }
+
+  public static final String TRANSLATION_FONT_SYSTEM = "system";
+  public static final String TRANSLATION_FONT_SANS = "sans";
+  public static final String TRANSLATION_FONT_SERIF = "serif";
+  public static final String TRANSLATION_FONT_BOLD = "bold";
+
+  public String getArabicFont() {
+    return prefs.getString(Constants.PREF_ARABIC_FONT, FONT_HAFS_BOLD);
+  }
+
+  public void setArabicFont(String font) {
+    prefs.edit().putString(Constants.PREF_ARABIC_FONT, font).apply();
+  }
+
+  public String getTranslationFont() {
+    return prefs.getString("translationFont", TRANSLATION_FONT_SYSTEM);
+  }
+
+  public void setTranslationFont(String font) {
+    prefs.edit().putString("translationFont", font).apply();
+  }
+
+  public float getTranslationLineSpacing() {
+    return prefs.getFloat("translationLineSpacing", 1.0f);
+  }
+
+  public void setTranslationLineSpacing(float spacing) {
+    prefs.edit().putFloat("translationLineSpacing", spacing).apply();
   }
 }

@@ -47,8 +47,12 @@ public class ZipUtils {
         while (entries.hasMoreElements()) {
           processedFiles++;
           ZipEntry entry = entries.nextElement();
+          String entryName = entry.getName();
+          if (entryName.startsWith("__MACOSX/") || entryName.endsWith("/.DS_Store") || entryName.equals(".DS_Store")) {
+            continue;
+          }
 
-          File currentEntryFile = new File(destDirectory, entry.getName());
+          File currentEntryFile = new File(destDirectory, entryName);
           if (currentEntryFile.getCanonicalPath().startsWith(canonicalPath)) {
             if (entry.isDirectory()) {
               if (!currentEntryFile.exists()) {
@@ -58,6 +62,11 @@ public class ZipUtils {
             } else if (currentEntryFile.exists()) {
               // delete files that already exist
               currentEntryFile.delete();
+            }
+
+            File parentDir = currentEntryFile.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+              parentDir.mkdirs();
             }
 
             try ( InputStream is = zip.getInputStream(entry);  FileOutputStream ostream = new FileOutputStream(currentEntryFile)) {

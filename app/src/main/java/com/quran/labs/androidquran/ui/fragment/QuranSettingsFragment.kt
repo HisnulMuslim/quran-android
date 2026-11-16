@@ -61,6 +61,15 @@ class QuranSettingsFragment : PreferenceFragmentCompat(),
     extraPreferences
       .sortedBy { it.order }
       .forEach { it.addPreferences(preferenceScreen) }
+
+    updateNightModeBrightnessVisibility()
+  }
+
+  private fun updateNightModeBrightnessVisibility() {
+    val isNightMode = preferenceScreen.sharedPreferences
+      ?.getBoolean(Constants.PREF_NIGHT_MODE, false) ?: false
+    findPreference<Preference>(Constants.PREF_NIGHT_MODE_TEXT_BRIGHTNESS)?.isVisible = isNightMode
+    findPreference<Preference>(Constants.PREF_NIGHT_MODE_BACKGROUND_BRIGHTNESS)?.isVisible = isNightMode
   }
 
   override fun onResume() {
@@ -89,6 +98,11 @@ class QuranSettingsFragment : PreferenceFragmentCompat(),
       }
     }
     /*KQACR6 end*/
+    else if (key == Constants.PREF_NIGHT_MODE) {
+      updateNightModeBrightnessVisibility()
+    } else if (key == Constants.PREF_APP_THEME) {
+      QuranApplication.applyAppTheme(sharedPreferences.getString(Constants.PREF_APP_THEME, "auto"))
+    }
   }
 
   override fun onPreferenceTreeClick(preference: Preference): Boolean {

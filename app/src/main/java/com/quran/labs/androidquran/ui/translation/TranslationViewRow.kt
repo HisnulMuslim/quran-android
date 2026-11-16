@@ -16,8 +16,16 @@ internal class TranslationViewRow @JvmOverloads constructor(
   val linkPage: Int? = null,
   val isArabic: Boolean = false,
   val ayat: List<IntRange> = emptyList(),
-  private val footnotes: List<IntRange> = emptyList()
+  private val footnotes: List<IntRange> = emptyList(),
+  val suraMetadata: String? = null
 ) {
+
+  constructor(
+    @Type type: Int,
+    ayahInfo: QuranAyahInfo,
+    data: CharSequence?,
+    suraMetadata: String?
+  ) : this(type = type, ayahInfo = ayahInfo, data = data, translationIndex = -1, suraMetadata = suraMetadata)
 
   fun footnoteCognizantText(
     spannableStringBuilder: SpannableStringBuilder,
@@ -42,7 +50,8 @@ internal class TranslationViewRow @JvmOverloads constructor(
     Type.TRANSLATOR,
     Type.TRANSLATION_TEXT,
     Type.VERSE_NUMBER,
-    Type.SPACER
+    Type.SPACER,
+    Type.FOOTER_ORNAMENT
   )
   internal annotation class Type {
     companion object {
@@ -53,6 +62,7 @@ internal class TranslationViewRow @JvmOverloads constructor(
       const val TRANSLATION_TEXT = 4
       const val VERSE_NUMBER = 5
       const val SPACER = 6
+      const val FOOTER_ORNAMENT = 7
     }
   }
 }

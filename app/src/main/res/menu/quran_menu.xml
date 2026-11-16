@@ -7,7 +7,7 @@
           app:showAsAction="ifRoom" />
     <!--KQACR22 switch to kannada mode icon change  -->
     <item android:id="@+id/goto_translation"
-          android:icon="@drawable/icon_kannada_toolbar"
+          android:icon="@drawable/ic_globe"
           android:title="@string/menu_translation"
           app:showAsAction="ifRoom" />
     <!--KQACR22 switch to arabic mode icon change  -->
@@ -17,8 +17,8 @@
           app:showAsAction="ifRoom" />
     <item android:id="@+id/font_size_selection"
           android:icon="@drawable/ic_text_size"
-          android:title="@string/menu_font_size"
-          app:showAsAction="ifRoom" />
+          android:title="Reading Options"
+          app:showAsAction="always" />
     <item android:id="@+id/search"
           android:icon="@drawable/ic_ab_search"
           android:title="@string/menu_search"

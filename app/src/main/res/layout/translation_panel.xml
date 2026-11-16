@@ -24,6 +24,24 @@
         android:textSize="14sp"
         android:textStyle="bold"
         />
+    <HorizontalScrollView
+        android:id="@+id/compare_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:visibility="gone"
+        android:paddingLeft="@dimen/translation_left_right_margin"
+        android:paddingRight="@dimen/translation_left_right_margin"
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp"
+        >
+      <LinearLayout
+          android:id="@+id/compare_bar"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          />
+    </HorizontalScrollView>
     <com.quran.labs.androidquran.view.InlineTranslationView
         android:id="@+id/translation_view"
         android:layout_width="match_parent"

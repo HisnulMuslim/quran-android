@@ -13,6 +13,8 @@ import com.quran.data.model.SuraAyah
 import com.quran.data.model.selection.AyahSelection
 import com.quran.labs.androidquran.common.QuranAyahInfo
 import com.quran.labs.androidquran.data.QuranDisplayData
+import com.quran.labs.androidquran.database.BookmarksDBAdapter
+import com.quran.labs.androidquran.model.bookmark.BookmarkModel
 import com.quran.labs.androidquran.presenter.quran.ayahtracker.AyahTrackerItem
 import com.quran.labs.androidquran.presenter.quran.ayahtracker.AyahTrackerPresenter
 import com.quran.labs.androidquran.presenter.quran.ayahtracker.AyahTrackerPresenter.AyahInteractionHandler
@@ -28,9 +30,13 @@ import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.view.QuranTranslationPageLayout
 import com.quran.mobile.translation.model.LocalTranslation
 import com.quran.reading.common.ReadingEventPresenter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 import javax.inject.Inject
 
 class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
@@ -49,8 +55,11 @@ class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
   @Inject lateinit var ayahTrackerPresenter: AyahTrackerPresenter
   @Inject lateinit var ayahSelectedListener: AyahSelectedListener
   @Inject lateinit var readingEventPresenter: ReadingEventPresenter
+  @Inject lateinit var bookmarksDBAdapter: BookmarksDBAdapter
+  @Inject lateinit var bookmarkModel: BookmarkModel
 
   private val scope = MainScope()
+  private var bookmarksDisposable: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -121,12 +130,32 @@ class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
     ayahTrackerPresenter.bind(this)
     presenter.bind(this)
     updateView()
+    refreshBookmarks()
+    bookmarksDisposable = bookmarkModel.bookmarksObservable()
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe({ refreshBookmarks() }, {})
   }
 
   override fun onPause() {
+    bookmarksDisposable?.dispose()
+    bookmarksDisposable = null
     ayahTrackerPresenter.unbind(this)
     presenter.unbind(this)
     super.onPause()
+  }
+
+  private fun refreshBookmarks() {
+    scope.launch {
+      val bookmarkedIds = withContext(Dispatchers.IO) {
+        bookmarksDBAdapter.getBookmarkedAyahsOnPage(pageNumber)
+          .filter { it.sura != null && it.ayah != null }
+          .map { quranInfo.getAyahId(it.sura!!, it.ayah!!) }
+          .toSet()
+      }
+      if (isAdded) {
+        translationView.setBookmarkedAyahs(bookmarkedIds)
+      }
+    }
   }
 
   override fun setVerses(
@@ -185,6 +214,13 @@ class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
     }
   }
 
+  override fun handleSingleTap(suraAyah: SuraAyah) {
+    if (isVisible) {
+      val toolBarPosition = translationView.getToolbarPosition(suraAyah.sura, suraAyah.ayah)
+      readingEventPresenter.onAyahSelection(AyahSelection.Ayah(suraAyah, toolBarPosition))
+    }
+  }
+
   override fun handleLongPress(suraAyah: SuraAyah) {
     if (isVisible) {
       val current = readingEventPresenter.currentAyahSelection()
@@ -193,27 +229,42 @@ class TranslationFragment : Fragment(), AyahInteractionHandler, QuranPage,
     }
   }
 
+  override fun handleAyahRange(start: SuraAyah, end: SuraAyah) {
+    if (isVisible) {
+      if (start == end) {
+        val toolBarPosition = translationView.getToolbarPosition(start.sura, start.ayah)
+        readingEventPresenter.onAyahSelection(AyahSelection.Ayah(start, toolBarPosition))
+      } else {
+        val (startAyah, endAyah) = if (start > end) end to start else start to end
+        val toolBarPosition = translationView.getToolbarPosition(endAyah.sura, endAyah.ayah)
+        readingEventPresenter.onAyahSelection(
+          AyahSelection.AyahRange(startAyah, endAyah, toolBarPosition)
+        )
+      }
+    }
+  }
+
   private fun updateAyahRange(selectedAyah: SuraAyah, ayahSelection: AyahSelection): AyahSelection {
     val (startAyah, endAyah) = when (ayahSelection) {
       is AyahSelection.None -> selectedAyah to null
       is AyahSelection.Ayah -> {
-        if (selectedAyah > ayahSelection.suraAyah) {
+        if (selectedAyah == ayahSelection.suraAyah) {
+          selectedAyah to null
+        } else if (selectedAyah > ayahSelection.suraAyah) {
           ayahSelection.suraAyah to selectedAyah
         } else {
           selectedAyah to ayahSelection.suraAyah
         }
       }
       is AyahSelection.AyahRange -> {
-        if (selectedAyah > ayahSelection.startSuraAyah) {
-          ayahSelection.startSuraAyah to selectedAyah
-        } else {
-          selectedAyah to ayahSelection.startSuraAyah
-        }
+        val newStart = if (selectedAyah < ayahSelection.startSuraAyah) selectedAyah else ayahSelection.startSuraAyah
+        val newEnd = if (selectedAyah > ayahSelection.endSuraAyah) selectedAyah else ayahSelection.endSuraAyah
+        newStart to newEnd
       }
     }
 
     val toolBarPosition = translationView.getToolbarPosition(selectedAyah.sura, selectedAyah.ayah)
-    return if (endAyah == null) {
+    return if (endAyah == null || startAyah == endAyah) {
       AyahSelection.Ayah(startAyah, toolBarPosition)
     } else {
       AyahSelection.AyahRange(startAyah, endAyah, toolBarPosition)

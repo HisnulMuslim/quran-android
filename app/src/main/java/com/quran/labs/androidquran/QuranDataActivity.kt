@@ -237,6 +237,9 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
 
     forceUpdateDialog?.dismiss()
     forceUpdateDialog = null
+    if (!isFinishing && !shouldCheckUpdateOnResume) {
+      didCheckPermissions = false
+    }
 
     super.onPause()
   }
@@ -400,6 +403,9 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
         quranSettings.shouldFetchPages() -> {
           downloadQuranImages(false)
         }
+        quranSettings.wasShowingTranslation -> {
+          runListView()
+        }
         else -> {
           promptForDownload()
         }
@@ -561,19 +567,30 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
   }
 
   private fun runListView() {
+    val returnToPage = intent.getIntExtra(EXTRA_RETURN_TO_PAGE, -1)
     scope.launch {
       try {
-        // Wait for splash/loading UI
-        delay(2000)
+        // Wait for splash/loading UI on normal startup
+        if (returnToPage <= 0) {
+          delay(2000)
+        }
 
         // Double-check activity state after delay
         if (!isFinishing && !isDestroyed) {
-          val intent = Intent(this@QuranDataActivity, QuranActivity::class.java)
-          intent.putExtra(
+          val homeIntent = Intent(this@QuranDataActivity, QuranActivity::class.java)
+          homeIntent.putExtra(
             QuranActivity.EXTRA_SHOW_TRANSLATION_UPGRADE,
             quranSettings.haveUpdatedTranslations()
           )
-          startActivity(intent)
+          if (returnToPage > 0) {
+            val pagerIntent = Intent(this@QuranDataActivity, com.quran.labs.androidquran.ui.PagerActivity::class.java).apply {
+              putExtra("page", returnToPage)
+              putExtra(com.quran.labs.androidquran.ui.PagerActivity.EXTRA_JUMP_TO_TRANSLATION, false)
+            }
+            startActivities(arrayOf(homeIntent, pagerIntent))
+          } else {
+            startActivity(homeIntent)
+          }
           finish()
         } else {
           Timber.w("QuranDataActivity finishing/destroyed, skipping navigation to QuranActivity")
@@ -595,6 +612,7 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
 
   companion object {
     const val PAGES_DOWNLOAD_KEY = "PAGES_DOWNLOAD_KEY"
+    const val EXTRA_RETURN_TO_PAGE = "return_to_page"
     private const val REQUEST_POST_NOTIFICATION_PERMISSIONS = 1
   }
 }

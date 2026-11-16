@@ -253,6 +253,8 @@ class QuranDataPresenter @Inject internal constructor(
   override fun unbind(activity: QuranDataActivity) {
     if (this.activity === activity) {
       this.activity = null
+      checkPagesDisposable?.dispose()
+      checkPagesDisposable = null
     }
   }
 }

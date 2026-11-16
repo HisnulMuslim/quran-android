@@ -464,6 +464,10 @@ class TabletFragment : Fragment(), PageController, TranslationPresenter.Translat
     )
   }
 
+  override fun handleSingleTap(suraAyah: SuraAyah) {
+    handleLongPress(suraAyah)
+  }
+
   override fun handleLongPress(suraAyah: SuraAyah) {
     if (isVisible) {
       val page = quranInfo.getPageFromSuraAyah(suraAyah.sura, suraAyah.ayah)
@@ -473,6 +477,9 @@ class TabletFragment : Fragment(), PageController, TranslationPresenter.Translat
       lastLongPressPage = page
       ayahTrackerPresenter.onLongPress(suraAyah)
     }
+  }
+
+  override fun handleAyahRange(start: SuraAyah, end: SuraAyah) {
   }
 
   override fun handleRetryClicked() {

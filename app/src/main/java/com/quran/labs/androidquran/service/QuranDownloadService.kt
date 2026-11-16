@@ -369,9 +369,7 @@ class QuranDownloadService : Service(), ZipListener<NotificationDetails> {
               )
               translationManagerPresenter.updateItem(updated)
             }
-            val active = quranSettings.activeTranslations.toMutableSet()
-            active.add(dbFilename)
-            quranSettings.activeTranslations = active
+            quranSettings.activeTranslations = setOf(dbFilename)
             quranSettings.setHaveUpdatedTranslations(false)
           } catch (e: Exception) {
             Timber.e(e, "Error activating downloaded translation")

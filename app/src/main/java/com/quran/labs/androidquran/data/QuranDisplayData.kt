@@ -198,4 +198,8 @@ class QuranDisplayData @Inject constructor(private val quranInfo: QuranInfo): Qu
     }
     return ayahKeys
   }
+
+  fun getPageFromSuraAyah(sura: Int, ayah: Int): Int {
+    return quranInfo.getPageFromSuraAyah(sura, ayah)
+  }
 }

@@ -177,7 +177,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   private var lastPopupTime: Long = 0
   private var isActionBarHidden = true
   private var shouldReconnect = false
-  private var showingTranslation = false
+  private var showingTranslation = true
   private var needsPermissionToDownloadOver3g = true
   private var promptDialog: AlertDialog? = null
   private var isDualPages = false
@@ -230,6 +230,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   @Inject lateinit var audioStatusRepository: AudioStatusRepository
   @Inject lateinit var readingEventPresenter: ReadingEventPresenter
   @Inject lateinit var pageProviderFactoryProvider: PageViewFactoryProvider
+  @Inject lateinit var quranPageProvider: com.quran.data.source.PageProvider
   @Inject lateinit var additionalAyahPanels: Set<@JvmSuppressWildcards AyahActionFragmentProvider>
   @Inject lateinit var pagerActivityRecitationPresenter: PagerActivityRecitationPresenter
   @Inject lateinit var translationListPresenter: TranslationListPresenter
@@ -761,6 +762,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val startPosition = startPosition(ayahSelection)
       updateLocalTranslations(startPosition)
       onClearAyahModeBackCallback.isEnabled = selectionStart != null
+      toggleActionBarVisibility(false)
     } else {
       endAyahMode()
       onClearAyahModeBackCallback.isEnabled = false
@@ -1183,10 +1185,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
     val nightMode = menu.findItem(R.id.night_mode)
     if (nightMode != null) {
-      val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-      val isNightMode = prefs.getBoolean(Constants.PREF_NIGHT_MODE, false)
-      nightMode.isChecked = isNightMode
-      nightMode.setIcon(if (isNightMode) R.drawable.ic_night_mode else R.drawable.ic_day_mode)
+      val isDark = quranSettings.isAppInDarkMode
+      nightMode.isChecked = isDark
+      nightMode.setIcon(if (isDark) R.drawable.ic_night_mode else R.drawable.ic_day_mode)
     }
     return true
   }
@@ -1209,13 +1210,13 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       }
       return true
     } else if (itemId == R.id.night_mode) {
-      val prefs = PreferenceManager
-        .getDefaultSharedPreferences(this)
-      val prefsEditor = prefs.edit()
-      val isNightMode = !item.isChecked
-      prefsEditor.putBoolean(Constants.PREF_NIGHT_MODE, isNightMode).apply()
-      item.setIcon(if (isNightMode) R.drawable.ic_night_mode else R.drawable.ic_day_mode)
-      item.isChecked = isNightMode
+      val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+      val targetDark = !quranSettings.isAppInDarkMode
+      val nextAppTheme = if (targetDark) "dark" else "light"
+      prefs.edit().putString(Constants.PREF_APP_THEME, nextAppTheme).apply()
+      QuranApplication.applyAppTheme(nextAppTheme)
+      item.setIcon(if (targetDark) R.drawable.ic_night_mode else R.drawable.ic_day_mode)
+      item.isChecked = targetDark
       refreshQuranPages()
       return true
     } else if (itemId == R.id.settings) {
@@ -1246,11 +1247,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     return super.onOptionsItemSelected(item)
   }
 
-  private fun refreshQuranPages() {
-    val pos = viewPager.currentItem
-    val start = if (pos == 0) 0 else pos - 1
-    val end = if (pos == pagerAdapter.count - 1) pos else pos + 1
-    for (i in start..end) {
+  fun refreshQuranPages() {
+    for (i in 0 until pagerAdapter.count) {
       val f = pagerAdapter.getFragmentIfExists(i)
       if (f is QuranPage) {
         (f as QuranPage).updateView()
@@ -1259,6 +1257,36 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   }
 
   private fun switchToQuran() {
+    if (!quranFileUtils.haveAllImages(quranScreenInfo.widthParam, quranInfo.numberOfPages, true) &&
+      quranPageProvider.getPageContentType() != com.quran.data.source.PageContentType.Image
+    ) {
+      AlertDialog.Builder(this, R.style.QuranDialog)
+        .setTitle(R.string.downloadPrompt_title)
+        .setMessage(R.string.downloadPrompt)
+        .setPositiveButton(R.string.downloadPrompt_ok) { dialog, _ ->
+          dialog.dismiss()
+          quranSettings.wasShowingTranslation = false
+          quranSettings.setShouldFetchPages(true)
+          val downloadIntent = Intent(this, com.quran.labs.androidquran.QuranDataActivity::class.java).apply {
+            putExtra(com.quran.labs.androidquran.QuranDataActivity.EXTRA_RETURN_TO_PAGE, currentPage)
+          }
+          startActivity(downloadIntent)
+          finish()
+        }
+        .setNegativeButton(R.string.downloadPrompt_no) { dialog, _ ->
+          dialog.dismiss()
+          quranSettings.pageType = quranPageProvider.getFallbackPageType() ?: "tajweed"
+          quranSettings.wasShowingTranslation = false
+          val restartIntent = Intent(this, PagerActivity::class.java).apply {
+            putExtra("page", currentPage)
+            putExtra(EXTRA_JUMP_TO_TRANSLATION, false)
+          }
+          finish()
+          startActivity(restartIntent)
+        }
+        .show()
+      return
+    }
     if (selectionStart != null) {
       endAyahMode()
     }
@@ -1432,11 +1460,17 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     translationJob =
       translationListPresenter.registerForTranslations { titles: Array<String>, updatedTranslations: List<LocalTranslation> ->
         var currentActiveTranslationsFilesNames = quranSettings.activeTranslations
-        if (currentActiveTranslationsFilesNames.isEmpty() && updatedTranslations.isNotEmpty()) {
-          currentActiveTranslationsFilesNames = HashSet()
-          val items = updatedTranslations.size
-          for (i in 0 until items) {
-            currentActiveTranslationsFilesNames.add(updatedTranslations[i].filename)
+        if (updatedTranslations.isNotEmpty()) {
+          val availableFilenames = updatedTranslations.map { it.filename }.toSet()
+          val validActive = currentActiveTranslationsFilesNames.firstOrNull { it in availableFilenames }
+          if (validActive == null) {
+            val defaultTranslation = updatedTranslations.firstOrNull { it.filename == "quran.kannada.hamzah.db" }
+              ?: updatedTranslations.first()
+            currentActiveTranslationsFilesNames = mutableSetOf(defaultTranslation.filename)
+            quranSettings.activeTranslations = currentActiveTranslationsFilesNames
+          } else if (currentActiveTranslationsFilesNames.size != 1) {
+            currentActiveTranslationsFilesNames = mutableSetOf(validActive)
+            quranSettings.activeTranslations = currentActiveTranslationsFilesNames
           }
         }
         activeTranslationsFilesNames = currentActiveTranslationsFilesNames
@@ -1884,6 +1918,287 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
   }
 
+  private fun showShareChoiceSheet(
+    result: com.quran.labs.androidquran.presenter.translation.BaseTranslationPresenter.ResultHolder,
+    verseRange: VerseRange,
+    activeTranslations: List<String>
+  ) {
+    val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+    val density = resources.displayMetrics.density
+    val dp = { v: Int -> (v * density).toInt() }
+
+    val themeId = quranSettings.getReadingTheme()
+    val isDark = themeId == QuranSettings.THEME_NIGHT || themeId == QuranSettings.THEME_SLATE
+    val sheetBgColor = when (themeId) {
+      QuranSettings.THEME_SEPIA -> android.graphics.Color.parseColor("#FAF6EC")
+      QuranSettings.THEME_SAGE -> android.graphics.Color.parseColor("#EEF5F0")
+      QuranSettings.THEME_SLATE -> android.graphics.Color.parseColor("#242933")
+      QuranSettings.THEME_NIGHT -> android.graphics.Color.parseColor("#181818")
+      else -> android.graphics.Color.WHITE
+    }
+    val cardBgColor = when (themeId) {
+      QuranSettings.THEME_SEPIA -> android.graphics.Color.parseColor("#F1EBD9")
+      QuranSettings.THEME_SAGE -> android.graphics.Color.parseColor("#E1ECE4")
+      QuranSettings.THEME_SLATE -> android.graphics.Color.parseColor("#2F3643")
+      QuranSettings.THEME_NIGHT -> android.graphics.Color.parseColor("#242424")
+      else -> android.graphics.Color.parseColor("#F5F6F7")
+    }
+    val textColor = if (isDark) android.graphics.Color.parseColor("#F2F2F2") else android.graphics.Color.parseColor("#1C1C1E")
+    val secondaryColor = if (isDark) android.graphics.Color.parseColor("#A8A8B0") else android.graphics.Color.parseColor("#636366")
+    val handleColor = if (isDark) android.graphics.Color.parseColor("#4A4A52") else android.graphics.Color.parseColor("#D1D1D6")
+    val accent = androidx.core.content.ContextCompat.getColor(this, R.color.accent_color_dark)
+    val badgeBgColor = androidx.core.graphics.ColorUtils.setAlphaComponent(accent, if (isDark) 52 else 28)
+    val badgeIconColor = if (isDark) android.graphics.Color.parseColor("#7CC8A9") else accent
+
+    val container = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      setPadding(dp(20), dp(10), dp(20), dp(24))
+      background = android.graphics.drawable.GradientDrawable().apply {
+        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+        setColor(sheetBgColor)
+        val r = 20 * density
+        cornerRadii = floatArrayOf(r, r, r, r, 0f, 0f, 0f, 0f)
+      }
+    }
+
+    val dragHandle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams(dp(36), dp(4)).apply {
+        gravity = android.view.Gravity.CENTER_HORIZONTAL
+        bottomMargin = dp(14)
+      }
+      background = android.graphics.drawable.GradientDrawable().apply {
+        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+        setColor(handleColor)
+        cornerRadius = 2 * density
+      }
+    }
+    container.addView(dragHandle)
+
+    val suraName = quranDisplayData.getSuraName(this, verseRange.startSura, false, false)
+    val referenceSubtitle = if (verseRange.startSura == verseRange.endingSura) {
+      if (verseRange.startAyah == verseRange.endingAyah) {
+        "$suraName: ${verseRange.startAyah}"
+      } else {
+        "$suraName: ${verseRange.startAyah}–${verseRange.endingAyah}"
+      }
+    } else {
+      val endSuraName = quranDisplayData.getSuraName(this, verseRange.endingSura, false, false)
+      "$suraName ${verseRange.startAyah} – $endSuraName ${verseRange.endingAyah}"
+    }
+
+    val title = android.widget.TextView(this).apply {
+      text = getString(R.string.share_ayah_sheet_title)
+      textSize = 19f
+      setTextColor(textColor)
+      setTypeface(null, android.graphics.Typeface.BOLD)
+    }
+    container.addView(title)
+
+    val refView = android.widget.TextView(this).apply {
+      text = referenceSubtitle
+      textSize = 13f
+      setTextColor(secondaryColor)
+      setPadding(0, dp(2), 0, dp(16))
+    }
+    container.addView(refView)
+
+    fun addOption(iconRes: Int, label: String, subtitle: String, addBottomGap: Boolean, onClick: () -> Unit) {
+      val row = android.widget.LinearLayout(this).apply {
+        orientation = android.widget.LinearLayout.HORIZONTAL
+        gravity = android.view.Gravity.CENTER_VERTICAL
+        setPadding(dp(14), dp(14), dp(14), dp(14))
+        layoutParams = android.widget.LinearLayout.LayoutParams(
+          android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+          android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+          if (addBottomGap) bottomMargin = dp(10)
+        }
+        background = android.graphics.drawable.GradientDrawable().apply {
+          shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+          setColor(cardBgColor)
+          cornerRadius = 14 * density
+        }
+        isClickable = true
+        isFocusable = true
+        setOnClickListener {
+          dialog.dismiss()
+          onClick()
+        }
+      }
+
+      val iconBadge = android.widget.FrameLayout(this).apply {
+        layoutParams = android.widget.LinearLayout.LayoutParams(dp(42), dp(42)).apply {
+          marginEnd = dp(14)
+        }
+        background = android.graphics.drawable.GradientDrawable().apply {
+          shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+          setColor(badgeBgColor)
+          cornerRadius = 12 * density
+        }
+        val iconView = android.widget.ImageView(this@PagerActivity).apply {
+          setImageResource(iconRes)
+          setColorFilter(badgeIconColor)
+          layoutParams = android.widget.FrameLayout.LayoutParams(dp(22), dp(22), android.view.Gravity.CENTER)
+        }
+        addView(iconView)
+      }
+
+      val textCol = android.widget.LinearLayout(this).apply {
+        orientation = android.widget.LinearLayout.VERTICAL
+        layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+      }
+      val primary = android.widget.TextView(this).apply {
+        text = label
+        textSize = 16f
+        setTextColor(textColor)
+        setTypeface(null, android.graphics.Typeface.BOLD)
+      }
+      val secondary = android.widget.TextView(this).apply {
+        text = subtitle
+        textSize = 13f
+        setTextColor(secondaryColor)
+        setPadding(0, dp(2), 0, 0)
+      }
+      textCol.addView(primary)
+      textCol.addView(secondary)
+
+      val chevron = android.widget.TextView(this).apply {
+        text = "›"
+        textSize = 22f
+        setTextColor(secondaryColor)
+        setPadding(dp(8), 0, dp(2), 0)
+      }
+
+      row.addView(iconBadge)
+      row.addView(textCol)
+      row.addView(chevron)
+      container.addView(row)
+    }
+
+    addOption(
+      iconRes = R.drawable.ic_share_image,
+      label = getString(R.string.share_as_image_title),
+      subtitle = getString(R.string.share_as_image_subtitle),
+      addBottomGap = true
+    ) {
+      val cardData = buildAyahShareCardData(result.ayahInformation, verseRange)
+      startActivity(
+        com.quran.labs.androidquran.ui.shareimage.ShareAyahImageActivity.createIntent(
+          this@PagerActivity,
+          cardData
+        )
+      )
+    }
+
+    addOption(
+      iconRes = R.drawable.ic_share_image,
+      label = getString(R.string.share_as_video_title),
+      subtitle = getString(R.string.share_as_video_subtitle),
+      addBottomGap = true
+    ) {
+      val cardData = buildAyahShareCardData(result.ayahInformation, verseRange)
+      startActivity(
+        com.quran.labs.androidquran.ui.shareimage.ShareAyahImageActivity.createIntent(
+          this@PagerActivity,
+          cardData,
+          isVideoMode = true
+        )
+      )
+    }
+
+    addOption(
+      iconRes = R.drawable.ic_share_text,
+      label = getString(R.string.share_as_text_title),
+      subtitle = getString(R.string.share_as_text_subtitle),
+      addBottomGap = false
+    ) {
+      shareUtil.shareVersesKQA(this@PagerActivity, result, verseRange, activeTranslations)
+    }
+
+    dialog.setContentView(container)
+    dialog.setOnShowListener {
+      dialog.findViewById<android.view.View>(com.google.android.material.R.id.design_bottom_sheet)
+        ?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+    }
+    dialog.show()
+  }
+
+  private fun toArabicIndicDigits(number: Int): String {
+    val digits = charArrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+    return number.toString().map { ch ->
+      if (ch in '0'..'9') digits[ch - '0'] else ch
+    }.joinToString("")
+  }
+
+  private fun buildAyahShareCardData(
+    verses: List<QuranAyahInfo>,
+    verseRange: VerseRange
+  ): com.quran.labs.androidquran.ui.shareimage.AyahShareCardData {
+    val footnoteRegex = "\\[\\[(.+?)]]".toRegex()
+    val footnotes = mutableListOf<String>()
+
+    val arabicBuilder = StringBuilder()
+    val translationBuilder = StringBuilder()
+
+    verses.forEach { ayahInfo ->
+      ayahInfo.arabicText?.let { rawArabic ->
+        val cleaned = com.quran.labs.androidquran.model.translation.ArabicDatabaseUtils.getAyahWithoutBasmallah(
+          ayahInfo.sura,
+          ayahInfo.ayah,
+          rawArabic.trim()
+        )
+        if (cleaned.isNotBlank()) {
+          if (arabicBuilder.isNotEmpty()) arabicBuilder.append(" ")
+          arabicBuilder.append(cleaned)
+          arabicBuilder.append("\u00A0")
+          arabicBuilder.append(toArabicIndicDigits(ayahInfo.ayah))
+        }
+      }
+
+      ayahInfo.texts.forEach { translation ->
+        val text = translation.text
+        if (text.isNotEmpty()) {
+          val processedText = footnoteRegex.replace(text) { match ->
+            val note = match.groupValues[1].trim()
+            footnotes.add(note)
+            "[${footnotes.size}]"
+          }
+          if (translationBuilder.isNotEmpty()) translationBuilder.append("\n")
+          translationBuilder.append(processedText.trim())
+        }
+      }
+    }
+
+    val reference = buildString {
+      append(quranDisplayData.getSuraName(this@PagerActivity, verseRange.startSura, true))
+      append(": ")
+      append(verseRange.startAyah)
+      if (verseRange.versesInRange > 1) {
+        if (verseRange.startSura != verseRange.endingSura) {
+          append(" - ")
+          append(quranDisplayData.getSuraName(this@PagerActivity, verseRange.endingSura, true))
+          append(": ")
+        } else {
+          append("-")
+        }
+        append(verseRange.endingAyah)
+      }
+    }
+
+    val isKannada = resources.configuration.locales[0]?.language == "kn"
+    return com.quran.labs.androidquran.ui.shareimage.AyahShareCardData(
+      referenceText = reference,
+      arabicText = arabicBuilder.toString(),
+      translationText = translationBuilder.toString(),
+      footnotes = footnotes,
+      isKannada = isKannada,
+      startSura = verseRange.startSura,
+      startAyah = verseRange.startAyah,
+      endSura = verseRange.endingSura,
+      endAyah = verseRange.endingAyah
+    )
+  }
+
   private fun shareAyah(start: SuraAyah?, end: SuraAyah?, isCopy: Boolean) {
     if (start == null || end == null) {
       return
@@ -1904,7 +2219,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       if (isCopy) {
         shareUtil.copyVersesKQA(this@PagerActivity, result,verseRange,activeTranslations)
       } else {
-        shareUtil.shareVersesKQA(this@PagerActivity, result,verseRange,activeTranslations)
+        showShareChoiceSheet(result, verseRange, activeTranslations)
       }
     }
 
@@ -2043,71 +2358,772 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     val quranSettings = QuranSettings.getInstance(this)
     val currentTranslationSize = quranSettings.translationTextSize
     val currentArabicSize = quranSettings.ayahTextSize
-    
+    val currentSpacing = quranSettings.getTranslationLineSpacing()
+    var currentMode = quranSettings.translationViewMode
+
+    val density = resources.displayMetrics.density
+
     val container = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
-      val padding = (24 * resources.displayMetrics.density).toInt()
+      val padding = (24 * density).toInt()
       setPadding(padding, padding, padding, padding)
     }
-    
-    // Arabic Size
+
+    val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+
+    val sheetTitleLabel = android.widget.TextView(this).apply {
+      text = "Reading Options"
+      textSize = 18f
+      setTypeface(null, android.graphics.Typeface.BOLD)
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), 0, 0, (12 * density).toInt())
+    }
+
+    // Theme Switcher Section
+    val themeLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.reading_theme)
+      textSize = 15f
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), (4 * density).toInt(), 0, (6 * density).toInt())
+    }
+
+    val themeLayout = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+      )
+    }
+
+    fun createCircleDrawable(color: Int): android.graphics.drawable.GradientDrawable {
+      return android.graphics.drawable.GradientDrawable().apply {
+        shape = android.graphics.drawable.GradientDrawable.OVAL
+        setColor(color)
+      }
+    }
+
+    val lightCircle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
+      background = createCircleDrawable(android.graphics.Color.WHITE)
+    }
+    val lightLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.theme_light)
+      textSize = 12f
+      setPadding(0, (4 * density).toInt(), 0, 0)
+    }
+    val lightBtn = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      gravity = android.view.Gravity.CENTER
+      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      addView(lightCircle)
+      addView(lightLabel)
+    }
+
+    val sepiaCircle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
+      background = createCircleDrawable(android.graphics.Color.parseColor("#FFFDF9"))
+    }
+    val sepiaLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.theme_sepia)
+      textSize = 12f
+      setPadding(0, (4 * density).toInt(), 0, 0)
+    }
+    val sepiaBtn = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      gravity = android.view.Gravity.CENTER
+      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      addView(sepiaCircle)
+      addView(sepiaLabel)
+    }
+
+    val nightCircle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
+      background = createCircleDrawable(android.graphics.Color.parseColor("#121212"))
+    }
+    val nightLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.theme_night)
+      textSize = 12f
+      setPadding(0, (4 * density).toInt(), 0, 0)
+    }
+    val nightBtn = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      gravity = android.view.Gravity.CENTER
+      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      addView(nightCircle)
+      addView(nightLabel)
+    }
+
+    val sageCircle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
+      background = createCircleDrawable(android.graphics.Color.parseColor("#EEF5F0"))
+    }
+    val sageLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.theme_sage)
+      textSize = 12f
+      setPadding(0, (4 * density).toInt(), 0, 0)
+    }
+    val sageBtn = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      gravity = android.view.Gravity.CENTER
+      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      addView(sageCircle)
+      addView(sageLabel)
+    }
+
+    val slateCircle = android.view.View(this).apply {
+      layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
+      background = createCircleDrawable(android.graphics.Color.parseColor("#1E242B"))
+    }
+    val slateLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.theme_slate)
+      textSize = 12f
+      setPadding(0, (4 * density).toInt(), 0, 0)
+    }
+    val slateBtn = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      gravity = android.view.Gravity.CENTER
+      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      addView(slateCircle)
+      addView(slateLabel)
+    }
+
+    fun updateThemeBorders(selectedTheme: Int) {
+      val accent = androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark)
+      (lightCircle.background as android.graphics.drawable.GradientDrawable).apply {
+        if (selectedTheme == QuranSettings.THEME_LIGHT) {
+          setStroke((3 * density).toInt(), accent)
+        } else {
+          setStroke((1 * density).toInt(), android.graphics.Color.parseColor("#CCCCCC"))
+        }
+      }
+      (sepiaCircle.background as android.graphics.drawable.GradientDrawable).apply {
+        if (selectedTheme == QuranSettings.THEME_SEPIA) {
+          setStroke((3 * density).toInt(), accent)
+        } else {
+          setStroke((1 * density).toInt(), android.graphics.Color.parseColor("#E0D6C8"))
+        }
+      }
+      (sageCircle.background as android.graphics.drawable.GradientDrawable).apply {
+        if (selectedTheme == QuranSettings.THEME_SAGE) {
+          setStroke((3 * density).toInt(), accent)
+        } else {
+          setStroke((1 * density).toInt(), android.graphics.Color.parseColor("#C2D6C7"))
+        }
+      }
+      (slateCircle.background as android.graphics.drawable.GradientDrawable).apply {
+        if (selectedTheme == QuranSettings.THEME_SLATE) {
+          setStroke((3 * density).toInt(), accent)
+        } else {
+          setStroke(0, 0)
+        }
+      }
+      (nightCircle.background as android.graphics.drawable.GradientDrawable).apply {
+        if (selectedTheme == QuranSettings.THEME_NIGHT) {
+          setStroke((3 * density).toInt(), accent)
+        } else {
+          setStroke(0, 0)
+        }
+      }
+    }
+
+    if (quranSettings.isAppInDarkMode) {
+      themeLayout.addView(slateBtn)
+      themeLayout.addView(nightBtn)
+    } else {
+      themeLayout.addView(lightBtn)
+      themeLayout.addView(sepiaBtn)
+      themeLayout.addView(sageBtn)
+    }
+
+    // 3-Way Display Mode Selector Section
+    val displayModeLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.display_mode)
+      textSize = 15f
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
+    }
+
+    val modeLayout = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+        (40 * density).toInt()
+      )
+    }
+
+    fun createPillDrawable(bgColor: Int, cornerRadius: Float): android.graphics.drawable.GradientDrawable {
+      return android.graphics.drawable.GradientDrawable().apply {
+        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+        setColor(bgColor)
+        this.cornerRadius = cornerRadius
+      }
+    }
+
+    val modeBothBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.mode_both)
+      textSize = 13f
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val modeArabicBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.mode_arabic)
+      textSize = 13f
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val modeTranslationBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.mode_translation)
+      textSize = 13f
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    modeLayout.addView(modeBothBtn)
+    modeLayout.addView(modeArabicBtn)
+    modeLayout.addView(modeTranslationBtn)
+
+    // Arabic Font Selector Section
+    var currentArabicFont = quranSettings.arabicFont
+    val fontLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.arabic_font)
+      textSize = 15f
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
+    }
+
+    val fontLayout = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+        (40 * density).toInt()
+      )
+    }
+
+    val fontHafsBoldBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.font_hafs_bold)
+      textSize = 13f
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val fontHafsClassicBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.font_hafs_classic)
+      textSize = 13f
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val fontKitabBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.font_kitab)
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val fontNaskhBtn = android.widget.TextView(this).apply {
+      text = "Naskh"
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    val fontSystemBtn = android.widget.TextView(this).apply {
+      text = "System"
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+
+    fontLayout.addView(fontHafsBoldBtn)
+    fontLayout.addView(fontHafsClassicBtn)
+    fontLayout.addView(fontKitabBtn)
+    fontLayout.addView(fontNaskhBtn)
+    fontLayout.addView(fontSystemBtn)
+
+    // Arabic Font Size
     val arabicLabel = android.widget.TextView(this).apply {
       text = getString(R.string.arabic_font_size, currentArabicSize)
-      textSize = 18f
+      textSize = 15f
       gravity = android.view.Gravity.LEFT
-      setTextColor(androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark))
-      setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
     }
-    
+
     val arabicSeekBar = android.widget.SeekBar(this).apply {
-      max = 32 // 8 to 40
-      progress = currentArabicSize - 8
+      max = 18 // 16 to 34
+      progress = (currentArabicSize - 16).coerceIn(0, 18)
       setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-          val newSize = progress + 8
+          val newSize = progress + 16
           arabicLabel.text = getString(R.string.arabic_font_size, newSize)
           quranSettings.ayahTextSize = newSize
+          if (fromUser) {
+            performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+          }
           refreshQuranPages()
         }
         override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
         override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
       })
     }
-    
-    // Translation Size
+
+    // Translation Font Size
     val translationLabel = android.widget.TextView(this).apply {
       text = getString(R.string.translation_font_size, currentTranslationSize)
-      textSize = 18f
+      textSize = 15f
       gravity = android.view.Gravity.LEFT
-      setTextColor(androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark))
-      setPadding(0, (16 * resources.displayMetrics.density).toInt(), 0, (8 * resources.displayMetrics.density).toInt())
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
     }
-    
+
     val translationSeekBar = android.widget.SeekBar(this).apply {
-      max = 32 // 8 to 40
-      progress = currentTranslationSize - 8
+      max = 15 // 13 to 28
+      progress = (currentTranslationSize - 13).coerceIn(0, 15)
       setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-          val newSize = progress + 8
+          val newSize = progress + 13
           translationLabel.text = getString(R.string.translation_font_size, newSize)
           quranSettings.translationTextSize = newSize
+          if (fromUser) {
+            performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+          }
           refreshQuranPages()
         }
         override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
         override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
       })
     }
-    
+
+    // Translation Font Selector Section
+    var currentTranslationFont = quranSettings.translationFont
+    val translationFontLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.translation_font)
+      textSize = 15f
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
+    }
+
+    val translationFontLayout = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+        (40 * density).toInt()
+      )
+    }
+
+    fun makeTranslationFontButton(labelRes: Int, previewTypeface: android.graphics.Typeface): android.widget.TextView {
+      return android.widget.TextView(this).apply {
+        text = getString(labelRes)
+        textSize = 13f
+        typeface = previewTypeface
+        maxLines = 1
+        gravity = android.view.Gravity.CENTER
+        layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+      }
+    }
+
+    val transFontSystemBtn = makeTranslationFontButton(R.string.translation_font_system, android.graphics.Typeface.DEFAULT)
+    val transFontSansBtn = makeTranslationFontButton(R.string.translation_font_sans, android.graphics.Typeface.SANS_SERIF)
+    val transFontSerifBtn = makeTranslationFontButton(R.string.translation_font_serif, android.graphics.Typeface.SERIF)
+    val transFontBoldBtn = makeTranslationFontButton(
+      R.string.translation_font_bold,
+      android.graphics.Typeface.create(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.BOLD)
+    )
+
+    translationFontLayout.addView(transFontSystemBtn)
+    translationFontLayout.addView(transFontSansBtn)
+    translationFontLayout.addView(transFontSerifBtn)
+    translationFontLayout.addView(transFontBoldBtn)
+
+    // Line Spacing
+    val spacingLabel = android.widget.TextView(this).apply {
+      text = getString(R.string.line_spacing, String.format(java.util.Locale.US, "%.2fx", currentSpacing))
+      textSize = 15f
+      gravity = android.view.Gravity.LEFT
+      setPadding((4 * density).toInt(), (10 * density).toInt(), 0, (6 * density).toInt())
+    }
+
+    val spacingSeekBar = android.widget.SeekBar(this).apply {
+      max = 2 // 0 = 1.0f, 1 = 1.25f, 2 = 1.5f
+      progress = when {
+        currentSpacing <= 1.0f -> 0
+        currentSpacing <= 1.25f -> 1
+        else -> 2
+      }
+      setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+          val spacing = when (progress) {
+            0 -> 1.0f
+            1 -> 1.25f
+            else -> 1.5f
+          }
+          spacingLabel.text = getString(R.string.line_spacing, String.format(java.util.Locale.US, "%.2fx", spacing))
+          quranSettings.setTranslationLineSpacing(spacing)
+          if (fromUser) {
+            performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+          }
+          refreshQuranPages()
+        }
+        override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+        override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+      })
+    }
+
+    fun updateModeVisibility(mode: Int) {
+      val showArabic = mode == QuranSettings.DISPLAY_MODE_BOTH || mode == QuranSettings.DISPLAY_MODE_ARABIC_ONLY
+      val showTranslation = mode == QuranSettings.DISPLAY_MODE_BOTH || mode == QuranSettings.DISPLAY_MODE_TRANSLATION_ONLY
+
+      fontLabel.visibility = if (showArabic) android.view.View.VISIBLE else android.view.View.GONE
+      fontLayout.visibility = if (showArabic) android.view.View.VISIBLE else android.view.View.GONE
+      arabicLabel.visibility = if (showArabic) android.view.View.VISIBLE else android.view.View.GONE
+      arabicSeekBar.visibility = if (showArabic) android.view.View.VISIBLE else android.view.View.GONE
+
+      translationLabel.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+      translationSeekBar.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+      translationFontLabel.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+      translationFontLayout.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+
+      spacingLabel.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+      spacingSeekBar.visibility = if (showTranslation) android.view.View.VISIBLE else android.view.View.GONE
+    }
+
+    fun updatePillSelector(
+      pillContainer: android.widget.LinearLayout,
+      items: List<Pair<android.widget.TextView, String>>,
+      selectedKey: String,
+      themeId: Int
+    ) {
+      val isDark = themeId == QuranSettings.THEME_NIGHT || themeId == QuranSettings.THEME_SLATE
+      val accent = androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark)
+
+      val unselectedBg = if (isDark) android.graphics.Color.parseColor("#2A2A2A") else android.graphics.Color.parseColor("#EAEAEA")
+      val unselectedText = if (isDark) android.graphics.Color.parseColor("#9E9E9E") else android.graphics.Color.parseColor("#757575")
+      val selectedBg = accent
+      val selectedText = android.graphics.Color.WHITE
+
+      val r = 20 * density
+      pillContainer.background = createPillDrawable(unselectedBg, r)
+
+      items.forEach { (btn, key) ->
+        if (selectedKey == key) {
+          btn.background = createPillDrawable(selectedBg, r)
+          btn.setTextColor(selectedText)
+          btn.setTypeface(btn.typeface, android.graphics.Typeface.BOLD)
+        } else {
+          btn.background = null
+          btn.setTextColor(unselectedText)
+          btn.setTypeface(btn.typeface, android.graphics.Typeface.NORMAL)
+        }
+      }
+    }
+
+    fun updateFontButtons(selectedFont: String, themeId: Int) {
+      updatePillSelector(
+        fontLayout,
+        listOf(
+          fontHafsBoldBtn to QuranSettings.FONT_HAFS_BOLD,
+          fontHafsClassicBtn to QuranSettings.FONT_HAFS_CLASSIC,
+          fontKitabBtn to QuranSettings.FONT_KITAB,
+          fontNaskhBtn to QuranSettings.FONT_NASKH,
+          fontSystemBtn to QuranSettings.FONT_SYSTEM
+        ),
+        selectedFont,
+        themeId
+      )
+    }
+
+    fun updateTranslationFontButtons(selectedFont: String, themeId: Int) {
+      updatePillSelector(
+        translationFontLayout,
+        listOf(
+          transFontSystemBtn to QuranSettings.TRANSLATION_FONT_SYSTEM,
+          transFontSansBtn to QuranSettings.TRANSLATION_FONT_SANS,
+          transFontSerifBtn to QuranSettings.TRANSLATION_FONT_SERIF,
+          transFontBoldBtn to QuranSettings.TRANSLATION_FONT_BOLD
+        ),
+        selectedFont,
+        themeId
+      )
+    }
+
+    fun updateModeButtons(selectedMode: Int, themeId: Int) {
+      val isDark = themeId == QuranSettings.THEME_NIGHT || themeId == QuranSettings.THEME_SLATE
+      val accent = androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color_dark)
+
+      val unselectedBg = if (isDark) android.graphics.Color.parseColor("#2A2A2A") else android.graphics.Color.parseColor("#EAEAEA")
+      val unselectedText = if (isDark) android.graphics.Color.parseColor("#9E9E9E") else android.graphics.Color.parseColor("#757575")
+      val selectedBg = accent
+      val selectedText = android.graphics.Color.WHITE
+
+      modeLayout.background = createPillDrawable(unselectedBg, 20 * density)
+
+      val r = 20 * density
+      modeBothBtn.apply {
+        if (selectedMode == QuranSettings.DISPLAY_MODE_BOTH) {
+          background = createPillDrawable(selectedBg, r)
+          setTextColor(selectedText)
+          setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+          background = null
+          setTextColor(unselectedText)
+          setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+      }
+
+      modeArabicBtn.apply {
+        if (selectedMode == QuranSettings.DISPLAY_MODE_ARABIC_ONLY) {
+          background = createPillDrawable(selectedBg, r)
+          setTextColor(selectedText)
+          setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+          background = null
+          setTextColor(unselectedText)
+          setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+      }
+
+      modeTranslationBtn.apply {
+        if (selectedMode == QuranSettings.DISPLAY_MODE_TRANSLATION_ONLY) {
+          background = createPillDrawable(selectedBg, r)
+          setTextColor(selectedText)
+          setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+          background = null
+          setTextColor(unselectedText)
+          setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+      }
+    }
+
+    fun applyThemeToDialogViews(themeId: Int) {
+      val bgColor = when (themeId) {
+        QuranSettings.THEME_NIGHT -> android.graphics.Color.parseColor("#1E1E1E")
+        QuranSettings.THEME_SLATE -> android.graphics.Color.parseColor("#1E242B")
+        QuranSettings.THEME_SEPIA -> android.graphics.Color.parseColor("#FFF5E6")
+        QuranSettings.THEME_SAGE -> android.graphics.Color.parseColor("#E6EFE9")
+        else -> android.graphics.Color.WHITE
+      }
+
+      val textColor = when (themeId) {
+        QuranSettings.THEME_NIGHT -> android.graphics.Color.parseColor("#E0E0E0")
+        QuranSettings.THEME_SLATE -> android.graphics.Color.parseColor("#E2E8F0")
+        QuranSettings.THEME_SEPIA -> android.graphics.Color.parseColor("#3E2723")
+        QuranSettings.THEME_SAGE -> android.graphics.Color.parseColor("#1B3022")
+        else -> android.graphics.Color.parseColor("#212121")
+      }
+
+      val bottomSheet = dialog.findViewById<android.view.View>(com.google.android.material.R.id.design_bottom_sheet)
+      bottomSheet?.background = android.graphics.drawable.GradientDrawable().apply {
+        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+        setColor(bgColor)
+        val r = 16 * density
+        cornerRadii = floatArrayOf(r, r, r, r, 0f, 0f, 0f, 0f)
+      }
+
+      val textViews = listOf(
+        sheetTitleLabel, themeLabel, lightLabel, sepiaLabel, sageLabel, slateLabel, nightLabel,
+        displayModeLabel, fontLabel, arabicLabel, translationLabel, translationFontLabel, spacingLabel
+      )
+      textViews.forEach { it.setTextColor(textColor) }
+
+      updateModeButtons(currentMode, themeId)
+      updateFontButtons(currentArabicFont, themeId)
+      updateTranslationFontButtons(currentTranslationFont, themeId)
+    }
+
+    listOf(
+      transFontSystemBtn to QuranSettings.TRANSLATION_FONT_SYSTEM,
+      transFontSansBtn to QuranSettings.TRANSLATION_FONT_SANS,
+      transFontSerifBtn to QuranSettings.TRANSLATION_FONT_SERIF,
+      transFontBoldBtn to QuranSettings.TRANSLATION_FONT_BOLD
+    ).forEach { (btn, fontKey) ->
+      btn.setOnClickListener {
+        if (currentTranslationFont != fontKey) {
+          currentTranslationFont = fontKey
+          quranSettings.translationFont = fontKey
+          btn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+          updateTranslationFontButtons(currentTranslationFont, quranSettings.getReadingTheme())
+          refreshQuranPages()
+        }
+      }
+    }
+
+    listOf(
+      fontHafsBoldBtn to QuranSettings.FONT_HAFS_BOLD,
+      fontHafsClassicBtn to QuranSettings.FONT_HAFS_CLASSIC,
+      fontKitabBtn to QuranSettings.FONT_KITAB,
+      fontNaskhBtn to QuranSettings.FONT_NASKH,
+      fontSystemBtn to QuranSettings.FONT_SYSTEM
+    ).forEach { (btn, fontKey) ->
+      btn.setOnClickListener {
+        if (currentArabicFont != fontKey) {
+          currentArabicFont = fontKey
+          quranSettings.arabicFont = fontKey
+          com.quran.labs.androidquran.ui.util.TypefaceManager.clearUthmaniTypefaceCache()
+          btn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+          updateFontButtons(currentArabicFont, quranSettings.getReadingTheme())
+          refreshQuranPages()
+        }
+      }
+    }
+
+    modeBothBtn.setOnClickListener {
+      if (currentMode != QuranSettings.DISPLAY_MODE_BOTH) {
+        currentMode = QuranSettings.DISPLAY_MODE_BOTH
+        quranSettings.translationViewMode = currentMode
+        modeBothBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+        updateModeButtons(currentMode, quranSettings.getReadingTheme())
+        updateModeVisibility(currentMode)
+        refreshQuranPages()
+      }
+    }
+
+    modeArabicBtn.setOnClickListener {
+      if (currentMode != QuranSettings.DISPLAY_MODE_ARABIC_ONLY) {
+        currentMode = QuranSettings.DISPLAY_MODE_ARABIC_ONLY
+        quranSettings.translationViewMode = currentMode
+        modeArabicBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+        updateModeButtons(currentMode, quranSettings.getReadingTheme())
+        updateModeVisibility(currentMode)
+        refreshQuranPages()
+      }
+    }
+
+    modeTranslationBtn.setOnClickListener {
+      if (currentMode != QuranSettings.DISPLAY_MODE_TRANSLATION_ONLY) {
+        currentMode = QuranSettings.DISPLAY_MODE_TRANSLATION_ONLY
+        quranSettings.translationViewMode = currentMode
+        modeTranslationBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+        updateModeButtons(currentMode, quranSettings.getReadingTheme())
+        updateModeVisibility(currentMode)
+        refreshQuranPages()
+      }
+    }
+
+    lightBtn.setOnClickListener {
+      lightBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      quranSettings.setReadingTheme(QuranSettings.THEME_LIGHT)
+      updateThemeBorders(QuranSettings.THEME_LIGHT)
+      applyThemeToDialogViews(QuranSettings.THEME_LIGHT)
+      refreshQuranPages()
+    }
+    sepiaBtn.setOnClickListener {
+      sepiaBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      quranSettings.setReadingTheme(QuranSettings.THEME_SEPIA)
+      updateThemeBorders(QuranSettings.THEME_SEPIA)
+      applyThemeToDialogViews(QuranSettings.THEME_SEPIA)
+      refreshQuranPages()
+    }
+    sageBtn.setOnClickListener {
+      sageBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      quranSettings.setReadingTheme(QuranSettings.THEME_SAGE)
+      updateThemeBorders(QuranSettings.THEME_SAGE)
+      applyThemeToDialogViews(QuranSettings.THEME_SAGE)
+      refreshQuranPages()
+    }
+    slateBtn.setOnClickListener {
+      slateBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      quranSettings.setReadingTheme(QuranSettings.THEME_SLATE)
+      updateThemeBorders(QuranSettings.THEME_SLATE)
+      applyThemeToDialogViews(QuranSettings.THEME_SLATE)
+      refreshQuranPages()
+    }
+    nightBtn.setOnClickListener {
+      nightBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      quranSettings.setReadingTheme(QuranSettings.THEME_NIGHT)
+      updateThemeBorders(QuranSettings.THEME_NIGHT)
+      applyThemeToDialogViews(QuranSettings.THEME_NIGHT)
+      refreshQuranPages()
+    }
+
+    updateThemeBorders(quranSettings.getReadingTheme())
+    updateModeVisibility(currentMode)
+
+    // Reset button
+    val resetButton = android.widget.Button(this).apply {
+      text = getString(R.string.reset_to_default)
+      textSize = 14f
+      setBackgroundColor(android.graphics.Color.TRANSPARENT)
+      setTextColor(androidx.core.content.ContextCompat.getColor(this@PagerActivity, R.color.accent_color))
+      val layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+      ).apply {
+        gravity = android.view.Gravity.CENTER
+        topMargin = (16 * density).toInt()
+      }
+      this.layoutParams = layoutParams
+
+      setOnClickListener {
+        performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+        quranSettings.ayahTextSize = Constants.DEFAULT_TEXT_SIZE
+        quranSettings.translationTextSize = Constants.DEFAULT_TRANSLATION_TEXT_SIZE
+        currentMode = QuranSettings.DISPLAY_MODE_BOTH
+        quranSettings.translationViewMode = currentMode
+        currentArabicFont = QuranSettings.FONT_HAFS_BOLD
+        quranSettings.arabicFont = currentArabicFont
+        currentTranslationFont = QuranSettings.TRANSLATION_FONT_SYSTEM
+        quranSettings.translationFont = currentTranslationFont
+        com.quran.labs.androidquran.ui.util.TypefaceManager.clearUthmaniTypefaceCache()
+        quranSettings.setReadingTheme(QuranSettings.THEME_LIGHT)
+        quranSettings.setTranslationLineSpacing(1.0f)
+
+        // Reset dialog controls
+        arabicSeekBar.progress = (Constants.DEFAULT_TEXT_SIZE - 16).coerceIn(0, 18)
+        translationSeekBar.progress = (Constants.DEFAULT_TRANSLATION_TEXT_SIZE - 13).coerceIn(0, 15)
+        arabicLabel.text = getString(R.string.arabic_font_size, Constants.DEFAULT_TEXT_SIZE)
+        translationLabel.text = getString(R.string.translation_font_size, Constants.DEFAULT_TRANSLATION_TEXT_SIZE)
+        spacingSeekBar.progress = 0
+        spacingLabel.text = getString(R.string.line_spacing, "1.00x")
+
+        updateModeVisibility(currentMode)
+        updateThemeBorders(QuranSettings.THEME_LIGHT)
+        applyThemeToDialogViews(QuranSettings.THEME_LIGHT)
+        refreshQuranPages()
+      }
+    }
+
+    // Assemble Container Views
+    container.addView(sheetTitleLabel)
+    container.addView(themeLabel)
+    container.addView(themeLayout)
+
+    container.addView(displayModeLabel)
+    container.addView(modeLayout)
+
+    container.addView(fontLabel)
+    container.addView(fontLayout)
+
     container.addView(arabicLabel)
     container.addView(arabicSeekBar)
+
     container.addView(translationLabel)
     container.addView(translationSeekBar)
-    
-    AlertDialog.Builder(this, R.style.QuranDialog)
-      .setTitle(R.string.adjust_font_sizes)
-      .setView(container)
-      .setPositiveButton(android.R.string.ok, null)
-      .show()
+
+    container.addView(translationFontLabel)
+    container.addView(translationFontLayout)
+
+    container.addView(spacingLabel)
+    container.addView(spacingSeekBar)
+
+    container.addView(resetButton)
+
+    val scrollView = android.widget.ScrollView(this).apply {
+      isFillViewport = true
+      addView(container)
+    }
+    dialog.setContentView(scrollView)
+    dialog.setOnShowListener {
+      applyThemeToDialogViews(quranSettings.getReadingTheme())
+    }
+    dialog.show()
   }
 
   companion object {

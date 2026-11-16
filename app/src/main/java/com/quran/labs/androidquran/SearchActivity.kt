@@ -28,6 +28,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.quran.labs.androidquran.util.applyGreenStatusBarInsets
+import com.quran.labs.androidquran.util.enableGreenStatusBarEdgeToEdge
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
@@ -76,10 +78,7 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
     // override these to always be dark since the app doesn't really
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
-    )
+    enableGreenStatusBarEdgeToEdge()
     super.onCreate(savedInstanceState)
 
     (application as QuranApplication)
@@ -87,22 +86,7 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
     setContentView(R.layout.search)
 
     val root = findViewById<ViewGroup>(R.id.root)
-    ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-      val insets = windowInsets.getInsets(
-        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-      )
-      root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = insets.top
-        bottomMargin = insets.bottom
-        leftMargin = insets.left
-        rightMargin = insets.right
-      }
-
-      // if we return WindowInsetsCompat.CONSUMED, the SnackBar won't
-      // be properly positioned on Android 29 and below (will be under
-      // the navigation bar).
-      windowInsets
-    }
+    applyGreenStatusBarInsets(root)
 
     messageView = findViewById<TextView>(R.id.search_area)
     warningView = findViewById<TextView>(R.id.search_warning)

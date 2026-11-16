@@ -13,12 +13,15 @@
 
   <TextView
       android:id="@+id/suraNumber"
-      android:layout_width="56dp"
-      android:layout_height="wrap_content"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_marginEnd="16dp"
+      android:layout_gravity="center_vertical"
+      android:background="@drawable/sura_number_badge"
       android:gravity="center"
-      android:layout_gravity="center"
       android:textColor="@color/sura_number_color"
-      android:textSize="24sp"
+      android:textSize="16sp"
+      android:textStyle="bold"
       tools:text="23"
       />
 
@@ -74,13 +77,32 @@
         />
   </LinearLayout>
 
-  <TextView
-      android:id="@+id/pageNumber"
+  <LinearLayout
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
-      android:textColor="@color/sura_details_color"
-      android:textSize="14sp"
-      tools:text="1"
-      />
+      android:layout_marginStart="8dp"
+      android:gravity="end"
+      android:orientation="vertical"
+      >
+    <TextView
+        android:id="@+id/arabicSuraName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/title_color"
+        android:textSize="18sp"
+        android:visibility="gone"
+        tools:text="البقرة"
+        tools:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/pageNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sura_details_color"
+        android:textSize="13sp"
+        tools:text="1"
+        />
+  </LinearLayout>
 </LinearLayout>

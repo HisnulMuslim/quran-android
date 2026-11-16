@@ -68,6 +68,7 @@ class TranslationsAdapter(private val downloadedMenuActionListener: DownloadedMe
               translationInfo?.setTextColor(ContextCompat.getColor(itemView.context, R.color.indicator_color)) //TODO
             } else {
               leftImage?.visibility = View.GONE
+              translationInfo?.setTextColor(ContextCompat.getColor(itemView.context, R.color.sura_details_color))
             }
           } else {
             leftImage?.visibility = View.GONE

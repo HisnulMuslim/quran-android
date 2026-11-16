@@ -82,4 +82,23 @@ class ZipUtilsTest {
 
     assertThat(e).isNotNull()
   }
+
+  @Test
+  fun testMacOsMetadataEntryIsSkipped() {
+    val zipFile = File(destinationDirectory, "macos_meta.zip")
+    java.util.zip.ZipOutputStream(zipFile.outputStream()).use { zos ->
+      zos.putNextEntry(java.util.zip.ZipEntry("quran.kannada.hamzah.db"))
+      zos.write("db-bytes".toByteArray())
+      zos.closeEntry()
+
+      zos.putNextEntry(java.util.zip.ZipEntry("__MACOSX/._quran.kannada.hamzah.db"))
+      zos.write("apple-double".toByteArray())
+      zos.closeEntry()
+    }
+
+    val success = ZipUtils.unzipFile(zipFile, destinationDirectory, null, listener)
+    assertThat(success).isTrue()
+    assertThat(File(destinationDirectory, "quran.kannada.hamzah.db").exists()).isTrue()
+    assertThat(File(destinationDirectory, "__MACOSX").exists()).isFalse()
+  }
 }

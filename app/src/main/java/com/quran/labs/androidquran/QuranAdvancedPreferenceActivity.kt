@@ -20,6 +20,8 @@ import com.quran.labs.androidquran.service.util.PermissionUtil
 import com.quran.labs.androidquran.ui.fragment.QuranAdvancedSettingsFragment
 import com.quran.labs.androidquran.ui.util.ToastCompat
 import com.quran.labs.androidquran.util.QuranSettings
+import com.quran.labs.androidquran.util.applyGreenStatusBarInsets
+import com.quran.labs.androidquran.util.enableGreenStatusBarEdgeToEdge
 
 class QuranAdvancedPreferenceActivity : AppCompatActivity() {
 
@@ -36,28 +38,13 @@ class QuranAdvancedPreferenceActivity : AppCompatActivity() {
     // override these to always be dark since the app doesn't really
     // have a light theme until now. without this, the clock color in
     // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
-    )
+    enableGreenStatusBarEdgeToEdge()
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.preferences)
 
     val root = findViewById<ViewGroup>(R.id.root)
-    ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-      val insets = windowInsets.getInsets(
-        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-      )
-      root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = insets.top
-        bottomMargin = insets.bottom
-        leftMargin = insets.left
-        rightMargin = insets.right
-      }
-
-      windowInsets
-    }
+    applyGreenStatusBarInsets(root)
 
     val toolbar = findViewById<Toolbar>(R.id.toolbar)
     toolbar.setTitle(R.string.prefs_category_advanced)

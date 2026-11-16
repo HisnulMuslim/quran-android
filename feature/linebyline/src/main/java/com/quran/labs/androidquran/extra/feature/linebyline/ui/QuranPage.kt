@@ -130,7 +130,7 @@ fun QuranPage(
           }
           highlights.forEach { highlightAyah ->
             val color = when (highlightAyah.highlightType) {
-              HighlightType.SELECTION -> Color(0x46, 0x94, 0xa6, 0x40)
+              HighlightType.SELECTION -> if (isNightMode) Color(0x4D80CBC4) else Color(0x47007A5E)
               HighlightType.AUDIO -> Color(0x46, 0xa6, 0x46, 0x40)
               HighlightType.BOOKMARK -> Color(0xa4, 0xa4, 0xa4, 0x40)
             }

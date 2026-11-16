@@ -2,6 +2,7 @@ package com.quran.labs.androidquran.presenter.translation
 
 import android.content.Context
 import android.util.Pair
+import com.quran.labs.androidquran.BuildConfig
 import com.quran.labs.androidquran.dao.translation.Translation
 import com.quran.labs.androidquran.dao.translation.TranslationItem
 import com.quran.labs.androidquran.dao.translation.TranslationList
@@ -122,7 +123,8 @@ open class TranslationManagerPresenter @Inject internal constructor(
 
   internal fun remoteTranslationList(): Flow<TranslationList> {
     return flow {
-      val url = host + WEB_SERVICE_ENDPOINT
+      val endpoint = if (BuildConfig.DEBUG) WEB_SERVICE_ENDPOINT_TEST else WEB_SERVICE_ENDPOINT
+      val url = host + endpoint
       val request: Request = Request.Builder()
         .url(url)
         .build()
@@ -165,11 +167,17 @@ open class TranslationManagerPresenter @Inject internal constructor(
     }
 
   internal open suspend fun mergeWithServerTranslations(serverTranslations: List<Translation>): List<TranslationItem> {
+    val combinedServerTranslations =
+      if (serverTranslations.any { it.fileName == ENGLISH_SAHIH_FILENAME }) {
+        serverTranslations
+      } else {
+        serverTranslations + ENGLISH_SAHIH_TRANSLATION
+      }
     val localTranslations = translationsDBAdapter.translationsHash()
     val databaseDir = quranFileUtils.getQuranDatabaseDirectory()
     val updates: MutableList<TranslationItem> = ArrayList()
 
-    val results = serverTranslations.mapIndexed { _, translation ->
+    val results = combinedServerTranslations.mapIndexed { _, translation ->
       val local = localTranslations[translation.id]
       val dbFile = File(databaseDir, translation.fileName)
       val translationExists = dbFile.exists()
@@ -236,6 +244,21 @@ open class TranslationManagerPresenter @Inject internal constructor(
   companion object {
     /*KQACR5*/
     private const val WEB_SERVICE_ENDPOINT = "data/api/translations.json"
-    private const val CACHED_RESPONSE_FILE_NAME = "translations.v5.cache"
+    private const val WEB_SERVICE_ENDPOINT_TEST = "data/api-test/translations.json"
+    private const val CACHED_RESPONSE_FILE_NAME = "translations.v6.cache"
+    private const val ENGLISH_SAHIH_FILENAME = "quran.ensi.db"
+
+    private val ENGLISH_SAHIH_TRANSLATION = Translation(
+      id = 2,
+      minimumVersion = 5,
+      currentVersion = 6,
+      displayName = "English Translation (Sahih International)",
+      downloadType = "translation",
+      fileName = ENGLISH_SAHIH_FILENAME,
+      fileUrl = "https://android.quran.com/data/getTranslation.php?id=98&ext=zip",
+      saveTo = "databases",
+      languageCode = "en",
+      translator = "Sahih International"
+    )
   }
 }
