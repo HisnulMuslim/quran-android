@@ -39,7 +39,7 @@ open class QuranApplication : Application(), QuranApplicationComponentProvider, 
 
     applyAppTheme(
       androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        .getString(com.quran.labs.androidquran.data.Constants.PREF_APP_THEME, "auto")
+        .getString(com.quran.labs.androidquran.data.Constants.PREF_APP_THEME, "dark")
     )
 
   }

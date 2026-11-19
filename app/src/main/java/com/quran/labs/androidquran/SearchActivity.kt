@@ -12,6 +12,7 @@ import android.text.Html
 import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -47,6 +48,7 @@ import com.quran.labs.androidquran.ui.PagerActivity
 import com.quran.labs.androidquran.ui.TranslationManagerActivity
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranUtils
+import com.quran.labs.androidquran.util.SearchViewStyler
 import java.lang.NumberFormatException
 import javax.inject.Inject
 
@@ -84,6 +86,10 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
     (application as QuranApplication)
       .applicationComponent.inject(this)
     setContentView(R.layout.search)
+    supportActionBar?.apply {
+      setDisplayHomeAsUpEnabled(true)
+      setTitle(R.string.menu_search)
+    }
 
     val root = findViewById<ViewGroup>(R.id.root)
     applyGreenStatusBarInsets(root)
@@ -108,9 +114,14 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
     super.onCreateOptionsMenu(menu)
     menuInflater.inflate(R.menu.search_menu, menu)
     val searchItem = menu.findItem(R.id.search)
+    SearchViewStyler.configure(
+      activity = this,
+      menu = menu,
+      searchItem = searchItem,
+      hasAlwaysDarkToolbarSurface = true,
+      expandToFullToolbarWidth = false
+    )
     val searchView = searchItem.actionView as SearchView?
-    val searchManager = (getSystemService(SEARCH_SERVICE) as SearchManager)
-    searchView?.setSearchableInfo(searchManager.getSearchableInfo(componentName))
 
     val intent = getIntent()
     if (Intent.ACTION_SEARCH == intent.action) {
@@ -121,6 +132,14 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
       searchItem.expandActionView()
     }
     return true
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    if (item.itemId == android.R.id.home) {
+      finish()
+      return true
+    }
+    return super.onOptionsItemSelected(item)
   }
 
   public override fun onPause() {
@@ -201,6 +220,7 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
       buttonGetTranslations.visibility = View.VISIBLE
       downloadArabicSearchDb = true
     } else {
+      warningView.visibility = View.GONE
       downloadArabicSearchDb = false
     }
 
@@ -217,6 +237,9 @@ class SearchActivity : AppCompatActivity(), SimpleDownloadListener,
         adapter?.swapCursor(null)
       }
     } else {
+      if (!showArabicWarning) {
+        buttonGetTranslations.visibility = View.GONE
+      }
       // Display the number of results
       val count = cursor.count
       val countString = getResources().getQuantityString(

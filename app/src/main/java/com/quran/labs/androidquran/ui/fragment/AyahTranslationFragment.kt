@@ -2,6 +2,7 @@ package com.quran.labs.androidquran.ui.fragment
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -86,6 +87,18 @@ class AyahTranslationFragment : AyahActionFragment(), TranslationScreen {
       R.layout.translation_panel, container, false
     )
     translator = view.findViewById(R.id.translator)
+    val density = resources.displayMetrics.density
+    translator.setPopupBackgroundDrawable(
+      GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 10f * density
+        setColor(ContextCompat.getColor(view.context, R.color.secondary_dark_background))
+        setStroke(
+          (1f * density).toInt().coerceAtLeast(1),
+          ContextCompat.getColor(view.context, R.color.continue_reading_card_stroke)
+        )
+      }
+    )
     compareScroll = view.findViewById(R.id.compare_scroll)
     compareBar = view.findViewById(R.id.compare_bar)
     translationView = view.findViewById(R.id.translation_view)
@@ -163,38 +176,40 @@ class AyahTranslationFragment : AyahActionFragment(), TranslationScreen {
   }
 
   private fun updateCompareBar(translations: List<LocalTranslation>) {
-    if (translations.size <= 1) {
-      compareScroll.visibility = View.GONE
-      translationPresenter.setCustomTranslations(null)
-      return
-    }
-
-    if (selectedCompareFilterId >= translations.size) {
-      selectedCompareFilterId = -1
-    }
-
-    compareScroll.visibility = View.VISIBLE
-    compareBar.removeAllViews()
-
     val ctx = context ?: return
     val density = resources.displayMetrics.density
-    val accentColor = ContextCompat.getColor(ctx, R.color.accent_color)
-    val isNight = quranSettings.isNightMode
-    val unselectedBgColor = if (isNight) Color.parseColor("#2C2C2E") else Color.parseColor("#1A007A5E")
-    val unselectedTextColor = if (isNight) Color.WHITE else accentColor
+    val isNight =
+      (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES ||
+        quranSettings.isAppInDarkMode
 
-    fun addPill(tagId: Int, label: String) {
-      val isSelected = selectedCompareFilterId == tagId
-      val pill = TextView(ctx).apply {
+    val selectedBgColor = ContextCompat.getColor(ctx, R.color.accent_color_dark)
+    val selectedStrokeColor = ContextCompat.getColor(ctx, R.color.translation_translator_color)
+    val unselectedBgColor = ContextCompat.getColor(ctx, R.color.secondary_dark_background)
+    val unselectedStrokeColor = ContextCompat.getColor(ctx, R.color.continue_reading_card_stroke)
+    val unselectedTextColor = ContextCompat.getColor(ctx, R.color.title_color)
+
+    fun buildPill(label: String, isSelected: Boolean, onClick: () -> Unit): TextView {
+      return TextView(ctx).apply {
         text = label
         textSize = 13f
         gravity = Gravity.CENTER
-        setPadding((12 * density).toInt(), (6 * density).toInt(), (12 * density).toInt(), (6 * density).toInt())
+        setPadding(
+          (12 * density).toInt(),
+          (6 * density).toInt(),
+          (12 * density).toInt(),
+          (6 * density).toInt()
+        )
         setTextColor(if (isSelected) Color.WHITE else unselectedTextColor)
         background = GradientDrawable().apply {
           shape = GradientDrawable.RECTANGLE
           cornerRadius = 16 * density
-          setColor(if (isSelected) accentColor else unselectedBgColor)
+          setColor(if (isSelected) selectedBgColor else unselectedBgColor)
+          val strokeColor = if (isSelected) {
+            if (isNight) selectedStrokeColor else selectedBgColor
+          } else {
+            unselectedStrokeColor
+          }
+          setStroke((1f * density).toInt().coerceAtLeast(1), strokeColor)
         }
         layoutParams = LinearLayout.LayoutParams(
           LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -202,19 +217,40 @@ class AyahTranslationFragment : AyahActionFragment(), TranslationScreen {
         ).apply {
           marginEnd = (8 * density).toInt()
         }
-        setOnClickListener {
-          selectedCompareFilterId = tagId
-          applyCompareFilter(translations)
-          updateCompareBar(translations)
-          refreshView()
-        }
+        setOnClickListener { onClick() }
       }
-      compareBar.addView(pill)
     }
 
-    addPill(-1, getString(R.string.compare_all))
+    compareScroll.visibility = View.VISIBLE
+    compareBar.removeAllViews()
+
+    if (translations.size <= 1) {
+      translationPresenter.setCustomTranslations(null)
+      translations.firstOrNull()?.let { single ->
+        compareBar.addView(buildPill(shortNameForTranslation(single), true) { })
+      }
+      compareBar.addView(buildPill("+ ${getString(R.string.more_translations)}", false) {
+        (activity as? PagerActivity)?.startTranslationManager()
+      })
+      return
+    }
+
+    if (selectedCompareFilterId >= translations.size) {
+      selectedCompareFilterId = -1
+    }
+
+    fun addFilterPill(tagId: Int, label: String) {
+      compareBar.addView(buildPill(label, selectedCompareFilterId == tagId) {
+        selectedCompareFilterId = tagId
+        applyCompareFilter(translations)
+        updateCompareBar(translations)
+        refreshView()
+      })
+    }
+
+    addFilterPill(-1, getString(R.string.compare_all))
     translations.forEachIndexed { index, trans ->
-      addPill(index, shortNameForTranslation(trans))
+      addFilterPill(index, shortNameForTranslation(trans))
     }
     applyCompareFilter(translations)
   }

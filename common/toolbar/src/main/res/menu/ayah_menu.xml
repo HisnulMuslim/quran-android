@@ -32,4 +32,10 @@
           android:visible="false"
           android:icon="@drawable/ic_mic"
           android:title="@string/recite_from_here" />
+    <item android:id="@+id/cab_shrink_ayah"
+          android:icon="@drawable/ic_minus"
+          android:title="@string/shrink_ayah_selection" />
+    <item android:id="@+id/cab_expand_ayah"
+          android:icon="@drawable/ic_plus"
+          android:title="@string/expand_ayah_selection" />
 </menu>

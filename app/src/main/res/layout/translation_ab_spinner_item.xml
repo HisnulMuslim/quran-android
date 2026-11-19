@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--KQACR27-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/spinner_dropdown_item_height"
-    android:background="@color/page_background">
+    android:paddingStart="12dp"
+    android:paddingEnd="16dp"
+    android:background="@color/secondary_dark_background">
 
   <CheckBox
       android:id="@+id/checkbox"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
+      app:buttonTint="@color/panel_label"
       android:text="@null" />
 
   <TextView
@@ -21,10 +25,11 @@
       android:layout_toEndOf="@+id/checkbox"
       android:layout_toRightOf="@+id/checkbox"
       android:background="?attr/selectableItemBackground"
-      android:ellipsize="marquee"
-      android:marqueeRepeatLimit="marquee_forever"
+      android:ellipsize="end"
       android:singleLine="true"
-      android:paddingEnd="2dp"
-      android:paddingLeft="2dp"
-      android:paddingStart="2dp" />
+      android:textColor="@color/title_color"
+      android:textSize="14sp"
+      android:paddingEnd="4dp"
+      android:paddingLeft="6dp"
+      android:paddingStart="6dp" />
 </RelativeLayout>

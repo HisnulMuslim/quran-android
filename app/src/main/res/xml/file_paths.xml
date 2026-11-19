@@ -6,4 +6,7 @@
   <cache-path
       name="shared_cards"
       path="shared_cards/" />
+  <files-path
+      name="shared_exports"
+      path="shared_exports/" />
 </paths>

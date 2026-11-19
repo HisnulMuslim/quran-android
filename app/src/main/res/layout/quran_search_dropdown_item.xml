@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="60dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+  <!-- Zero-width placeholders so AppCompat SuggestionsAdapter can toggle visibility without a blank gutter -->
+  <ImageView
+      android:id="@android:id/icon1"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:visibility="gone" />
+
+  <ImageView
+      android:id="@+id/edit_query"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_alignParentEnd="true"
+      android:layout_centerVertical="true"
+      android:scaleType="centerInside"
+      android:background="?attr/selectableItemBackgroundBorderless"
+      android:visibility="gone" />
+
+  <ImageView
+      android:id="@android:id/icon2"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_toStartOf="@id/edit_query"
+      android:visibility="gone" />
+
+  <TextView
+      android:id="@android:id/text1"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:layout_toStartOf="@id/edit_query"
+      android:layout_alignWithParentIfMissing="true"
+      android:ellipsize="end"
+      android:singleLine="true"
+      android:textAlignment="viewStart"
+      android:textColor="@color/title_color"
+      android:textSize="15sp" />
+
+  <TextView
+      android:id="@android:id/text2"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@android:id/text1"
+      android:layout_toStartOf="@id/edit_query"
+      android:layout_alignWithParentIfMissing="true"
+      android:paddingTop="2dp"
+      android:ellipsize="end"
+      android:singleLine="true"
+      android:textAlignment="viewStart"
+      android:textColor="@color/sura_details_color"
+      android:textSize="13sp"
+      android:visibility="gone" />
+</RelativeLayout>

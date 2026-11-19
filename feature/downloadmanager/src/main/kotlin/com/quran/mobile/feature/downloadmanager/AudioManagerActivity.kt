@@ -1,6 +1,7 @@
 package com.quran.mobile.feature.downloadmanager
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import com.quran.labs.androidquran.common.audio.model.QariItem
 import com.quran.labs.androidquran.common.ui.LanguageEnforcer
 import com.quran.labs.androidquran.common.ui.core.QuranTheme
+import com.quran.labs.androidquran.common.ui.core.isQuranDarkTheme
 import com.quran.mobile.di.QuranApplicationComponentProvider
 import com.quran.mobile.feature.downloadmanager.di.DownloadManagerComponentInterface
 import com.quran.mobile.feature.downloadmanager.presenter.AudioManagerPresenter
@@ -50,12 +52,22 @@ class AudioManagerActivity : ComponentActivity() {
     val downloadedShuyookhFlow =
       audioManagerPresenter.downloadedShuyookh { QariItem.fromQari(this, it) }
 
-    enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT),SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT))
+    val isSystemDark =
+      (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    val isDark = isQuranDarkTheme(this, isSystemDark)
 
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = if (isDark) {
+        SystemBarStyle.dark(Color.TRANSPARENT)
+      } else {
+        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+      }
+    )
 
     setContent {
       val downloadedShuyookhState = downloadedShuyookhFlow.collectAsState(persistentListOf())
-      QuranTheme {
+      QuranTheme(useDarkTheme = isDark) {
         Column(modifier = Modifier
           .background(MaterialTheme.colorScheme.surface)
           .fillMaxSize()

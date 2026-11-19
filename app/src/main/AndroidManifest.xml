@@ -100,6 +100,7 @@
     </activity>
 
     <activity android:name=".ui.shareimage.ShareAyahImageActivity"
+        android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
         android:exported="false"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 

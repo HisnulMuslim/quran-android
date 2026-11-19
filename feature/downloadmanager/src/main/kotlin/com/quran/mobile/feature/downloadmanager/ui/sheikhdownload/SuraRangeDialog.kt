@@ -1,7 +1,11 @@
 package com.quran.mobile.feature.downloadmanager.ui.sheikhdownload
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,33 +33,36 @@ fun SuraRangeDialog(
     onDismissRequest = onDismiss,
     properties = DialogProperties()
   ) {
-    val backgroundColor = MaterialTheme.colorScheme.surface
+    val backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val startSura = remember { mutableStateOf(1) }
     val endingSura = remember { mutableStateOf(114) }
 
     Surface(
       modifier = Modifier,
-      shape = MaterialTheme.shapes.medium,
+      shape = RoundedCornerShape(16.dp),
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
       color = backgroundColor,
       contentColor = contentColorFor(backgroundColor)
     ) {
-      Column(modifier = Modifier.padding(16.dp)) {
+      Column(modifier = Modifier.padding(18.dp)) {
         Text(
           text = stringResource(id = R.string.audio_manager_download_all),
           style = MaterialTheme.typography.titleLarge,
           color = MaterialTheme.colorScheme.onSurface,
-          modifier = Modifier.padding(vertical = 16.dp)
+          modifier = Modifier.padding(bottom = 16.dp)
         )
         AutoCompleteDropdown(
           stringResource(com.quran.mobile.common.ui.core.R.string.from),
           initialText = items.first().name,
           items
         ) { startSura.value = it }
+        Spacer(modifier = Modifier.height(10.dp))
         AutoCompleteDropdown(
           stringResource(com.quran.mobile.common.ui.core.R.string.to),
           initialText = items.last().name,
           items
         ) { endingSura.value = it }
+        Spacer(modifier = Modifier.height(12.dp))
 
         TextButton(
           modifier = Modifier.align(Alignment.End),

@@ -48,6 +48,7 @@ object Constants {
   const val PREF_USE_ARABIC_NAMES = "useArabicNames"
   //KQACR6 add option for interface language change
   const val PREF_INTERFACE_LANGUAGE = "interfaceLanguage"
+  const val PREF_HAS_SELECTED_INITIAL_LANGUAGE = "hasSelectedInitialLanguage"
   const val PREF_APP_THEME = "appTheme"
   const val PREF_BACKGROUND_COLOR = "backgroundColor"
   const val PREF_LAST_PAGE = "lastPage"

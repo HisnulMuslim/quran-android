@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,9 +39,10 @@ fun DownloadManagerToolbar(
     },
     actions = actions /*KQACR11 Download Manager UI start*/,
     colors = TopAppBarDefaults.topAppBarColors(
-      containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-      titleContentColor = MaterialTheme.colorScheme.surface,
-      navigationIconContentColor = MaterialTheme.colorScheme.surface
+      containerColor = Color(0xFF022B24),
+      titleContentColor = Color.White,
+      navigationIconContentColor = Color.White,
+      actionIconContentColor = Color.White
     )/*KQACR11 Download Manager UI end TODO*/
   )
 }

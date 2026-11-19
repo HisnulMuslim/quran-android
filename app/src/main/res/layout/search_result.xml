@@ -2,14 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="5dp">
-   	<TextView android:id="@+id/verseText"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:textAppearance="@style/SearchResult"/>
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+    <TextView android:id="@+id/verseText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingMultiplier="1.15"
+        android:textAppearance="@style/SearchResult"/>
     <TextView android:id="@+id/verseLocation"
               android:layout_width="match_parent"
-    	      android:layout_height="wrap_content"
-    	      android:textAppearance="@style/SearchResult.Location" />
+              android:layout_height="wrap_content"
+              android:paddingTop="4dp"
+              android:textAppearance="@style/SearchResult.Location" />
 </LinearLayout>

@@ -2,8 +2,6 @@ package com.quran.labs.androidquran.ui
 
 import android.Manifest
 import android.app.ProgressDialog
-import android.app.SearchManager
-import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -24,16 +22,16 @@ import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
@@ -65,7 +63,6 @@ import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.TajweedActivity
 import com.quran.labs.androidquran.QuranPreferenceActivity
 import com.quran.labs.androidquran.R
-import com.quran.labs.androidquran.SearchActivity
 import com.quran.labs.androidquran.common.QuranAyahInfo
 import com.quran.labs.androidquran.common.audio.model.QariItem
 import com.quran.labs.androidquran.common.audio.model.QariItem.Companion.fromQari
@@ -210,6 +207,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   private lateinit var onClearAyahModeBackCallback: OnBackPressedCallback
   private lateinit var onShowingTranslationBackCallback: OnBackPressedCallback
   private lateinit var onEndSessionBackCallback: OnBackPressedCallback
+  private lateinit var onCollapseSearchBackCallback: OnBackPressedCallback
+  private var searchMenuItem: MenuItem? = null
 
   private var lastSelectedTranslationAyah: QuranAyahInfo? = null
   private var lastActivatedLocalTranslations: Array<LocalTranslation> = emptyArray()
@@ -281,7 +280,13 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     val quranApp = application as QuranApplication
     quranApp.refreshLocale(this, false)
 
-    WindowCompat.setDecorFitsSystemWindows(window, false)
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.auto(
+        android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b),
+        android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
+      )
+    )
     super.onCreate(savedInstanceState)
 
     // field injection
@@ -609,8 +614,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     // just got created, need to reconnect to service
     shouldReconnect = true
 
-    // enforce orientation lock
-    if (quranSettings.isLockOrientation) {
+    // enforce orientation lock only on compact screens (large screens handle free resizing)
+    if (quranSettings.isLockOrientation && resources.configuration.smallestScreenWidthDp < 600) {
       val current = resources.configuration.orientation
       if (quranSettings.isLandscapeOrientation) {
         if (current == Configuration.ORIENTATION_PORTRAIT) {
@@ -658,6 +663,13 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       }
     }
     onBackPressedDispatcher.addCallback(this, onClearAyahModeBackCallback)
+
+    onCollapseSearchBackCallback = object : OnBackPressedCallback(false) {
+      override fun handleOnBackPressed() {
+        searchMenuItem?.collapseActionView()
+      }
+    }
+    onBackPressedDispatcher.addCallback(this, onCollapseSearchBackCallback)
   }
 
   override fun onRequestPermissionsResult(
@@ -762,10 +774,69 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val startPosition = startPosition(ayahSelection)
       updateLocalTranslations(startPosition)
       onClearAyahModeBackCallback.isEnabled = selectionStart != null
+      val endPosition = ayahSelection.endSuraAyah()
+      val canShrink = startPosition != null && endPosition != null && endPosition > startPosition
+      val canExpand = canExpandAyahSelection(ayahSelection)
+      ayahToolBar.setSelectionRangeState(canShrink, canExpand)
       toggleActionBarVisibility(false)
     } else {
+      ayahToolBar.setSelectionRangeState(canShrink = false, canExpand = false)
       endAyahMode()
       onClearAyahModeBackCallback.isEnabled = false
+    }
+  }
+
+  private var selectionToast: Toast? = null
+
+  private fun canExpandAyahSelection(selection: AyahSelection): Boolean {
+    val end = selection.endSuraAyah() ?: return false
+    return end.next(quranInfo) != null
+  }
+
+  private fun showCrossPageSelectionToast(start: SuraAyah, end: SuraAyah) {
+    val endPage = quranInfo.getPageFromSuraAyah(end.sura, end.ayah)
+    if (quranInfo.getPositionFromPage(endPage, isDualPageVisible) == viewPager.currentItem) {
+      return
+    }
+    val startSuraName = quranDisplayData.getSuraName(this, start.sura, false, false)
+    val refText = if (start.sura == end.sura) {
+      "$startSuraName: ${start.ayah}–${end.ayah}"
+    } else {
+      val endSuraName = quranDisplayData.getSuraName(this, end.sura, false, false)
+      "$startSuraName ${start.ayah} – $endSuraName ${end.ayah}"
+    }
+    val pageLabel = quranDisplayData.getPageSubtitle(this, endPage)
+    selectionToast?.cancel()
+    selectionToast = Toast.makeText(this, "$refText ($pageLabel)", Toast.LENGTH_SHORT).also { it.show() }
+  }
+
+  private fun expandAyahSelection() {
+    val currentSelection = readingEventPresenter.currentAyahSelection()
+    val start = currentSelection.startSuraAyah() ?: return
+    val end = currentSelection.endSuraAyah() ?: return
+    val next = end.next(quranInfo) ?: return
+    viewPager.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+    val indicator = currentSelection.selectionIndicator()
+    readingEventPresenter.onAyahSelection(AyahRange(start, next, indicator))
+    showCrossPageSelectionToast(start, next)
+  }
+
+  private fun shrinkAyahSelection() {
+    val currentSelection = readingEventPresenter.currentAyahSelection()
+    val start = currentSelection.startSuraAyah() ?: return
+    val end = currentSelection.endSuraAyah() ?: return
+    if (end <= start) return
+    val prev = end.prev(quranInfo) ?: return
+    viewPager.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+    val indicator = currentSelection.selectionIndicator()
+    val updated = if (prev <= start) {
+      AyahSelection.Ayah(start, indicator)
+    } else {
+      AyahRange(start, prev, indicator)
+    }
+    readingEventPresenter.onAyahSelection(updated)
+    if (prev > start) {
+      showCrossPageSelectionToast(start, prev)
     }
   }
 
@@ -786,14 +857,6 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   }
 
   private fun setUiVisibility(isVisible: Boolean) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      setUiVisibilityR(isVisible)
-    } else {
-      setUiVisibilityKitKat(isVisible)
-    }
-  }
-
-  private fun setUiVisibilityR(isVisible: Boolean) {
     if (isVisible) {
       windowInsetsController.show(
         WindowInsetsCompat.Type.statusBars() or
@@ -808,24 +871,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
-      animateToolBar(isVisible)
-    }
-  }
-
-  private fun setUiVisibilityKitKat(isVisible: Boolean) {
-    var flags = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-    if (!isVisible) {
-      flags = flags or (View.SYSTEM_UI_FLAG_LOW_PROFILE
-          or View.SYSTEM_UI_FLAG_FULLSCREEN
-          or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-          or View.SYSTEM_UI_FLAG_IMMERSIVE)
-    }
-    viewPager.systemUiVisibility = flags
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || isInMultiWindowMode) {
       animateToolBar(isVisible)
     }
   }
@@ -845,16 +891,13 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         animateToolBar(isVisible)
         insets
       }
-    } else {
-      viewPager.setOnSystemUiVisibilityChangeListener { flags: Int ->
-        val visible = (flags and View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
-        animateToolBar(visible)
-      }
     }
   }
 
   private fun clearUiVisibilityListener() {
-    viewPager.setOnSystemUiVisibilityChangeListener(null)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      ViewCompat.setOnApplyWindowInsetsListener(window.decorView, null)
+    }
   }
 
   private fun animateToolBar(visible: Boolean) {
@@ -1143,13 +1186,14 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     val inflater = menuInflater
     inflater.inflate(R.menu.quran_menu, menu)
     val item = menu.findItem(R.id.search)
-    val searchView = item.actionView as SearchView
-    val searchManager = getSystemService(SEARCH_SERVICE) as SearchManager
-    searchView.queryHint = getString(R.string.search_hint)
-    searchView.setSearchableInfo(
-      searchManager.getSearchableInfo(
-        ComponentName(this, SearchActivity::class.java)
-      )
+    searchMenuItem = item
+    com.quran.labs.androidquran.util.SearchViewStyler.configure(
+      activity = this,
+      menu = menu,
+      searchItem = item,
+      hasAlwaysDarkToolbarSurface = true,
+      expandToFullToolbarWidth = true,
+      onExpandChanged = { expanded -> onCollapseSearchBackCallback.isEnabled = expanded }
     )
 
     // cache because invalidateOptionsMenu in a toolbar world always calls both
@@ -1905,6 +1949,12 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         shareAyah(startSuraAyah, endSuraAyah, false)
       } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_copy_ayah) {
         shareAyah(startSuraAyah, endSuraAyah, true)
+      } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_expand_ayah) {
+        expandAyahSelection()
+        return true
+      } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_shrink_ayah) {
+        shrinkAyahSelection()
+        return true
       } else {
         return false
       }
@@ -1974,16 +2024,22 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     container.addView(dragHandle)
 
-    val suraName = quranDisplayData.getSuraName(this, verseRange.startSura, false, false)
-    val referenceSubtitle = if (verseRange.startSura == verseRange.endingSura) {
-      if (verseRange.startAyah == verseRange.endingAyah) {
-        "$suraName: ${verseRange.startAyah}"
+    var activeRange = verseRange
+    var activeResult = result
+    var rangeJob: kotlinx.coroutines.Job? = null
+
+    fun formatReference(range: VerseRange): String {
+      val suraName = quranDisplayData.getSuraName(this, range.startSura, false, false)
+      return if (range.startSura == range.endingSura) {
+        if (range.startAyah == range.endingAyah) {
+          "$suraName: ${range.startAyah}"
+        } else {
+          "$suraName: ${range.startAyah}–${range.endingAyah}"
+        }
       } else {
-        "$suraName: ${verseRange.startAyah}–${verseRange.endingAyah}"
+        val endSuraName = quranDisplayData.getSuraName(this, range.endingSura, false, false)
+        "$suraName ${range.startAyah} – $endSuraName ${range.endingAyah}"
       }
-    } else {
-      val endSuraName = quranDisplayData.getSuraName(this, verseRange.endingSura, false, false)
-      "$suraName ${verseRange.startAyah} – $endSuraName ${verseRange.endingAyah}"
     }
 
     val title = android.widget.TextView(this).apply {
@@ -1994,13 +2050,90 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     container.addView(title)
 
-    val refView = android.widget.TextView(this).apply {
-      text = referenceSubtitle
-      textSize = 13f
-      setTextColor(secondaryColor)
-      setPadding(0, dp(2), 0, dp(16))
+    val refRow = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER_VERTICAL
+      setPadding(0, dp(4), 0, dp(16))
     }
-    container.addView(refView)
+
+    val refView = android.widget.TextView(this).apply {
+      text = formatReference(activeRange)
+      textSize = 13.5f
+      setTextColor(secondaryColor)
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        0,
+        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+        1f
+      )
+    }
+
+    fun makeStepperButton(iconRes: Int, descRes: Int): android.widget.ImageButton {
+      return android.widget.ImageButton(this).apply {
+        layoutParams = android.widget.LinearLayout.LayoutParams(dp(34), dp(34))
+        setImageResource(iconRes)
+        setColorFilter(textColor)
+        contentDescription = getString(descRes)
+        scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+        setPadding(dp(7), dp(7), dp(7), dp(7))
+        background = android.graphics.drawable.GradientDrawable().apply {
+          shape = android.graphics.drawable.GradientDrawable.OVAL
+          setColor(cardBgColor)
+        }
+      }
+    }
+
+    val minusBtn = makeStepperButton(
+      com.quran.labs.androidquran.common.toolbar.R.drawable.ic_minus,
+      com.quran.labs.androidquran.common.toolbar.R.string.shrink_ayah_selection
+    ).apply {
+      (layoutParams as android.widget.LinearLayout.LayoutParams).marginEnd = dp(8)
+    }
+    val plusBtn = makeStepperButton(
+      com.quran.labs.androidquran.common.toolbar.R.drawable.ic_plus,
+      com.quran.labs.androidquran.common.toolbar.R.string.expand_ayah_selection
+    )
+
+    fun refreshStepperState() {
+      val start = SuraAyah(activeRange.startSura, activeRange.startAyah)
+      val end = SuraAyah(activeRange.endingSura, activeRange.endingAyah)
+      val canShrink = end > start
+      val canExpand = end.next(quranInfo) != null
+      minusBtn.isEnabled = canShrink
+      minusBtn.alpha = if (canShrink) 1f else 0.35f
+      plusBtn.isEnabled = canExpand
+      plusBtn.alpha = if (canExpand) 1f else 0.35f
+      refView.text = formatReference(activeRange)
+    }
+
+    fun updateRange(expand: Boolean) {
+      val start = SuraAyah(activeRange.startSura, activeRange.startAyah)
+      val end = SuraAyah(activeRange.endingSura, activeRange.endingAyah)
+      val newEnd = if (expand) {
+        end.next(quranInfo) ?: return
+      } else {
+        if (end <= start) return
+        val prev = end.prev(quranInfo) ?: return
+        if (prev < start) start else prev
+      }
+      container.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+      val count = 1 + abs(quranInfo.getAyahId(start.sura, start.ayah) - quranInfo.getAyahId(newEnd.sura, newEnd.ayah))
+      val nextRange = VerseRange(start.sura, start.ayah, newEnd.sura, newEnd.ayah, count)
+      activeRange = nextRange
+      refreshStepperState()
+      rangeJob?.cancel()
+      rangeJob = scope.launch {
+        activeResult = translationPresenter.getVerses(true, activeTranslations, nextRange)
+      }
+    }
+
+    minusBtn.setOnClickListener { updateRange(expand = false) }
+    plusBtn.setOnClickListener { updateRange(expand = true) }
+    refreshStepperState()
+
+    refRow.addView(refView)
+    refRow.addView(minusBtn)
+    refRow.addView(plusBtn)
+    container.addView(refRow)
 
     fun addOption(iconRes: Int, label: String, subtitle: String, addBottomGap: Boolean, onClick: () -> Unit) {
       val row = android.widget.LinearLayout(this).apply {
@@ -2075,19 +2208,29 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       container.addView(row)
     }
 
+    fun launchShareCard(isVideoMode: Boolean) {
+      scope.launch {
+        rangeJob?.join()
+        if (isFinishing || isDestroyed) return@launch
+        val cardData = buildAyahShareCardData(activeResult.ayahInformation, activeRange)
+        if (isFinishing || isDestroyed) return@launch
+        startActivity(
+          com.quran.labs.androidquran.ui.shareimage.ShareAyahImageActivity.createIntent(
+            this@PagerActivity,
+            cardData,
+            isVideoMode = isVideoMode
+          )
+        )
+      }
+    }
+
     addOption(
       iconRes = R.drawable.ic_share_image,
       label = getString(R.string.share_as_image_title),
       subtitle = getString(R.string.share_as_image_subtitle),
       addBottomGap = true
     ) {
-      val cardData = buildAyahShareCardData(result.ayahInformation, verseRange)
-      startActivity(
-        com.quran.labs.androidquran.ui.shareimage.ShareAyahImageActivity.createIntent(
-          this@PagerActivity,
-          cardData
-        )
-      )
+      launchShareCard(isVideoMode = false)
     }
 
     addOption(
@@ -2096,14 +2239,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       subtitle = getString(R.string.share_as_video_subtitle),
       addBottomGap = true
     ) {
-      val cardData = buildAyahShareCardData(result.ayahInformation, verseRange)
-      startActivity(
-        com.quran.labs.androidquran.ui.shareimage.ShareAyahImageActivity.createIntent(
-          this@PagerActivity,
-          cardData,
-          isVideoMode = true
-        )
-      )
+      launchShareCard(isVideoMode = true)
     }
 
     addOption(
@@ -2112,7 +2248,10 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       subtitle = getString(R.string.share_as_text_subtitle),
       addBottomGap = false
     ) {
-      shareUtil.shareVersesKQA(this@PagerActivity, result, verseRange, activeTranslations)
+      scope.launch {
+        rangeJob?.join()
+        shareUtil.shareVersesKQA(this@PagerActivity, activeResult, activeRange, activeTranslations)
+      }
     }
 
     dialog.setContentView(container)
@@ -2134,27 +2273,34 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     verses: List<QuranAyahInfo>,
     verseRange: VerseRange
   ): com.quran.labs.androidquran.ui.shareimage.AyahShareCardData {
-    val footnoteRegex = "\\[\\[(.+?)]]".toRegex()
+    val footnoteRegex = "\\[\\[(.+?)]]".toRegex(RegexOption.DOT_MATCHES_ALL)
     val footnotes = mutableListOf<String>()
 
     val arabicBuilder = StringBuilder()
     val translationBuilder = StringBuilder()
+    val ayahSlides = mutableListOf<com.quran.labs.androidquran.ui.shareimage.AyahSlideData>()
 
     verses.forEach { ayahInfo ->
-      ayahInfo.arabicText?.let { rawArabic ->
+      val slideArabic = ayahInfo.arabicText?.let { rawArabic ->
         val cleaned = com.quran.labs.androidquran.model.translation.ArabicDatabaseUtils.getAyahWithoutBasmallah(
           ayahInfo.sura,
           ayahInfo.ayah,
           rawArabic.trim()
         )
         if (cleaned.isNotBlank()) {
-          if (arabicBuilder.isNotEmpty()) arabicBuilder.append(" ")
-          arabicBuilder.append(cleaned)
-          arabicBuilder.append("\u00A0")
-          arabicBuilder.append(toArabicIndicDigits(ayahInfo.ayah))
+          "$cleaned\u00A0${toArabicIndicDigits(ayahInfo.ayah)}"
+        } else {
+          ""
         }
+      }.orEmpty()
+
+      if (slideArabic.isNotEmpty()) {
+        if (arabicBuilder.isNotEmpty()) arabicBuilder.append(" ")
+        arabicBuilder.append(slideArabic)
       }
 
+      val slideFootnotes = mutableListOf<String>()
+      val slideTranslationBuilder = StringBuilder()
       ayahInfo.texts.forEach { translation ->
         val text = translation.text
         if (text.isNotEmpty()) {
@@ -2165,8 +2311,27 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
           }
           if (translationBuilder.isNotEmpty()) translationBuilder.append("\n")
           translationBuilder.append(processedText.trim())
+
+          val slideProcessedText = footnoteRegex.replace(text) { match ->
+            val note = match.groupValues[1].trim()
+            slideFootnotes.add(note)
+            "[${slideFootnotes.size}]"
+          }
+          if (slideTranslationBuilder.isNotEmpty()) slideTranslationBuilder.append("\n")
+          slideTranslationBuilder.append(slideProcessedText.trim())
         }
       }
+
+      ayahSlides.add(
+        com.quran.labs.androidquran.ui.shareimage.AyahSlideData(
+          sura = ayahInfo.sura,
+          ayah = ayahInfo.ayah,
+          referenceText = "${quranDisplayData.getSuraName(this@PagerActivity, ayahInfo.sura, true)}: ${ayahInfo.ayah}",
+          arabicText = slideArabic,
+          translationText = slideTranslationBuilder.toString(),
+          footnotes = slideFootnotes
+        )
+      )
     }
 
     val reference = buildString {
@@ -2195,7 +2360,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       startSura = verseRange.startSura,
       startAyah = verseRange.startAyah,
       endSura = verseRange.endingSura,
-      endAyah = verseRange.endingAyah
+      endAyah = verseRange.endingAyah,
+      ayahSlides = ayahSlides
     )
   }
 
@@ -2403,19 +2569,30 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       }
     }
 
+    val themeBtnLp = android.widget.LinearLayout.LayoutParams(
+      0,
+      android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+      1f
+    )
+    val themeBtnPadH = (4 * density).toInt()
+    val themeBtnPadV = (6 * density).toInt()
+
     val lightCircle = android.view.View(this).apply {
       layoutParams = android.widget.LinearLayout.LayoutParams((34 * density).toInt(), (34 * density).toInt())
       background = createCircleDrawable(android.graphics.Color.WHITE)
     }
     val lightLabel = android.widget.TextView(this).apply {
       text = getString(R.string.theme_light)
-      textSize = 12f
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
       setPadding(0, (4 * density).toInt(), 0, 0)
     }
     val lightBtn = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
       gravity = android.view.Gravity.CENTER
-      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      layoutParams = android.widget.LinearLayout.LayoutParams(themeBtnLp)
+      setPadding(themeBtnPadH, themeBtnPadV, themeBtnPadH, themeBtnPadV)
       addView(lightCircle)
       addView(lightLabel)
     }
@@ -2426,13 +2603,16 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     val sepiaLabel = android.widget.TextView(this).apply {
       text = getString(R.string.theme_sepia)
-      textSize = 12f
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
       setPadding(0, (4 * density).toInt(), 0, 0)
     }
     val sepiaBtn = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
       gravity = android.view.Gravity.CENTER
-      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      layoutParams = android.widget.LinearLayout.LayoutParams(themeBtnLp)
+      setPadding(themeBtnPadH, themeBtnPadV, themeBtnPadH, themeBtnPadV)
       addView(sepiaCircle)
       addView(sepiaLabel)
     }
@@ -2443,13 +2623,16 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     val nightLabel = android.widget.TextView(this).apply {
       text = getString(R.string.theme_night)
-      textSize = 12f
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
       setPadding(0, (4 * density).toInt(), 0, 0)
     }
     val nightBtn = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
       gravity = android.view.Gravity.CENTER
-      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      layoutParams = android.widget.LinearLayout.LayoutParams(themeBtnLp)
+      setPadding(themeBtnPadH, themeBtnPadV, themeBtnPadH, themeBtnPadV)
       addView(nightCircle)
       addView(nightLabel)
     }
@@ -2460,13 +2643,16 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     val sageLabel = android.widget.TextView(this).apply {
       text = getString(R.string.theme_sage)
-      textSize = 12f
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
       setPadding(0, (4 * density).toInt(), 0, 0)
     }
     val sageBtn = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
       gravity = android.view.Gravity.CENTER
-      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      layoutParams = android.widget.LinearLayout.LayoutParams(themeBtnLp)
+      setPadding(themeBtnPadH, themeBtnPadV, themeBtnPadH, themeBtnPadV)
       addView(sageCircle)
       addView(sageLabel)
     }
@@ -2477,13 +2663,16 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     }
     val slateLabel = android.widget.TextView(this).apply {
       text = getString(R.string.theme_slate)
-      textSize = 12f
+      textSize = 11.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
       setPadding(0, (4 * density).toInt(), 0, 0)
     }
     val slateBtn = android.widget.LinearLayout(this).apply {
       orientation = android.widget.LinearLayout.VERTICAL
       gravity = android.view.Gravity.CENTER
-      setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
+      layoutParams = android.widget.LinearLayout.LayoutParams(themeBtnLp)
+      setPadding(themeBtnPadH, themeBtnPadV, themeBtnPadH, themeBtnPadV)
       addView(slateCircle)
       addView(slateLabel)
     }
@@ -2527,14 +2716,51 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       }
     }
 
-    if (quranSettings.isAppInDarkMode) {
-      themeLayout.addView(slateBtn)
-      themeLayout.addView(nightBtn)
-    } else {
-      themeLayout.addView(lightBtn)
-      themeLayout.addView(sepiaBtn)
-      themeLayout.addView(sageBtn)
+    // Show all 5 reading themes (Light, Sepia, Sage, Slate, Night) regardless of current dark/light mode
+    // so users always discover dark themes easily.
+    themeLayout.addView(lightBtn)
+    themeLayout.addView(sepiaBtn)
+    themeLayout.addView(sageBtn)
+    themeLayout.addView(slateBtn)
+    themeLayout.addView(nightBtn)
+
+    // Appearance selector row (System / Light / Dark)
+    val appearancePrefs = PreferenceManager.getDefaultSharedPreferences(this)
+    var currentAppTheme = appearancePrefs.getString(Constants.PREF_APP_THEME, "dark") ?: "dark"
+    val appearanceLayout = android.widget.LinearLayout(this).apply {
+      orientation = android.widget.LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(
+        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+        (36 * density).toInt()
+      ).apply {
+        bottomMargin = (10 * density).toInt()
+      }
     }
+    val appearanceAutoBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.prefs_app_theme_auto)
+      textSize = 12.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+    val appearanceLightBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.prefs_app_theme_light)
+      textSize = 12.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+    val appearanceDarkBtn = android.widget.TextView(this).apply {
+      text = getString(R.string.prefs_app_theme_dark)
+      textSize = 12.5f
+      maxLines = 1
+      gravity = android.view.Gravity.CENTER
+      layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+    }
+    appearanceLayout.addView(appearanceAutoBtn)
+    appearanceLayout.addView(appearanceLightBtn)
+    appearanceLayout.addView(appearanceDarkBtn)
 
     // 3-Way Display Mode Selector Section
     val displayModeLabel = android.widget.TextView(this).apply {
@@ -2936,6 +3162,16 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       updateModeButtons(currentMode, themeId)
       updateFontButtons(currentArabicFont, themeId)
       updateTranslationFontButtons(currentTranslationFont, themeId)
+      updatePillSelector(
+        appearanceLayout,
+        listOf(
+          appearanceAutoBtn to "auto",
+          appearanceLightBtn to "light",
+          appearanceDarkBtn to "dark"
+        ),
+        currentAppTheme,
+        themeId
+      )
     }
 
     listOf(
@@ -3007,40 +3243,65 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       }
     }
 
+    fun applyAppearanceAndTheme(nextAppTheme: String, explicitReadingTheme: Int?) {
+      val wasDark = quranSettings.isAppInDarkMode
+      currentAppTheme = nextAppTheme
+      appearancePrefs.edit().putString(Constants.PREF_APP_THEME, nextAppTheme).apply()
+      explicitReadingTheme?.let { quranSettings.setReadingTheme(it) }
+
+      val sysDark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+        android.content.res.Configuration.UI_MODE_NIGHT_YES
+      val willBeDark = when (nextAppTheme) {
+        "dark" -> true
+        "light" -> false
+        else -> sysDark
+      }
+
+      if (wasDark != willBeDark) {
+        dialog.dismiss()
+        QuranApplication.applyAppTheme(nextAppTheme)
+      } else {
+        QuranApplication.applyAppTheme(nextAppTheme)
+        val activeTheme = quranSettings.getReadingTheme()
+        updateThemeBorders(activeTheme)
+        applyThemeToDialogViews(activeTheme)
+        invalidateOptionsMenu()
+        refreshQuranPages()
+      }
+    }
+
+    appearanceAutoBtn.setOnClickListener {
+      it.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      applyAppearanceAndTheme("auto", null)
+    }
+    appearanceLightBtn.setOnClickListener {
+      it.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      applyAppearanceAndTheme("light", null)
+    }
+    appearanceDarkBtn.setOnClickListener {
+      it.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+      applyAppearanceAndTheme("dark", null)
+    }
+
     lightBtn.setOnClickListener {
       lightBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-      quranSettings.setReadingTheme(QuranSettings.THEME_LIGHT)
-      updateThemeBorders(QuranSettings.THEME_LIGHT)
-      applyThemeToDialogViews(QuranSettings.THEME_LIGHT)
-      refreshQuranPages()
+      applyAppearanceAndTheme("light", QuranSettings.THEME_LIGHT)
     }
     sepiaBtn.setOnClickListener {
       sepiaBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-      quranSettings.setReadingTheme(QuranSettings.THEME_SEPIA)
-      updateThemeBorders(QuranSettings.THEME_SEPIA)
-      applyThemeToDialogViews(QuranSettings.THEME_SEPIA)
-      refreshQuranPages()
+      applyAppearanceAndTheme("light", QuranSettings.THEME_SEPIA)
     }
     sageBtn.setOnClickListener {
       sageBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-      quranSettings.setReadingTheme(QuranSettings.THEME_SAGE)
-      updateThemeBorders(QuranSettings.THEME_SAGE)
-      applyThemeToDialogViews(QuranSettings.THEME_SAGE)
-      refreshQuranPages()
+      applyAppearanceAndTheme("light", QuranSettings.THEME_SAGE)
     }
     slateBtn.setOnClickListener {
       slateBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-      quranSettings.setReadingTheme(QuranSettings.THEME_SLATE)
-      updateThemeBorders(QuranSettings.THEME_SLATE)
-      applyThemeToDialogViews(QuranSettings.THEME_SLATE)
-      refreshQuranPages()
+      applyAppearanceAndTheme("dark", QuranSettings.THEME_SLATE)
     }
     nightBtn.setOnClickListener {
       nightBtn.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-      quranSettings.setReadingTheme(QuranSettings.THEME_NIGHT)
-      updateThemeBorders(QuranSettings.THEME_NIGHT)
-      applyThemeToDialogViews(QuranSettings.THEME_NIGHT)
-      refreshQuranPages()
+      applyAppearanceAndTheme("dark", QuranSettings.THEME_NIGHT)
     }
 
     updateThemeBorders(quranSettings.getReadingTheme())
@@ -3072,7 +3333,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         currentTranslationFont = QuranSettings.TRANSLATION_FONT_SYSTEM
         quranSettings.translationFont = currentTranslationFont
         com.quran.labs.androidquran.ui.util.TypefaceManager.clearUthmaniTypefaceCache()
-        quranSettings.setReadingTheme(QuranSettings.THEME_LIGHT)
+        val resetTheme = if (quranSettings.isAppInDarkMode) QuranSettings.THEME_NIGHT else QuranSettings.THEME_LIGHT
+        quranSettings.setReadingTheme(resetTheme)
         quranSettings.setTranslationLineSpacing(1.0f)
 
         // Reset dialog controls
@@ -3084,8 +3346,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
         spacingLabel.text = getString(R.string.line_spacing, "1.00x")
 
         updateModeVisibility(currentMode)
-        updateThemeBorders(QuranSettings.THEME_LIGHT)
-        applyThemeToDialogViews(QuranSettings.THEME_LIGHT)
+        updateThemeBorders(resetTheme)
+        applyThemeToDialogViews(resetTheme)
         refreshQuranPages()
       }
     }
@@ -3093,16 +3355,17 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     // Assemble Container Views
     container.addView(sheetTitleLabel)
     container.addView(themeLabel)
+    container.addView(appearanceLayout)
     container.addView(themeLayout)
 
     container.addView(displayModeLabel)
     container.addView(modeLayout)
 
-    container.addView(fontLabel)
-    container.addView(fontLayout)
-
     container.addView(arabicLabel)
     container.addView(arabicSeekBar)
+
+    container.addView(fontLabel)
+    container.addView(fontLayout)
 
     container.addView(translationLabel)
     container.addView(translationSeekBar)

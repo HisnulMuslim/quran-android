@@ -62,7 +62,7 @@ fun DownloadCommonRow(
       Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onPrimaryContainer
+        color = MaterialTheme.colorScheme.onSurface
       )
       Text(
         text = subtitle,

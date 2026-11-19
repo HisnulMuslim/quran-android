@@ -1,12 +1,17 @@
 package com.quran.labs.androidquran.common.ui.core
 
+import android.content.Context
 import android.os.Build
+import android.preference.PreferenceManager
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 
@@ -69,15 +74,37 @@ private val DarkColors = darkColorScheme(
     inverseSurface = darkInverseSurface,
     inversePrimary = darkInversePrimary,
     surfaceTint = darkSurfaceTint,
+    surfaceContainerHigh = darkSurfaceColorHigh,
+    surfaceContainerHighest = darkSurfaceColorHighest
 )
 
 private val forceLtr = listOf("huawei", "lenovo", "tecno")
 
 val QuranIcons = Icons.Filled
 
+fun isQuranDarkTheme(context: Context, isSystemDark: Boolean): Boolean {
+  @Suppress("DEPRECATION")
+  val appTheme = PreferenceManager.getDefaultSharedPreferences(context)
+    .getString("appTheme", "dark") ?: "dark"
+  return when (appTheme) {
+    "dark" -> true
+    "light" -> false
+    else -> isSystemDark
+  }
+}
+
+@Composable
+fun rememberQuranDarkTheme(): Boolean {
+  val context = LocalContext.current
+  val systemDark = isSystemInDarkTheme()
+  return remember(context, systemDark) {
+    isQuranDarkTheme(context, systemDark)
+  }
+}
+
 @Composable
 fun QuranTheme(
-  useDarkTheme: Boolean = false,
+  useDarkTheme: Boolean = rememberQuranDarkTheme(),
   content: @Composable () -> Unit
 ) {
   val colors = if (!useDarkTheme) {

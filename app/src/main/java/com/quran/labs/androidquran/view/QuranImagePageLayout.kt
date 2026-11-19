@@ -46,7 +46,8 @@ open class QuranImagePageLayout(context: Context) : QuranPageLayout(context) {
     val isDark = quranSettings.isNightMode || quranSettings.readingTheme == QuranSettings.THEME_SLATE
     val textBrightness = if (quranSettings.isNightMode) quranSettings.nightModeTextBrightness else 235
     val backgroundBrightness = if (quranSettings.isNightMode) quranSettings.nightModeBackgroundBrightness else 0
-    imageView.setNightMode(isDark, textBrightness, backgroundBrightness)
+    val preserveHue = quranSettings.pageType == "tajweed"
+    imageView.setNightMode(isDark, textBrightness, backgroundBrightness, preserveHue)
   }
 
   override fun setPageController(controller: PageController?, pageNumber: Int, skips: Int) {

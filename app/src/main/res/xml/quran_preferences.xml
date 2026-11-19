@@ -29,7 +29,7 @@
         app:iconSpaceReserved="false"/>
 
     <ListPreference
-        android:defaultValue="auto"
+        android:defaultValue="dark"
         android:dialogTitle="@string/prefs_app_theme_title"
         android:entries="@array/app_theme_entries"
         android:entryValues="@array/app_theme_values"

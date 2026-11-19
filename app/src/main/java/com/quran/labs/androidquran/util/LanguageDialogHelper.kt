@@ -1,11 +1,9 @@
 package com.quran.labs.androidquran.util
 
-import android.preference.PreferenceManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.R
-import com.quran.labs.androidquran.data.Constants
 import com.quran.labs.androidquran.ui.QuranActivity
 
 object LanguageDialogHelper {
@@ -19,10 +17,7 @@ object LanguageDialogHelper {
       .setTitle(R.string.prefs_language_title)
       .setSingleChoiceItems(languages, currentIndex) { dialog, which ->
         val selectedLanguage = languageValues[which]
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
-        sharedPreferences.edit()
-          .putString(Constants.PREF_INTERFACE_LANGUAGE, selectedLanguage)
-          .apply()
+        settings.setInterfaceLanguage(selectedLanguage)
         dialog.dismiss()
         // Set flag to recreate QuranActivity when it resumes
         QuranActivity.shouldRecreate = true

@@ -101,7 +101,7 @@ class QuranSettingsFragment : PreferenceFragmentCompat(),
     else if (key == Constants.PREF_NIGHT_MODE) {
       updateNightModeBrightnessVisibility()
     } else if (key == Constants.PREF_APP_THEME) {
-      QuranApplication.applyAppTheme(sharedPreferences.getString(Constants.PREF_APP_THEME, "auto"))
+      QuranApplication.applyAppTheme(sharedPreferences.getString(Constants.PREF_APP_THEME, "dark"))
     }
   }
 

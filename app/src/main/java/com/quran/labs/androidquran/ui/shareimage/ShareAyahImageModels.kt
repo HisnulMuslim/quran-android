@@ -6,6 +6,29 @@ import android.graphics.Typeface
 import com.quran.labs.androidquran.ui.util.TypefaceManager
 import com.quran.labs.androidquran.util.QuranSettings
 
+data class AyahSlideData(
+  val sura: Int,
+  val ayah: Int,
+  val referenceText: String,
+  val arabicText: String,
+  val translationText: String,
+  val footnotes: List<String> = emptyList()
+) {
+  fun toCardData(isKannada: Boolean): AyahShareCardData {
+    return AyahShareCardData(
+      referenceText = referenceText,
+      arabicText = arabicText,
+      translationText = translationText,
+      footnotes = footnotes,
+      isKannada = isKannada,
+      startSura = sura,
+      startAyah = ayah,
+      endSura = sura,
+      endAyah = ayah
+    )
+  }
+}
+
 data class AyahShareCardData(
   val referenceText: String,
   val arabicText: String,
@@ -15,21 +38,42 @@ data class AyahShareCardData(
   val startSura: Int = 0,
   val startAyah: Int = 0,
   val endSura: Int = 0,
-  val endAyah: Int = 0
+  val endAyah: Int = 0,
+  val ayahSlides: List<AyahSlideData> = emptyList()
 )
+
+private fun currentLanguage(context: Context): String {
+  return context.resources.configuration.locales[0]?.language?.lowercase().orEmpty()
+}
+
+internal fun pickLocalizedLabel(
+  context: Context,
+  labelEn: String,
+  labelKn: String,
+  labelAr: String
+): String {
+  return when (currentLanguage(context)) {
+    "kn" -> labelKn
+    "ar" -> labelAr
+    else -> labelEn
+  }
+}
 
 enum class AyahCardAspectRatio(
   val id: String,
   val shortLabel: String,
   val labelEn: String,
   val labelKn: String,
+  val labelAr: String,
   val heightRatio: Float
 ) {
-  SQUARE("1:1", "1:1", "1:1 Square", "ಚೌಕ (1:1)", 1.0f),
-  PORTRAIT("4:5", "4:5", "4:5 Portrait", "ಭಾವಚಿತ್ರ (4:5)", 1.25f),
-  STORY("9:16", "9:16", "9:16 Story", "ಕಥೆ (9:16)", 16f / 9f);
+  SQUARE("1:1", "1:1", "1:1 Square", "ಚೌಕ (1:1)", "مربع 1:1", 1.0f),
+  PORTRAIT("4:5", "4:5", "4:5 Portrait", "ಭಾವಚಿತ್ರ (4:5)", "عمودي 4:5", 1.25f),
+  STORY("9:16", "9:16", "9:16 Story", "ಕಥೆ (9:16)", "قصة 9:16", 16f / 9f);
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 
   fun heightFor(width: Float): Float = width * heightRatio
 }
@@ -37,37 +81,46 @@ enum class AyahCardAspectRatio(
 enum class AyahShareCaptionMode(
   val id: String,
   val labelEn: String,
-  val labelKn: String
+  val labelKn: String,
+  val labelAr: String
 ) {
-  IMAGE_ONLY("image_only", "Image Only", "ಚಿತ್ರ ಮಾತ್ರ"),
-  LINK_ONLY("link_only", "Link Only", "ಲಿಂಕ್ ಮಾತ್ರ"),
-  FULL_TEXT("full_text", "Full Text", "ಸಂಪೂರ್ಣ ಪಠ್ಯ");
+  IMAGE_ONLY("image_only", "Media Only", "ಮಾಧ್ಯಮ ಮಾತ್ರ", "الوسائط فقط"),
+  LINK_ONLY("link_only", "Link Only", "ಲಿಂಕ್ ಮಾತ್ರ", "الرابط فقط"),
+  FULL_TEXT("full_text", "Full Text", "ಸಂಪೂರ್ಣ ಪಠ್ಯ", "النص الكامل");
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 }
 
 enum class AyahCardTextColorTarget(
   val id: String,
   val labelEn: String,
-  val labelKn: String
+  val labelKn: String,
+  val labelAr: String
 ) {
-  ARABIC("arabic", "Arabic", "ಅರೇಬಿಕ್"),
-  TRANSLATION("translation", "Translation", "ಅನುವಾದ");
+  ARABIC("arabic", "Arabic", "ಅರೇಬಿಕ್", "العربية"),
+  TRANSLATION("translation", "Translation", "ಅನುವಾದ", "الترجمة");
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 }
 
 enum class AyahCardTranslationFont(
   val id: String,
   val labelEn: String,
-  val labelKn: String
+  val labelKn: String,
+  val labelAr: String
 ) {
-  SERIF("noto_serif", "Serif", "ಸೀರಿಫ್"),
-  SANS("noto_sans", "Sans", "ಸಾನ್ಸ್"),
-  BOLD("bold", "Bold", "ದಪ್ಪ"),
-  SYSTEM("system", "System", "ಸಿಸ್ಟಮ್");
+  SERIF("noto_serif", "Serif", "ಸೀರಿಫ್", "سيريف"),
+  SANS("noto_sans", "Sans", "ಸಾನ್ಸ್", "سانس"),
+  BOLD("bold", "Bold", "ದಪ್ಪ", "عريض"),
+  SYSTEM("system", "System", "ಸಿಸ್ಟಮ್", "النظام");
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 
   fun typeface(): Typeface {
     return when (this) {
@@ -79,36 +132,21 @@ enum class AyahCardTranslationFont(
   }
 }
 
-enum class AyahCardPhotoPreset(
-  val id: String,
-  val labelEn: String,
-  val labelKn: String,
-  val drawableResName: String
-) {
-  MOSQUE_DUSK("mosque_dusk", "Mosque", "ಮಸೀದಿ", "bg_mosque"),
-  MAKKAH_NIGHT("makkah_night", "Makkah", "ಮಕ್ಕಾ", "bg_makkah"),
-  NABAWI_EVENING("nabawi_evening", "Madinah", "ಮದೀನಾ", "bg_nabawi"),
-  DESERT_SUNSET("desert_sunset", "Desert", "ಮರುಭೂಮಿ", "bg_desert"),
-  STARRY_NIGHT("starry_night", "Stars", "ನಕ್ಷತ್ರಗಳು", "bg_stars"),
-  MISTY_MOUNTAINS("misty_mountains", "Mountains", "ಪರ್ವತಗಳು", "bg_mountains"),
-  SACRED_ARCHES("sacred_arches", "Arches", "ಕಮಾನುಗಳು", "bg_arches"),
-  OCEAN_SUNSET("ocean_sunset", "Ocean", "ಸಾಗರ", "bg_ocean");
-
-  fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
-}
-
 enum class AyahCardArabicFont(
   val id: String,
   val labelEn: String,
-  val labelKn: String
+  val labelKn: String,
+  val labelAr: String
 ) {
-  UTHMANIC("uthmanic", "Hafs Bold", "ಉಸ್ಮಾನಿ"),
-  CLASSIC("classic", "Hafs Classic", "ಕ್ಲಾಸಿಕ್"),
-  KITAB("kitab", "Kitab", "ಕಿತಾಬ್"),
-  NASKH("naskh", "Naskh", "ನಸ್ಖ್"),
-  SYSTEM("system", "System", "ಸಿಸ್ಟಮ್");
+  UTHMANIC("uthmanic", "Hafs Bold", "ಉಸ್ಮಾನಿ", "حفص عريض"),
+  CLASSIC("classic", "Hafs Classic", "ಕ್ಲಾಸಿಕ್", "حفص كلاسيك"),
+  KITAB("kitab", "Kitab", "ಕಿತಾಬ್", "كتاب"),
+  NASKH("naskh", "Naskh", "ನಸ್ಖ್", "النسخ"),
+  SYSTEM("system", "System", "ಸಿಸ್ಟಮ್", "النظام");
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 
   fun formatArabicSpannable(context: Context, text: String): CharSequence {
     if (this == UTHMANIC || this == CLASSIC) return text
@@ -152,19 +190,22 @@ enum class AyahCardTextColorScheme(
   val id: String,
   val labelEn: String,
   val labelKn: String,
+  val labelAr: String,
   val colorInt: Int?
 ) {
-  THEME_DEFAULT("theme_default", "Theme", "ಥೀಮ್", null),
-  CLASSIC_GOLD("classic_gold", "Gold", "ಚಿನ್ನ", Color.rgb(255, 235, 179)),
-  PURE_WHITE("pure_white", "White", "ಬಿಳಿ", Color.WHITE),
-  ICE_CYAN("ice_cyan", "Cyan", "ನೀಲಿ", Color.rgb(166, 235, 255)),
-  EMERALD_MINT("emerald_mint", "Mint", "ಪಚ್ಚೆ", Color.rgb(153, 245, 204)),
-  SUNSET_AMBER("sunset_amber", "Amber", "ಕಿತ್ತಳೆ", Color.rgb(255, 204, 122)),
-  ROSE_GOLD("rose_gold", "Rose", "ಗುಲಾಬಿ", Color.rgb(255, 199, 209)),
-  ROYAL_LAVENDER("royal_lavender", "Lavender", "ನೇರಳೆ", Color.rgb(224, 214, 255)),
-  CUSTOM("custom", "Custom", "ಕಸ್ಟಮ್", null);
+  THEME_DEFAULT("theme_default", "Theme", "ಥೀಮ್", "المظهر", null),
+  CLASSIC_GOLD("classic_gold", "Gold", "ಚಿನ್ನ", "ذهبي", Color.rgb(255, 235, 179)),
+  PURE_WHITE("pure_white", "White", "ಬಿಳಿ", "أبيض", Color.WHITE),
+  ICE_CYAN("ice_cyan", "Cyan", "ನೀಲಿ", "سماوي", Color.rgb(166, 235, 255)),
+  EMERALD_MINT("emerald_mint", "Mint", "ಪಚ್ಚೆ", "نعناعي", Color.rgb(153, 245, 204)),
+  SUNSET_AMBER("sunset_amber", "Amber", "ಕಿತ್ತಳೆ", "كهرماني", Color.rgb(255, 204, 122)),
+  ROSE_GOLD("rose_gold", "Rose", "ಗುಲಾಬಿ", "وردي", Color.rgb(255, 199, 209)),
+  ROYAL_LAVENDER("royal_lavender", "Lavender", "ನೇರಳೆ", "أرجواني", Color.rgb(224, 214, 255)),
+  CUSTOM("custom", "Custom", "ಕಸ್ಟಮ್", "مخصص", null);
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 
   companion object {
     val presets: List<AyahCardTextColorScheme> = listOf(
@@ -313,6 +354,47 @@ enum class AyahCardTheme(
   );
 
   fun displayName(isKannada: Boolean): String = if (isKannada) labelKn else labelEn
+
+  fun displayName(context: Context): String =
+    pickLocalizedLabel(
+      context,
+      labelEn,
+      labelKn,
+      when (this) {
+        EMERALD -> "زمردي"
+        MIDNIGHT -> "منتصف الليل"
+        ROYAL -> "أزرق ملكي"
+        SUNSET -> "الغروب"
+        OLIVE -> "زيتوني"
+        PARCHMENT -> "ورقي"
+        MINIMAL -> "أبيض نقي"
+      }
+    )
+}
+
+enum class AyahVideoExportQuality(
+  val id: String,
+  val labelEn: String,
+  val labelKn: String,
+  val labelAr: String,
+  val maxWidthPx: Int
+) {
+  STANDARD_720P("720p", "Standard · 720p", "ಸ್ಟ್ಯಾಂಡರ್ಡ್ · 720p", "قياسي · 720p", 720),
+  HIGH_1080P("1080p", "High · 1080p", "ಹೈ · 1080p", "عالي · 1080p", 1080);
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
+}
+
+enum class RemoteVideoResolutionFilter(
+  val labelEn: String,
+  val labelKn: String,
+  val labelAr: String
+) {
+  ALL("All", "ಎಲ್ಲಾ", "الكل"),
+  HD_1080P("HD 1080p", "HD 1080p", "HD 1080p"),
+  STANDARD_720P("720p", "720p", "720p");
+
+  fun displayName(context: Context): String = pickLocalizedLabel(context, labelEn, labelKn, labelAr)
 }
 
 data class RemoteAyahBackgroundItem(
@@ -320,8 +402,27 @@ data class RemoteAyahBackgroundItem(
   val name: String,
   val nameKn: String?,
   val thumbnailUrl: String,
-  val imageUrl: String
+  val imageUrl: String = "",
+  val videoUrl: String? = null,
+  val durationSec: Double? = null,
+  val sizeBytes: Long? = null,
+  val resolution: String? = null,
+  val isHd: Boolean = false
 ) {
+  val isVideo: Boolean
+    get() = !videoUrl.isNullOrBlank()
+
+  val isHdVideo: Boolean
+    get() = isHd ||
+      resolution.equals("1080p", ignoreCase = true) ||
+      resolution.equals("hd", ignoreCase = true)
+
+  fun formattedSizeLabel(): String? {
+    val bytes = sizeBytes ?: return null
+    if (bytes <= 0L) return null
+    return String.format(java.util.Locale.US, "%.1f MB", bytes / 1_000_000.0)
+  }
+
   fun localizedName(isKannada: Boolean): String {
     return if (isKannada && !nameKn.isNullOrBlank()) nameKn else name
   }

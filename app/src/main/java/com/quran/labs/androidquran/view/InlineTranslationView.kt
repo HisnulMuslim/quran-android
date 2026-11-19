@@ -114,7 +114,7 @@ class InlineTranslationView @JvmOverloads constructor(
     val suraNumber = ayah.sura
     val ayahNumber = ayah.ayah
     val ayahHeader = TextView(context)
-    ayahHeader.setTextColor(ContextCompat.getColor(context, R.color.accent_color))
+    ayahHeader.setTextColor(inlineAyahColor)
     ayahHeader.textSize = ayahFontSize.toFloat()
     ayahHeader.setTypeface(null, Typeface.BOLD)
     ayahHeader.text = context.resources.getString(R.string.sura_ayah, suraNumber, ayahNumber)
@@ -144,7 +144,15 @@ class InlineTranslationView @JvmOverloads constructor(
             StyleSpan(Typeface.BOLD),
             start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
           )
-          builder.append("\n\n")
+          builder.setSpan(
+            ForegroundColorSpan(inlineAyahColor),
+            start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+          )
+          builder.setSpan(
+            RelativeSizeSpan(0.9f),
+            start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+          )
+          builder.append("\n")
         }
 
         // irrespective of whether it's a link or not, show the text

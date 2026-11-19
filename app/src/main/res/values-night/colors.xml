@@ -22,6 +22,7 @@
   <color name="continue_reading_card_stroke">#2E2E2E</color>
   <color name="translation_translator_color">#80CBC4</color>
   <color name="translation_bookmark_tint">#80CBC4</color>
+  <color name="panel_background_color">#0D423A</color>
   <color name="panel_label">#80CBC4</color>
   <color name="ayah_bookmark_color">#80CBC4</color>
   <color name="toolbar_background_main">#022B24</color>

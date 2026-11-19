@@ -255,7 +255,7 @@ open class TranslationManagerPresenter @Inject internal constructor(
       displayName = "English Translation (Sahih International)",
       downloadType = "translation",
       fileName = ENGLISH_SAHIH_FILENAME,
-      fileUrl = "https://android.quran.com/data/getTranslation.php?id=98&ext=zip",
+      fileUrl = "${Constants.HOST}data/databases/quran.ensi.db.zip",
       saveTo = "databases",
       languageCode = "en",
       translator = "Sahih International"

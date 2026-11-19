@@ -60,6 +60,30 @@ public class QuranSettings {
   public String interfaceLanguage() {
     return prefs.getString(Constants.PREF_INTERFACE_LANGUAGE, "kn");
   }
+
+  public void setInterfaceLanguage(@NonNull String language) {
+    prefs.edit().putString(Constants.PREF_INTERFACE_LANGUAGE, language).apply();
+    setInitialLanguageSelected();
+  }
+
+  public boolean hasSelectedInitialLanguage() {
+    return perInstallationPrefs.getBoolean(Constants.PREF_HAS_SELECTED_INITIAL_LANGUAGE, false);
+  }
+
+  public void setInitialLanguageSelected() {
+    perInstallationPrefs.edit().putBoolean(Constants.PREF_HAS_SELECTED_INITIAL_LANGUAGE, true).apply();
+  }
+
+  public boolean shouldShowInitialLanguagePrompt() {
+    if (hasSelectedInitialLanguage()) {
+      return false;
+    }
+    if (prefs.contains(Constants.PREF_INTERFACE_LANGUAGE)) {
+      setInitialLanguageSelected();
+      return false;
+    }
+    return true;
+  }
   /*KQACR6 end*/
 
   public boolean isLockOrientation() {

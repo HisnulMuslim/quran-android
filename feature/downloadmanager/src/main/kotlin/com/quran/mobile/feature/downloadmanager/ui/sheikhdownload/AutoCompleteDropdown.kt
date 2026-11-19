@@ -1,11 +1,11 @@
 package com.quran.mobile.feature.downloadmanager.ui.sheikhdownload
 
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material.Text
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -69,7 +69,16 @@ fun AutoCompleteDropdown(
           expanded = isExpanded.value
         )
       },
-      colors = ExposedDropdownMenuDefaults.textFieldColors(),
+      colors = ExposedDropdownMenuDefaults.textFieldColors(
+        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+        focusedLabelColor = MaterialTheme.colorScheme.primary,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+        unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+      ),
       modifier = Modifier
         .menuAnchor()
         .onFocusChanged { focusState ->
@@ -89,7 +98,7 @@ fun AutoCompleteDropdown(
       ) {
         filtered.forEach {
           DropdownMenuItem(
-            text = { Text(it.name, color = MaterialTheme.colorScheme.onSecondaryContainer) },
+            text = { Text(it.name, color = MaterialTheme.colorScheme.onSurface) },
             onClick = {
               textState.value = textState.value.copy(text = it.name)
               isExpanded.value = false

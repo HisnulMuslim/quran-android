@@ -18,9 +18,11 @@
         android:id="@+id/translator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/translation_top_bottom_margin"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
         android:layout_marginLeft="@dimen/translation_left_right_margin"
         android:layout_marginRight="@dimen/translation_left_right_margin"
+        android:backgroundTint="@color/title_color"
         android:textSize="14sp"
         android:textStyle="bold"
         />
@@ -32,8 +34,8 @@
         android:visibility="gone"
         android:paddingLeft="@dimen/translation_left_right_margin"
         android:paddingRight="@dimen/translation_left_right_margin"
-        android:paddingTop="6dp"
-        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="10dp"
         >
       <LinearLayout
           android:id="@+id/compare_bar"
@@ -42,10 +44,17 @@
           android:orientation="horizontal"
           />
     </HorizontalScrollView>
+    <View
+        android:id="@+id/translation_header_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/continue_reading_card_stroke"
+        />
     <com.quran.labs.androidquran.view.InlineTranslationView
         android:id="@+id/translation_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         />
   </LinearLayout>
 
@@ -54,14 +63,20 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="bottom"
+      android:paddingStart="12dp"
+      android:paddingEnd="12dp"
+      android:paddingBottom="10dp"
       >
     <ImageButton
         android:id="@+id/next_ayah"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/translation_nav_button_bg"
         android:src="@drawable/ic_translation_next"
+        android:tint="@color/title_color"
         android:contentDescription="@string/next"
-        android:padding="12dp"
+        android:scaleType="centerInside"
+        android:padding="10dp"
         />
     <Space
         android:layout_width="0dp"
@@ -70,11 +85,14 @@
         />
     <ImageButton
         android:id="@+id/previous_ayah"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/translation_nav_button_bg"
         android:src="@drawable/ic_translation_previous"
+        android:tint="@color/title_color"
         android:contentDescription="@string/previous"
-        android:padding="12dp"
+        android:scaleType="centerInside"
+        android:padding="10dp"
         />
   </com.quran.labs.androidquran.view.LeftToRightLinearLayout>
 
@@ -82,7 +100,7 @@
       android:id="@+id/empty_state"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="8dp"
+      android:padding="16dp"
       android:orientation="vertical"
       android:visibility="gone"
       >
@@ -90,13 +108,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
+        android:textColor="@color/title_color"
         android:text="@string/need_translation"
         />
     <Button
         android:id="@+id/get_translations_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/accent_color_dark"
+        android:textColor="@color/toolbar_text"
         android:text="@string/get_translations"
         />
   </LinearLayout>

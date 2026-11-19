@@ -71,7 +71,7 @@ object QuranDataModule {
   @Named(DependencyInjectionConstants.FALLBACK_PAGE_TYPE)
   @JvmStatic
   @Provides
-  fun provideFallbackPageType(): String = "madani_1439"
+  fun provideFallbackPageType(): String = "tajweed"
 
   @JvmStatic
   @Provides

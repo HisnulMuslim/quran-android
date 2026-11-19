@@ -51,6 +51,8 @@ class AyahToolBar @JvmOverloads constructor(
   var isRecitationEnabled = false
   var lastMeasuredWidth = 0
   var lastSelectionShouldPadForCutout = false
+  private var canShrinkSelection = false
+  private var canExpandSelection = true
 
   var insets: Insets = Insets.NONE
 
@@ -175,6 +177,7 @@ class AyahToolBar @JvmOverloads constructor(
       }
     }
     currentMenu = menu
+    applyRangeButtonStates()
   }
 
   private fun getMenuItemView(item: MenuItem): View {
@@ -182,6 +185,7 @@ class AyahToolBar @JvmOverloads constructor(
       setImageDrawable(item.icon)
       setBackgroundResource(R.drawable.toolbar_button)
       id = item.itemId
+      contentDescription = item.title
       layoutParams = LayoutParams(itemWidth, LayoutParams.MATCH_PARENT)
       setOnClickListener(this@AyahToolBar)
       setOnLongClickListener(this@AyahToolBar)
@@ -191,7 +195,28 @@ class AyahToolBar @JvmOverloads constructor(
   // relying on getWidth() may give us the width of a shorter
   // submenu instead of the actual menu
   private val toolBarWidth: Int
-    get() = menu.size() * itemWidth
+    get() {
+      val activeMenu = currentMenu ?: menu
+      val visibleCount = (0 until activeMenu.size()).count { activeMenu.getItem(it).isVisible }
+      return visibleCount.coerceAtLeast(1) * itemWidth
+    }
+
+  fun setSelectionRangeState(canShrink: Boolean, canExpand: Boolean) {
+    canShrinkSelection = canShrink
+    canExpandSelection = canExpand
+    applyRangeButtonStates()
+  }
+
+  private fun applyRangeButtonStates() {
+    findViewById<ImageButton>(R.id.cab_shrink_ayah)?.apply {
+      isEnabled = canShrinkSelection
+      alpha = if (canShrinkSelection) 1f else 0.35f
+    }
+    findViewById<ImageButton>(R.id.cab_expand_ayah)?.apply {
+      isEnabled = canExpandSelection
+      alpha = if (canExpandSelection) 1f else 0.35f
+    }
+  }
 
   fun setBookmarked(bookmarked: Boolean) {
     val bookmarkItem = menu.findItem(R.id.cab_bookmark_ayah)

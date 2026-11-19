@@ -88,6 +88,7 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
   private var lastForceValue: Boolean = false
   private var didCheckPermissions: Boolean = false
   private var forceUpdateDialog: ForceUpdateDialog? = null
+  private var initialLanguageDialog: com.google.android.material.bottomsheet.BottomSheetDialog? = null
   private var userClickedUpdate: Boolean = false
   private var shouldCheckUpdateOnResume: Boolean = false
   private lateinit var forceUpdateChecker: ForceUpdateChecker
@@ -188,8 +189,32 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
         if (updateInfo != null) {
           showForceUpdateDialog(updateInfo)
         } else {
-          checkPermissions()
+          checkInitialLanguageThenPermissions()
         }
+      }
+    }
+  }
+
+  private fun checkInitialLanguageThenPermissions() {
+    if (!quranSettings.shouldShowInitialLanguagePrompt()) {
+      checkPermissions()
+      return
+    }
+    if (initialLanguageDialog == null && !isFinishing && !isDestroyed) {
+      initialLanguageDialog = com.quran.labs.androidquran.util.InitialLanguagePrompt.show(
+        activity = this,
+        settings = quranSettings
+      ) { chosenLanguage, chosenTheme ->
+        initialLanguageDialog = null
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+          .edit()
+          .putString(com.quran.labs.androidquran.data.Constants.PREF_APP_THEME, chosenTheme)
+          .apply()
+        QuranApplication.applyAppTheme(chosenTheme)
+        quranSettings.setInterfaceLanguage(chosenLanguage)
+        (application as QuranApplication).refreshLocale(this, true)
+        com.quran.labs.androidquran.ui.QuranActivity.shouldRecreate = true
+        checkPermissions()
       }
     }
   }
@@ -204,7 +229,7 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
           // User clicked "Remind Me Later"
           forceUpdateChecker.postponeUpdate()
           forceUpdateDialog = null
-          checkPermissions()
+          checkInitialLanguageThenPermissions()
         },
         onUpdateClicked = {
           // User clicked "Update Now" - mark it and wait to see if they return
@@ -237,6 +262,8 @@ class QuranDataActivity : AppCompatActivity(), SimpleDownloadListener, OnRequest
 
     forceUpdateDialog?.dismiss()
     forceUpdateDialog = null
+    initialLanguageDialog?.dismiss()
+    initialLanguageDialog = null
     if (!isFinishing && !shouldCheckUpdateOnResume) {
       didCheckPermissions = false
     }

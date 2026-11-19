@@ -21,7 +21,7 @@ import com.quran.labs.androidquran.R
 fun ComponentActivity.enableGreenStatusBarEdgeToEdge() {
   enableEdgeToEdge(
     statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-    navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
   )
 }
 

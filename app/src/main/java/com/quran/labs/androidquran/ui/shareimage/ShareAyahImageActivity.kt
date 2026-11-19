@@ -4,15 +4,21 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.graphics.SurfaceTexture
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.view.Surface
+import android.view.TextureView
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,6 +41,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +53,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
@@ -77,9 +85,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -92,38 +102,54 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
+import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
+import kotlin.coroutines.resume
 import kotlin.math.roundToInt
 
 class ShareAyahImageActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    (application as? QuranApplication)?.refreshLocale(this, false)
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.light(
+        android.graphics.Color.TRANSPARENT,
+        android.graphics.Color.TRANSPARENT
+      ),
+      navigationBarStyle = SystemBarStyle.light(
+        android.graphics.Color.TRANSPARENT,
+        android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
+      )
+    )
     super.onCreate(savedInstanceState)
 
-    val cardData = AyahShareCardData(
-      referenceText = intent.getStringExtra(EXTRA_REFERENCE).orEmpty(),
-      arabicText = intent.getStringExtra(EXTRA_ARABIC).orEmpty(),
-      translationText = intent.getStringExtra(EXTRA_TRANSLATION).orEmpty(),
-      footnotes = intent.getStringArrayListExtra(EXTRA_FOOTNOTES)?.toList().orEmpty(),
-      isKannada = intent.getBooleanExtra(EXTRA_IS_KANNADA, false),
-      startSura = intent.getIntExtra(EXTRA_START_SURA, 0),
-      startAyah = intent.getIntExtra(EXTRA_START_AYAH, 0),
-      endSura = intent.getIntExtra(EXTRA_END_SURA, 0),
-      endAyah = intent.getIntExtra(EXTRA_END_AYAH, 0)
-    )
+    val cardData = readCardDataFromIntent(this, intent)
     val isVideoMode = intent.getBooleanExtra(EXTRA_IS_VIDEO_MODE, false)
 
     setContent {
@@ -155,95 +181,275 @@ class ShareAyahImageActivity : ComponentActivity() {
     private const val EXTRA_START_AYAH = "extra_start_ayah"
     private const val EXTRA_END_SURA = "extra_end_sura"
     private const val EXTRA_END_AYAH = "extra_end_ayah"
+    private const val EXTRA_AYAH_SLIDES_JSON = "extra_ayah_slides_json"
+    private const val EXTRA_PAYLOAD_FILE = "extra_payload_file"
+    private const val MAX_INLINE_INTENT_CHARS = 32_000
+    private const val PENDING_PAYLOAD_FILENAME = "pending_share_card.json"
+
+    internal fun encodeCardDataJson(data: AyahShareCardData): String {
+      return JSONObject().apply {
+        put("referenceText", data.referenceText)
+        put("arabicText", data.arabicText)
+        put("translationText", data.translationText)
+        put("footnotes", JSONArray(data.footnotes))
+        put("isKannada", data.isKannada)
+        put("startSura", data.startSura)
+        put("startAyah", data.startAyah)
+        put("endSura", data.endSura)
+        put("endAyah", data.endAyah)
+        encodeAyahSlidesJson(data.ayahSlides)?.let { put("ayahSlidesJson", it) }
+      }.toString()
+    }
+
+    internal fun decodeCardDataJson(json: String?): AyahShareCardData? {
+      if (json.isNullOrBlank()) return null
+      return try {
+        val obj = JSONObject(json)
+        val fnArr = obj.optJSONArray("footnotes")
+        val footnotes = if (fnArr != null) {
+          List(fnArr.length()) { idx -> fnArr.optString(idx) }
+        } else {
+          emptyList()
+        }
+        AyahShareCardData(
+          referenceText = obj.optString("referenceText"),
+          arabicText = obj.optString("arabicText"),
+          translationText = obj.optString("translationText"),
+          footnotes = footnotes,
+          isKannada = obj.optBoolean("isKannada", false),
+          startSura = obj.optInt("startSura", 0),
+          startAyah = obj.optInt("startAyah", 0),
+          endSura = obj.optInt("endSura", 0),
+          endAyah = obj.optInt("endAyah", 0),
+          ayahSlides = decodeAyahSlidesJson(
+            obj.optString("ayahSlidesJson").takeIf { it.isNotEmpty() }
+          )
+        )
+      } catch (_: Exception) {
+        null
+      }
+    }
+
+    internal fun readCardDataFromIntent(context: Context, intent: Intent): AyahShareCardData {
+      val payloadPath = intent.getStringExtra(EXTRA_PAYLOAD_FILE)
+      if (!payloadPath.isNullOrBlank()) {
+        try {
+          val file = java.io.File(payloadPath)
+          if (file.exists() && file.canonicalFile.parentFile?.canonicalPath == context.cacheDir.canonicalPath) {
+            decodeCardDataJson(file.readText())?.let { return it }
+          }
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to read share card payload file")
+        }
+      }
+      return AyahShareCardData(
+        referenceText = intent.getStringExtra(EXTRA_REFERENCE).orEmpty(),
+        arabicText = intent.getStringExtra(EXTRA_ARABIC).orEmpty(),
+        translationText = intent.getStringExtra(EXTRA_TRANSLATION).orEmpty(),
+        footnotes = intent.getStringArrayListExtra(EXTRA_FOOTNOTES)?.toList().orEmpty(),
+        isKannada = intent.getBooleanExtra(EXTRA_IS_KANNADA, false),
+        startSura = intent.getIntExtra(EXTRA_START_SURA, 0),
+        startAyah = intent.getIntExtra(EXTRA_START_AYAH, 0),
+        endSura = intent.getIntExtra(EXTRA_END_SURA, 0),
+        endAyah = intent.getIntExtra(EXTRA_END_AYAH, 0),
+        ayahSlides = decodeAyahSlidesJson(intent.getStringExtra(EXTRA_AYAH_SLIDES_JSON))
+      )
+    }
+
+    private fun encodeAyahSlidesJson(slides: List<AyahSlideData>): String? {
+      if (slides.isEmpty()) return null
+      val arr = JSONArray()
+      for (slide in slides) {
+        val obj = JSONObject().apply {
+          put("sura", slide.sura)
+          put("ayah", slide.ayah)
+          put("ref", slide.referenceText)
+          put("ar", slide.arabicText)
+          put("tr", slide.translationText)
+          put("fn", JSONArray(slide.footnotes))
+        }
+        arr.put(obj)
+      }
+      return arr.toString()
+    }
+
+    private fun decodeAyahSlidesJson(jsonStr: String?): List<AyahSlideData> {
+      if (jsonStr.isNullOrBlank()) return emptyList()
+      return try {
+        val arr = JSONArray(jsonStr)
+        List(arr.length()) { idx ->
+          val obj = arr.getJSONObject(idx)
+          val fnArr = obj.optJSONArray("fn")
+          val footnotes = if (fnArr != null) {
+            List(fnArr.length()) { fIdx -> fnArr.optString(fIdx) }
+          } else {
+            emptyList()
+          }
+          AyahSlideData(
+            sura = obj.optInt("sura"),
+            ayah = obj.optInt("ayah"),
+            referenceText = obj.optString("ref"),
+            arabicText = obj.optString("ar"),
+            translationText = obj.optString("tr"),
+            footnotes = footnotes
+          )
+        }
+      } catch (_: Exception) {
+        emptyList()
+      }
+    }
 
     fun createIntent(
       context: Context,
       data: AyahShareCardData,
       isVideoMode: Boolean = false
     ): Intent {
+      val slidesJson = encodeAyahSlidesJson(data.ayahSlides)
+      val estimatedChars = data.referenceText.length +
+        data.arabicText.length +
+        data.translationText.length +
+        data.footnotes.sumOf { it.length } +
+        (slidesJson?.length ?: 0)
+
+      val payloadFilePath = if (estimatedChars > MAX_INLINE_INTENT_CHARS) {
+        try {
+          val target = java.io.File(context.cacheDir, PENDING_PAYLOAD_FILENAME)
+          target.parentFile?.mkdirs()
+          val temp = java.io.File(context.cacheDir, "$PENDING_PAYLOAD_FILENAME.part")
+          temp.writeText(encodeCardDataJson(data))
+          if (target.exists() && !target.delete()) {
+            temp.copyTo(target, overwrite = true)
+            temp.delete()
+          } else if (!temp.renameTo(target)) {
+            temp.copyTo(target, overwrite = true)
+            temp.delete()
+          }
+          target.absolutePath
+        } catch (e: Exception) {
+          Timber.e(e, "Failed to spool large share card payload to cache")
+          null
+        }
+      } else {
+        null
+      }
+
       return Intent(context, ShareAyahImageActivity::class.java).apply {
         putExtra(EXTRA_REFERENCE, data.referenceText)
-        putExtra(EXTRA_ARABIC, data.arabicText)
-        putExtra(EXTRA_TRANSLATION, data.translationText)
-        putStringArrayListExtra(EXTRA_FOOTNOTES, ArrayList(data.footnotes))
         putExtra(EXTRA_IS_KANNADA, data.isKannada)
         putExtra(EXTRA_IS_VIDEO_MODE, isVideoMode)
         putExtra(EXTRA_START_SURA, data.startSura)
         putExtra(EXTRA_START_AYAH, data.startAyah)
         putExtra(EXTRA_END_SURA, data.endSura)
         putExtra(EXTRA_END_AYAH, data.endAyah)
+        if (payloadFilePath != null) {
+          putExtra(EXTRA_PAYLOAD_FILE, payloadFilePath)
+        } else {
+          putExtra(EXTRA_ARABIC, data.arabicText)
+          putExtra(EXTRA_TRANSLATION, data.translationText)
+          putStringArrayListExtra(EXTRA_FOOTNOTES, ArrayList(data.footnotes))
+          slidesJson?.let { putExtra(EXTRA_AYAH_SLIDES_JSON, it) }
+        }
       }
     }
   }
 }
 
-private fun loadPresetBitmap(context: Context, preset: AyahCardPhotoPreset): Bitmap? {
-  val resId = context.resources.getIdentifier(preset.drawableResName, "drawable", context.packageName)
-  if (resId == 0) return null
-  return BitmapFactory.decodeResource(context.resources, resId)
+private fun saveMediaToGallery(
+  context: Context,
+  collection: android.net.Uri,
+  legacyDirectory: String,
+  filename: String,
+  mimeType: String,
+  relativePath: String,
+  logTag: String,
+  writePayload: (java.io.OutputStream) -> Boolean
+): Boolean {
+  return try {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      val resolver = context.contentResolver
+      val values = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+        put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+        put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
+        put(MediaStore.MediaColumns.IS_PENDING, 1)
+      }
+      val uri = resolver.insert(collection, values) ?: return false
+      try {
+        val written = resolver.openOutputStream(uri)?.use { out -> writePayload(out) } ?: false
+        if (!written) {
+          resolver.delete(uri, null, null)
+          return false
+        }
+        values.clear()
+        values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+        resolver.update(uri, values, null, null)
+        true
+      } catch (e: Exception) {
+        try {
+          resolver.delete(uri, null, null)
+        } catch (_: Exception) {
+        }
+        throw e
+      }
+    } else {
+      val hasStoragePermission = androidx.core.content.ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+      ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+      if (!hasStoragePermission) return false
+
+      @Suppress("DEPRECATION")
+      val root = Environment.getExternalStoragePublicDirectory(legacyDirectory)
+      val targetDir = java.io.File(root, "Quran")
+      if (!targetDir.exists() && !targetDir.mkdirs()) return false
+      val targetFile = java.io.File(targetDir, filename)
+      val written = java.io.FileOutputStream(targetFile).use { out -> writePayload(out) }
+      if (!written) {
+        targetFile.delete()
+        return false
+      }
+      android.media.MediaScannerConnection.scanFile(
+        context.applicationContext,
+        arrayOf(targetFile.absolutePath),
+        arrayOf(mimeType),
+        null
+      )
+      true
+    }
+  } catch (e: Exception) {
+    Timber.e(e, "Failed to save %s to gallery", logTag)
+    false
+  }
 }
 
 private fun saveBitmapToGallery(context: Context, bitmap: Bitmap): Boolean {
+  if (bitmap.isRecycled) return false
   val filename = "Quran_Ayah_${System.currentTimeMillis()}.png"
-  return try {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val values = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-        put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/Quran")
-        put(MediaStore.Images.Media.IS_PENDING, 1)
-      }
-      val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-        ?: return false
-      context.contentResolver.openOutputStream(uri)?.use { out ->
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-      }
-      values.clear()
-      values.put(MediaStore.Images.Media.IS_PENDING, 0)
-      context.contentResolver.update(uri, values, null, null)
-      true
-    } else {
-      @Suppress("DEPRECATION")
-      val inserted = MediaStore.Images.Media.insertImage(
-        context.contentResolver,
-        bitmap,
-        filename,
-        "Quran Ayah Card"
-      )
-      inserted != null
-    }
-  } catch (e: Exception) {
-    Timber.e(e, "Failed to save image to gallery")
-    false
+  return saveMediaToGallery(
+    context = context,
+    collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+    legacyDirectory = Environment.DIRECTORY_PICTURES,
+    filename = filename,
+    mimeType = "image/png",
+    relativePath = "${Environment.DIRECTORY_PICTURES}/Quran",
+    logTag = "image"
+  ) { out ->
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
   }
 }
 
 private fun saveVideoToGallery(context: Context, videoFile: java.io.File): Boolean {
-  val filename = videoFile.name
-  return try {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val values = ContentValues().apply {
-        put(MediaStore.Video.Media.DISPLAY_NAME, filename)
-        put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-        put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/Quran")
-        put(MediaStore.Video.Media.IS_PENDING, 1)
-      }
-      val uri = context.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
-        ?: return false
-      val stream = context.contentResolver.openOutputStream(uri) ?: return false
-      stream.use { out ->
-        videoFile.inputStream().use { input -> input.copyTo(out) }
-      }
-      values.clear()
-      values.put(MediaStore.Video.Media.IS_PENDING, 0)
-      context.contentResolver.update(uri, values, null, null)
-      true
-    } else {
-      false
-    }
-  } catch (e: Exception) {
-    Timber.e(e, "Failed to save video to gallery")
-    false
+  if (!videoFile.exists() || videoFile.length() <= 0L) return false
+  return saveMediaToGallery(
+    context = context,
+    collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+    legacyDirectory = Environment.DIRECTORY_MOVIES,
+    filename = videoFile.name,
+    mimeType = "video/mp4",
+    relativePath = "${Environment.DIRECTORY_MOVIES}/Quran",
+    logTag = "video"
+  ) { out ->
+    videoFile.inputStream().use { input -> input.copyTo(out) > 0L }
   }
 }
 
@@ -257,16 +463,28 @@ private fun ShareAyahImageScreen(
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
-  val isKn = data.isKannada
+  val isKn = data.isKannada || context.resources.configuration.locales[0]?.language == "kn"
+  val isLowRamDevice = remember {
+    (context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
+  }
+  val previewRenderWidthPx = if (isLowRamDevice) 720 else 1080
+  val imageExportWidthPx = if (isLowRamDevice) 1080 else 1440
 
-  // State matching iOS defaults
+  // Videos tab is default when Share as Video; Photos tab is default when Share as Image
   var selectedTheme by remember { mutableStateOf(AyahCardTheme.EMERALD) }
   var selectedAspectRatio by remember { mutableStateOf(AyahCardAspectRatio.STORY) }
-  var backgroundMode by remember { mutableIntStateOf(0) } // 0 = Colors, 1 = Photos
-  var selectedPhotoPreset by remember { mutableStateOf<AyahCardPhotoPreset?>(null) }
+  var backgroundMode by remember { mutableIntStateOf(if (isVideoMode) 2 else 1) } // 0 = Colors, 1 = Photos, 2 = Videos
+  var selectedRemotePhotoItem by remember { mutableStateOf<RemoteAyahBackgroundItem?>(null) }
   var downloadedCloudPhoto by remember { mutableStateOf<Bitmap?>(null) }
-  var selectedRemoteItem by remember { mutableStateOf<RemoteAyahBackgroundItem?>(null) }
-  var isUsingCloudPhoto by remember { mutableStateOf(false) }
+  var photoDownloadJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+  var selectedRemoteVideoItem by remember { mutableStateOf<RemoteAyahBackgroundItem?>(null) }
+  var downloadedCloudVideoFile by remember { mutableStateOf<File?>(null) }
+  var loadingVideoThumbnail by remember { mutableStateOf<Bitmap?>(null) }
+  var isLoadingRemoteVideo by remember { mutableStateOf(false) }
+  var remoteVideoProgress by remember { mutableStateOf<Int?>(null) }
+  var videoDownloadJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+  var cloudSheetTab by remember { mutableIntStateOf(if (isVideoMode) 1 else 0) } // 0 = Photos, 1 = Videos
 
   var selectedArabicFont by remember { mutableStateOf(AyahCardArabicFont.UTHMANIC) }
   var selectedTranslationFont by remember { mutableStateOf(AyahCardTranslationFont.SERIF) }
@@ -281,15 +499,56 @@ private fun ShareAyahImageScreen(
   var showArabic by remember { mutableStateOf(data.arabicText.isNotBlank()) }
   var showTranslation by remember { mutableStateOf(data.translationText.isNotBlank()) }
   var showFootnotes by remember { mutableStateOf(false) }
-  var showQRCode by remember { mutableStateOf(true) }
   var captionMode by remember { mutableStateOf(AyahShareCaptionMode.LINK_ONLY) }
 
-  val repository = remember { RemoteBackgroundRepository(context) }
-  var catalogItems by remember {
-    mutableStateOf(repository.getCachedCatalog().orEmpty())
+  val hasMultiAyahSlides = data.ayahSlides.size > 1
+  var syncAyahWithAudio by remember { mutableStateOf(isVideoMode && hasMultiAyahSlides) }
+  var activePreviewSlideIndex by remember { mutableIntStateOf(0) }
+  var selectedVideoQuality by remember { mutableStateOf(AyahVideoExportQuality.STANDARD_720P) }
+  var videoResolutionFilter by remember { mutableStateOf(RemoteVideoResolutionFilter.ALL) }
+  LaunchedEffect(isVideoMode) {
+    if (isVideoMode) {
+      selectedVideoQuality = withContext(Dispatchers.IO) {
+        AyahVideoExporter(context).recommendedExportQuality()
+      }
+    }
   }
+
+  val repository = remember { RemoteBackgroundRepository(context) }
+  var catalogItems by remember { mutableStateOf<List<RemoteAyahBackgroundItem>>(emptyList()) }
+  val photoCatalogItems = remember(catalogItems) { catalogItems.filter { !it.isVideo } }
+  val videoCatalogItems = remember(catalogItems) { catalogItems.filter { it.isVideo } }
   var isLoadingCatalog by remember { mutableStateOf(false) }
   var isLoadingRemoteImage by remember { mutableStateOf(false) }
+  var downloadedPhotoIdSet by remember { mutableStateOf<Set<String>>(emptySet()) }
+  var downloadedVideoIdSet by remember { mutableStateOf<Set<String>>(emptySet()) }
+  LaunchedEffect(photoCatalogItems, downloadedCloudPhoto, isLoadingRemoteImage) {
+    downloadedPhotoIdSet = repository.filterCachedPhotoIds(photoCatalogItems)
+  }
+  LaunchedEffect(videoCatalogItems, downloadedCloudVideoFile, isLoadingRemoteVideo) {
+    downloadedVideoIdSet = repository.filterCachedVideoIds(videoCatalogItems)
+  }
+  val downloadedPhotoCatalogItems = remember(photoCatalogItems, downloadedPhotoIdSet) {
+    photoCatalogItems.filter { it.id in downloadedPhotoIdSet }
+  }
+  val downloadedVideoCatalogItems = remember(videoCatalogItems, downloadedVideoIdSet) {
+    videoCatalogItems.filter { it.id in downloadedVideoIdSet }
+  }
+  fun buildInlineCatalogItems(
+    downloaded: List<RemoteAyahBackgroundItem>,
+    all: List<RemoteAyahBackgroundItem>
+  ): List<RemoteAyahBackgroundItem> {
+    val minimumInlineCount = 4
+    if (downloaded.size >= minimumInlineCount) return downloaded
+    val downloadedIds = downloaded.map { it.id }.toSet()
+    return downloaded + all.filter { it.id !in downloadedIds }.take(minimumInlineCount - downloaded.size)
+  }
+  val inlinePhotoCatalogItems = remember(downloadedPhotoCatalogItems, photoCatalogItems) {
+    buildInlineCatalogItems(downloadedPhotoCatalogItems, photoCatalogItems)
+  }
+  val inlineVideoCatalogItems = remember(downloadedVideoCatalogItems, videoCatalogItems) {
+    buildInlineCatalogItems(downloadedVideoCatalogItems, videoCatalogItems)
+  }
   var showCloudSheet by remember { mutableStateOf(false) }
   var showColorPickerDialog by remember { mutableStateOf(false) }
   var isExporting by remember { mutableStateOf(false) }
@@ -317,11 +576,101 @@ private fun ShareAyahImageScreen(
   }
   val selectedQariName = availableQaris.firstOrNull { it.first == selectedQariId }?.second
   var previewQariName by remember { mutableStateOf<String?>(selectedQariName) }
-  var mediaPlayer by remember { mutableStateOf<android.media.MediaPlayer?>(null) }
+  var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
   val targetEndAyah = if (data.endSura == data.startSura && data.endAyah >= data.startAyah) {
     data.endAyah
   } else {
     data.startAyah
+  }
+  val ayahListPairs = remember(data) {
+    data.ayahSlides.map { it.sura to it.ayah }
+  }
+
+  fun selectCloudPhotoItem(item: RemoteAyahBackgroundItem) {
+    if (item.imageUrl.isBlank()) return
+    selectedRemotePhotoItem = item
+    backgroundMode = 1
+    photoScale = 1.0f
+
+    val cacheKey = "full_${item.id}"
+    photoDownloadJob?.cancel()
+    if (!repository.hasCachedImage(cacheKey)) {
+      downloadedCloudPhoto = null
+    }
+    isLoadingRemoteImage = true
+    photoDownloadJob = scope.launch {
+      try {
+        val fullBmp = repository.loadImage(url = item.imageUrl, cacheKey = cacheKey)
+        if (selectedRemotePhotoItem?.id == item.id) {
+          if (fullBmp != null) {
+            downloadedCloudPhoto = fullBmp
+          } else {
+            selectedRemotePhotoItem = null
+            snackbarHostState.showSnackbar(context.getString(R.string.share_error_bg_photo))
+          }
+        }
+      } catch (_: kotlinx.coroutines.CancellationException) {
+        // User selected another photo
+      } finally {
+        if (selectedRemotePhotoItem?.id == item.id) {
+          isLoadingRemoteImage = false
+        }
+      }
+    }
+  }
+
+  fun selectCloudVideoItem(item: RemoteAyahBackgroundItem) {
+    val videoUrl = item.videoUrl ?: return
+    selectedRemoteVideoItem = item
+    backgroundMode = 2
+    photoScale = 1.0f
+
+    val cacheKey = "vid_${item.id}"
+    val existing = repository.getCachedVideoFile(cacheKey)
+    videoDownloadJob?.cancel()
+    if (existing != null) {
+      downloadedCloudVideoFile = existing
+      loadingVideoThumbnail = null
+      isLoadingRemoteVideo = false
+      remoteVideoProgress = null
+      return
+    }
+
+    downloadedCloudVideoFile = null
+    isLoadingRemoteVideo = true
+    remoteVideoProgress = 0
+    videoDownloadJob = scope.launch {
+      try {
+        val thumbJob = launch {
+          loadingVideoThumbnail = runCatching {
+            repository.loadImage(url = item.thumbnailUrl, cacheKey = "thumb_${item.id}")
+          }.getOrNull()
+        }
+        val downloaded = repository.loadVideo(url = videoUrl, cacheKey = cacheKey) { pct ->
+          mainHandler.post {
+            if (selectedRemoteVideoItem?.id == item.id) {
+              remoteVideoProgress = pct
+            }
+          }
+        }
+        thumbJob.join()
+        if (selectedRemoteVideoItem?.id == item.id) {
+          if (downloaded != null) {
+            downloadedCloudVideoFile = downloaded
+          } else {
+            selectedRemoteVideoItem = null
+            snackbarHostState.showSnackbar(context.getString(R.string.share_error_bg_video))
+          }
+        }
+      } catch (_: kotlinx.coroutines.CancellationException) {
+        // User selected another item
+      } finally {
+        if (selectedRemoteVideoItem?.id == item.id) {
+          isLoadingRemoteVideo = false
+          remoteVideoProgress = null
+        }
+      }
+    }
   }
 
   fun stopAudioPreview() {
@@ -338,11 +687,82 @@ private fun ShareAyahImageScreen(
     isLoadingAudioPreview = false
     previewAudioStatusText = null
     previewAudioPercent = null
+    activePreviewSlideIndex = 0
   }
 
   DisposableEffect(Unit) {
     onDispose {
+      photoDownloadJob?.cancel()
+      videoDownloadJob?.cancel()
       stopAudioPreview()
+    }
+  }
+
+  fun findCueIndexAt(cues: List<AyahVideoExporter.AyahAudioCue>, relMs: Long): Int {
+    for (i in cues.indices.reversed()) {
+      if (relMs >= cues[i].relativeStartMs) return i
+    }
+    return 0
+  }
+
+  suspend fun playPartWithCueTracking(
+    partIndex: Int,
+    part: AyahVideoExporter.AudioTrackPart,
+    cues: List<AyahVideoExporter.AyahAudioCue>,
+    partCumulativeOffsetMs: Long
+  ) {
+    val player = MediaPlayer()
+    mediaPlayer?.release()
+    mediaPlayer = player
+
+    try {
+      val cuesInPart = cues.withIndex().filter { it.value.partIndex == partIndex }
+      if (cuesInPart.size == 1 && data.ayahSlides.isNotEmpty()) {
+        val cue = cuesInPart[0].value
+        val slideIdx = data.ayahSlides.indexOfFirst { it.sura == cue.sura && it.ayah == cue.ayah }
+          .takeIf { it >= 0 } ?: cuesInPart[0].index
+        activePreviewSlideIndex = slideIdx.coerceIn(0, data.ayahSlides.lastIndex)
+      }
+
+      var completed = false
+      player.setDataSource(part.file.absolutePath)
+      player.prepare()
+      if (part.startMs > 0L) {
+        player.seekTo(part.startMs.toInt())
+      }
+      player.setOnCompletionListener { completed = true }
+      player.setOnErrorListener { _, _, _ ->
+        completed = true
+        true
+      }
+      player.start()
+
+      while (!completed && mediaPlayer === player) {
+        val posMs = runCatching { player.currentPosition.toLong() }.getOrDefault(part.startMs)
+        if (part.endMs != Long.MAX_VALUE && posMs >= part.endMs) {
+          break
+        }
+        if (cuesInPart.size > 1 && data.ayahSlides.isNotEmpty()) {
+          val relMs = partCumulativeOffsetMs + maxOf(0L, posMs - part.startMs)
+          val cueIdx = findCueIndexAt(cues, relMs)
+          val cue = cues[cueIdx]
+          val slideIdx = data.ayahSlides.indexOfFirst { it.sura == cue.sura && it.ayah == cue.ayah }
+            .takeIf { it >= 0 } ?: cueIdx
+          val clamped = slideIdx.coerceIn(0, data.ayahSlides.lastIndex)
+          if (activePreviewSlideIndex != clamped) {
+            activePreviewSlideIndex = clamped
+          }
+        }
+        delay(60L)
+      }
+    } finally {
+      if (mediaPlayer === player) {
+        runCatching { player.stop() }
+        runCatching { player.release() }
+        mediaPlayer = null
+      } else {
+        runCatching { player.release() }
+      }
     }
   }
 
@@ -354,16 +774,18 @@ private fun ShareAyahImageScreen(
     if (data.startSura <= 0 || data.startAyah <= 0) return
     isLoadingAudioPreview = true
     previewAudioPercent = null
-    previewAudioStatusText = if (isKn) "ಆಡಿಯೋ ಲೋಡ್..." else "Loading audio..."
+    previewAudioStatusText = context.getString(R.string.share_loading_audio)
+    activePreviewSlideIndex = 0
     previewJob = scope.launch {
       try {
         val segment = try {
           withContext(Dispatchers.IO) {
             AyahVideoExporter(context).resolveAudioForAyah(
-              data.startSura,
-              data.startAyah,
-              targetEndAyah,
-              selectedQariId
+              sura = data.startSura,
+              startAyah = data.startAyah,
+              endAyah = targetEndAyah,
+              qariId = selectedQariId,
+              ayahList = ayahListPairs
             ) { p ->
               previewHandler.post {
                 previewAudioStatusText = p.statusText
@@ -379,71 +801,90 @@ private fun ShareAyahImageScreen(
         }
 
         previewQariName = segment.qariName
-        val player = android.media.MediaPlayer().apply {
-          setDataSource(segment.file.absolutePath)
-          prepare()
-          if (segment.startMs > 0) {
-            seekTo(segment.startMs.toInt())
-          }
-          setOnCompletionListener {
-            stopAudioPreview()
-          }
-          start()
-        }
-        mediaPlayer?.release()
-        mediaPlayer = player
         isPlayingAudioPreview = true
-        if (segment.endMs != Long.MAX_VALUE && segment.endMs > segment.startMs) {
-          kotlinx.coroutines.delay(segment.endMs - segment.startMs)
-          if (mediaPlayer === player) {
-            stopAudioPreview()
+        val parts = segment.parts.ifEmpty {
+          listOf(AyahVideoExporter.AudioTrackPart(segment.file, segment.startMs, segment.endMs))
+        }
+        var partCumulativeOffsetMs = 0L
+        for (partIdx in parts.indices) {
+          val part = parts[partIdx]
+          playPartWithCueTracking(partIdx, part, segment.ayahCues, partCumulativeOffsetMs)
+          val cuesInPart = segment.ayahCues.filter { it.partIndex == partIdx }
+          val lastEnd = cuesInPart.lastOrNull()?.relativeEndMs
+          if (lastEnd != null && lastEnd != Long.MAX_VALUE) {
+            partCumulativeOffsetMs = lastEnd
           }
         }
+        stopAudioPreview()
       } catch (_: kotlinx.coroutines.CancellationException) {
         // Ignore user-initiated cancellation
       } catch (e: Exception) {
         Timber.e(e, "Failed to load audio preview")
+        stopAudioPreview()
         snackbarHostState.showSnackbar(
-          if (isKn) "ಆಡಿಯೋ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ" else "Could not load recitation: ${e.message ?: "error"}"
+          context.getString(R.string.share_error_audio_preview_reason, e.message ?: "error")
         )
       }
     }
   }
 
-  // Load thumbnails for the 8 curated photo presets once
-  val presetBitmaps = remember {
-    AyahCardPhotoPreset.entries.associateWith { preset ->
-      loadPresetBitmap(context, preset)
-    }
-  }
-
+  val isLiveVideoBackground = isVideoMode && backgroundMode == 2 && downloadedCloudVideoFile != null
   val activePhotoBitmap: Bitmap? = when {
     backgroundMode == 0 -> null
-    isUsingCloudPhoto && downloadedCloudPhoto != null -> downloadedCloudPhoto
-    selectedPhotoPreset != null -> presetBitmaps[selectedPhotoPreset]
-    else -> null
+    backgroundMode == 2 -> if (downloadedCloudVideoFile == null) loadingVideoThumbnail else null
+    else -> downloadedCloudPhoto
+  }
+  val displayedCardData = remember(data, isVideoMode, syncAyahWithAudio, activePreviewSlideIndex) {
+    if (isVideoMode && syncAyahWithAudio && data.ayahSlides.isNotEmpty()) {
+      data.ayahSlides[activePreviewSlideIndex.coerceIn(0, data.ayahSlides.lastIndex)].toCardData(isKn)
+    } else {
+      data
+    }
   }
 
   var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-  // Fetch cloud background catalog in background
+  // Fetch cloud background catalog in background and auto-select active cached/starter background
   LaunchedEffect(Unit) {
+    suspend fun applyCatalog(items: List<RemoteAyahBackgroundItem>) {
+      catalogItems = items
+      val cachedPhotos = repository.filterCachedPhotoIds(items)
+      val cachedVideos = repository.filterCachedVideoIds(items)
+      downloadedPhotoIdSet = cachedPhotos
+      downloadedVideoIdSet = cachedVideos
+      if (isVideoMode && backgroundMode == 2 && selectedRemoteVideoItem == null) {
+        val targetVideo = items.firstOrNull { it.isVideo && it.id in cachedVideos }
+          ?: items.firstOrNull { it.isVideo }
+        targetVideo?.let { selectCloudVideoItem(it) }
+      } else if (backgroundMode == 1 && selectedRemotePhotoItem == null) {
+        val targetPhoto = items.firstOrNull { !it.isVideo && it.id in cachedPhotos }
+          ?: items.firstOrNull { !it.isVideo }
+        targetPhoto?.let { selectCloudPhotoItem(it) }
+      }
+    }
+
     isLoadingCatalog = true
+    val cached = repository.cachedCatalogItems()
+    if (cached.isNotEmpty()) {
+      applyCatalog(cached)
+    }
     val fetched = runCatching { repository.fetchCatalog() }.getOrDefault(emptyList())
     if (fetched.isNotEmpty()) {
-      catalogItems = fetched
+      applyCatalog(fetched)
     }
     isLoadingCatalog = false
   }
 
   // Re-render preview whenever any customization state changes
   LaunchedEffect(
+    displayedCardData,
     selectedTheme,
     selectedAspectRatio,
     backgroundMode,
-    selectedPhotoPreset,
-    isUsingCloudPhoto,
+    isLiveVideoBackground,
+    selectedRemotePhotoItem,
     downloadedCloudPhoto,
+    loadingVideoThumbnail,
     selectedArabicFont,
     selectedTranslationFont,
     arabicColorScheme,
@@ -454,38 +895,51 @@ private fun ShareAyahImageScreen(
     showArabic,
     showTranslation,
     showFootnotes,
-    showQRCode,
     photoScale
   ) {
     val rendered = withContext(Dispatchers.Default) {
-      AyahCardBitmapRenderer.render(
-        context = context,
-        data = data,
-        theme = selectedTheme,
-        aspectRatio = selectedAspectRatio,
-        arabicFont = selectedArabicFont,
-        translationFont = selectedTranslationFont,
-        textColorScheme = arabicColorScheme,
-        customArabicColor = customArabicColorInt,
-        translationTextColorScheme = translationColorScheme,
-        customTranslationColor = customTranslationColorInt,
-        fontSizeScale = fontSizeScale,
-        showArabic = showArabic,
-        showTranslation = showTranslation,
-        showFootnotes = showFootnotes,
-        showQRCode = showQRCode,
-        photoBackground = activePhotoBitmap,
-        photoScale = photoScale,
-        cardWidthPx = 540
-      )
+      try {
+        AyahCardBitmapRenderer.render(
+          context = context,
+          data = displayedCardData,
+          theme = selectedTheme,
+          aspectRatio = selectedAspectRatio,
+          arabicFont = selectedArabicFont,
+          translationFont = selectedTranslationFont,
+          textColorScheme = arabicColorScheme,
+          customArabicColor = customArabicColorInt,
+          translationTextColorScheme = translationColorScheme,
+          customTranslationColor = customTranslationColorInt,
+          fontSizeScale = fontSizeScale,
+          showArabic = showArabic,
+          showTranslation = showTranslation,
+          showFootnotes = showFootnotes,
+          photoBackground = activePhotoBitmap?.takeIf { !it.isRecycled },
+          photoScale = photoScale,
+          transparentBackground = isLiveVideoBackground,
+          cardWidthPx = previewRenderWidthPx
+        )
+      } catch (t: Throwable) {
+        if (t is kotlinx.coroutines.CancellationException) throw t
+        Timber.e(t, "Failed to render preview bitmap")
+        null
+      }
     }
-    previewBitmap = rendered
+    if (rendered != null) {
+      previewBitmap = rendered
+    }
   }
 
-  fun renderHighResBitmap(): Bitmap {
+  fun renderCardBitmap(
+    cardData: AyahShareCardData,
+    widthPx: Int,
+    photoBg: Bitmap?,
+    transparentBg: Boolean,
+    heightPxOverride: Int? = null
+  ): Bitmap {
     return AyahCardBitmapRenderer.render(
       context = context,
-      data = data,
+      data = cardData,
       theme = selectedTheme,
       aspectRatio = selectedAspectRatio,
       arabicFont = selectedArabicFont,
@@ -498,43 +952,121 @@ private fun ShareAyahImageScreen(
       showArabic = showArabic,
       showTranslation = showTranslation,
       showFootnotes = showFootnotes,
-      showQRCode = showQRCode,
-      photoBackground = activePhotoBitmap,
+      photoBackground = photoBg,
       photoScale = photoScale,
-      cardWidthPx = 1080
+      transparentBackground = transparentBg,
+      cardWidthPx = widthPx,
+      cardHeightPxOverride = heightPxOverride
     )
+  }
+
+  suspend fun ensureSelectedBackgroundVideoFile(): File? {
+    if (!isVideoMode || backgroundMode != 2) return null
+    downloadedCloudVideoFile?.let { if (it.exists() && it.length() > 0L) return it }
+    val item = selectedRemoteVideoItem ?: return null
+    val url = item.videoUrl ?: return null
+    val dlText = context.getString(R.string.share_downloading_bg_video)
+    postExportProgress(AyahVideoExporter.VideoExportProgress(dlText, 0))
+    return repository.loadVideo(url = url, cacheKey = "vid_${item.id}") { pct ->
+      postExportProgress(AyahVideoExporter.VideoExportProgress(dlText, pct))
+    }
+  }
+
+  suspend fun exportCurrentMediaFile(): File = withContext(Dispatchers.IO) {
+    if (isVideoMode && data.startSura > 0 && data.startAyah > 0) {
+      val videoBgFile = ensureSelectedBackgroundVideoFile()
+      val useTransparentOverlay = videoBgFile != null
+      val staticBg = if (useTransparentOverlay) null else activePhotoBitmap
+
+      val exporter = AyahVideoExporter(context)
+      val segment = exporter.resolveAudioForAyah(
+        sura = data.startSura,
+        startAyah = data.startAyah,
+        endAyah = targetEndAyah,
+        qariId = selectedQariId,
+        ayahList = ayahListPairs
+      ) { p -> postExportProgress(p) }
+
+      val baseWidth = 1080
+      val baseHeight = selectedAspectRatio.heightFor(baseWidth.toFloat()).roundToInt()
+      val shouldSyncSlides = syncAyahWithAudio && data.ayahSlides.size > 1
+
+      exporter.exportMp4WithSlides(
+        baseWidth = baseWidth,
+        baseHeight = baseHeight,
+        segment = segment,
+        backgroundVideoFile = videoBgFile,
+        backgroundVideoScale = photoScale,
+        slideFactory = { resolvedCues, _, _ ->
+          if (shouldSyncSlides && resolvedCues.isNotEmpty()) {
+            resolvedCues.mapIndexed { idx, cue ->
+              val slideData = data.ayahSlides.firstOrNull {
+                it.sura == cue.sura && it.ayah == cue.ayah
+              } ?: data.ayahSlides.getOrElse(idx) { data.ayahSlides.first() }
+              val slideCardData = slideData.toCardData(isKn)
+              AyahVideoExporter.TimedSlideSource(
+                startMs = cue.relativeStartMs,
+                endMs = cue.relativeEndMs
+              ) { w, h ->
+                renderCardBitmap(
+                  cardData = slideCardData,
+                  widthPx = w,
+                  photoBg = staticBg,
+                  transparentBg = useTransparentOverlay,
+                  heightPxOverride = h
+                )
+              }
+            }
+          } else {
+            listOf(
+              AyahVideoExporter.TimedSlideSource(0L, Long.MAX_VALUE) { w, h ->
+                renderCardBitmap(
+                  cardData = data,
+                  widthPx = w,
+                  photoBg = staticBg,
+                  transparentBg = useTransparentOverlay,
+                  heightPxOverride = h
+                )
+              }
+            )
+          }
+        },
+        recycleProducedBitmaps = true,
+        requestedQuality = selectedVideoQuality,
+        onProgress = { p -> postExportProgress(p) }
+      )
+    } else {
+      val highRes = withContext(Dispatchers.Default) {
+        renderCardBitmap(
+          cardData = data,
+          widthPx = imageExportWidthPx,
+          photoBg = activePhotoBitmap?.takeIf { !it.isRecycled },
+          transparentBg = false
+        )
+      }
+      try {
+        AyahCardBitmapRenderer.savePngToShareCache(context, highRes)
+      } finally {
+        highRes.recycle()
+      }
+    }
   }
 
   fun shareCard() {
     if (isExporting) return
+    stopAudioPreview()
     isExporting = true
     exportActionIsSave = false
-    exportStatusText = if (isKn) "ತಯಾರಿಸಲಾಗುತ್ತಿದೆ..." else "Preparing..."
+    exportStatusText = context.getString(R.string.share_preparing)
     exportProgressPercent = null
     scope.launch {
       try {
-        val shareUri = withContext(Dispatchers.Default) {
-          val highRes = renderHighResBitmap()
-          val file = withContext(Dispatchers.IO) {
-            if (isVideoMode && data.startSura > 0 && data.startAyah > 0) {
-              val exporter = AyahVideoExporter(context)
-              val segment = exporter.resolveAudioForAyah(
-                data.startSura,
-                data.startAyah,
-                targetEndAyah,
-                selectedQariId
-              ) { p -> postExportProgress(p) }
-              exporter.exportMp4(highRes, segment) { p -> postExportProgress(p) }
-            } else {
-              AyahCardBitmapRenderer.savePngToShareCache(context, highRes)
-            }
-          }
-          FileProvider.getUriForFile(
-            context,
-            context.getString(R.string.file_authority),
-            file
-          )
-        }
+        val file = exportCurrentMediaFile()
+        val shareUri = FileProvider.getUriForFile(
+          context,
+          context.getString(R.string.file_authority),
+          file
+        )
 
         val captionText = when (captionMode) {
           AyahShareCaptionMode.IMAGE_ONLY -> null
@@ -575,23 +1107,15 @@ private fun ShareAyahImageScreen(
         context.startActivity(
           Intent.createChooser(
             sendIntent,
-            if (isVideoMode) {
-              if (isKn) "ವೀಡಿಯೊ ಹಂಚಿಕೆ" else "Share Ayah Video"
-            } else {
-              if (isKn) "ಚಿತ್ರ ಹಂಚಿಕೆ" else "Share Ayah"
-            }
+            context.getString(if (isVideoMode) R.string.share_video_title else R.string.share_card_title)
           )
         )
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
         Timber.e(e, "Failed to share card or video")
         val reason = e.message?.takeIf { it.isNotBlank() } ?: "error"
-        snackbarHostState.showSnackbar(
-          if (isVideoMode) {
-            if (isKn) "ವೀಡಿಯೊ ರಚಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: $reason" else "Could not create video: $reason"
-          } else {
-            if (isKn) "ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: $reason" else "Could not share: $reason"
-          }
-        )
+        val msgRes = if (isVideoMode) R.string.share_error_create_video_reason else R.string.share_error_share_reason
+        snackbarHostState.showSnackbar(context.getString(msgRes, reason))
       } finally {
         mainHandler.removeCallbacksAndMessages(null)
         isExporting = false
@@ -602,49 +1126,52 @@ private fun ShareAyahImageScreen(
     }
   }
 
-  fun saveToPhotos() {
+  fun performSaveToPhotos() {
     if (isExporting) return
+    stopAudioPreview()
     isExporting = true
     exportActionIsSave = true
-    exportStatusText = if (isKn) "ತಯಾರಿಸಲಾಗುತ್ತಿದೆ..." else "Preparing..."
+    exportStatusText = context.getString(R.string.share_preparing)
     exportProgressPercent = null
     scope.launch {
       try {
-        val saved = withContext(Dispatchers.Default) {
-          val highRes = renderHighResBitmap()
-          withContext(Dispatchers.IO) {
-            if (isVideoMode && data.startSura > 0 && data.startAyah > 0) {
-              val exporter = AyahVideoExporter(context)
-              val segment = exporter.resolveAudioForAyah(
-                data.startSura,
-                data.startAyah,
-                targetEndAyah,
-                selectedQariId
-              ) { p -> postExportProgress(p) }
-              val mp4 = exporter.exportMp4(highRes, segment) { p -> postExportProgress(p) }
+        val saved = if (isVideoMode && data.startSura > 0 && data.startAyah > 0) {
+          val mp4 = exportCurrentMediaFile()
+          try {
+            withContext(Dispatchers.IO) {
               saveVideoToGallery(context, mp4)
-            } else {
+            }
+          } finally {
+            mp4.delete()
+          }
+        } else {
+          val highRes = withContext(Dispatchers.Default) {
+            renderCardBitmap(
+              cardData = data,
+              widthPx = imageExportWidthPx,
+              photoBg = activePhotoBitmap?.takeIf { !it.isRecycled },
+              transparentBg = false
+            )
+          }
+          try {
+            withContext(Dispatchers.IO) {
               saveBitmapToGallery(context, highRes)
             }
+          } finally {
+            highRes.recycle()
           }
         }
-        snackbarHostState.showSnackbar(
-          if (saved) {
-            if (isVideoMode) {
-              if (isKn) "ವೀಡಿಯೊ ಗ್ಯಾಲರಿಗೆ ಉಳಿಸಲಾಗಿದೆ" else "Saved video to Gallery"
-            } else {
-              if (isKn) "ಫೋಟೋಗಳಿಗೆ ಉಳಿಸಲಾಗಿದೆ" else "Saved to Photos"
-            }
-          } else {
-            if (isKn) "ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ" else "Could not save"
-          }
-        )
-      } catch (e: Exception) {
+        val msgRes = when {
+          saved && isVideoMode -> R.string.share_saved_video
+          saved -> R.string.share_saved_photos
+          else -> R.string.share_error_save
+        }
+        snackbarHostState.showSnackbar(context.getString(msgRes))
+      } catch (e: Throwable) {
+        if (e is kotlinx.coroutines.CancellationException) throw e
         Timber.e(e, "Failed to save card or video")
         val reason = e.message?.takeIf { it.isNotBlank() } ?: "error"
-        snackbarHostState.showSnackbar(
-          if (isKn) "ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: $reason" else "Could not save: $reason"
-        )
+        snackbarHostState.showSnackbar(context.getString(R.string.share_error_save_reason, reason))
       } finally {
         mainHandler.removeCallbacksAndMessages(null)
         isExporting = false
@@ -653,6 +1180,32 @@ private fun ShareAyahImageScreen(
         exportProgressPercent = null
       }
     }
+  }
+
+  val storagePermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+    contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+  ) { granted ->
+    if (granted) {
+      performSaveToPhotos()
+    } else {
+      scope.launch {
+        snackbarHostState.showSnackbar(context.getString(R.string.share_error_save))
+      }
+    }
+  }
+
+  fun saveToPhotos() {
+    if (isExporting) return
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      val permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+      if (androidx.core.content.ContextCompat.checkSelfPermission(context, permission) !=
+        android.content.pm.PackageManager.PERMISSION_GRANTED
+      ) {
+        storagePermissionLauncher.launch(permission)
+        return
+      }
+    }
+    performSaveToPhotos()
   }
 
   val activeColorScheme = if (colorTarget == AyahCardTextColorTarget.ARABIC) {
@@ -671,17 +1224,13 @@ private fun ShareAyahImageScreen(
           IconButton(onClick = onClose) {
             Icon(
               imageVector = Icons.Default.Close,
-              contentDescription = "Close"
+              contentDescription = stringResource(R.string.share_close)
             )
           }
         },
         title = {
           Text(
-            text = if (isVideoMode) {
-              if (isKn) "ವೀಡಿಯೊ ಹಂಚಿಕೆ" else "Share Ayah Video"
-            } else {
-              if (isKn) "ಚಿತ್ರ ಹಂಚಿಕೆ" else "Share Ayah"
-            },
+            text = stringResource(if (isVideoMode) R.string.share_video_title else R.string.share_card_title),
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -708,42 +1257,55 @@ private fun ShareAyahImageScreen(
         contentAlignment = Alignment.Center
       ) {
         val bmp = previewBitmap
-        if (bmp != null) {
+        if (bmp != null && !bmp.isRecycled) {
           Box(
             modifier = Modifier
-              .shadow(10.dp, RoundedCornerShape(16.dp))
-              .clip(RoundedCornerShape(16.dp))
+              .shadow(10.dp, RoundedCornerShape(0.dp))
+              .clip(RoundedCornerShape(0.dp))
               .aspectRatio(1f / selectedAspectRatio.heightRatio, matchHeightConstraintsFirst = true)
           ) {
+            val activeVidFile = downloadedCloudVideoFile
+            if (isLiveVideoBackground && activeVidFile != null) {
+              LoopingBackgroundVideoView(
+                videoFile = activeVidFile,
+                zoom = photoScale,
+                modifier = Modifier.fillMaxSize()
+              )
+            }
             Image(
               bitmap = bmp.asImageBitmap(),
-              contentDescription = "Ayah Card Preview",
+              contentDescription = stringResource(R.string.share_card_preview_desc),
               contentScale = ContentScale.Fit,
+              filterQuality = FilterQuality.High,
               modifier = Modifier.fillMaxSize()
             )
             if (isVideoMode) {
               Surface(
                 color = Color.Black.copy(alpha = 0.65f),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                   .align(Alignment.TopEnd)
-                  .padding(10.dp)
+                  .padding(8.dp)
               ) {
                 Row(
-                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                  modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Icon(
                     imageVector = Icons.Default.Videocam,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(12.dp)
                   )
                   Spacer(modifier = Modifier.width(4.dp))
                   Text(
-                    text = "MP4",
+                    text = if (syncAyahWithAudio && hasMultiAyahSlides) {
+                      "${activePreviewSlideIndex + 1}/${data.ayahSlides.size}"
+                    } else {
+                      "MP4"
+                    },
                     color = Color.White,
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
                   )
                 }
@@ -751,39 +1313,39 @@ private fun ShareAyahImageScreen(
 
               Surface(
                 color = Color.Black.copy(alpha = 0.72f),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                   .align(Alignment.BottomCenter)
-                  .padding(bottom = 12.dp)
+                  .padding(bottom = 44.dp)
                   .clickable { toggleAudioPreview() }
               ) {
                 Row(
-                  modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                  modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   if (isLoadingAudioPreview) {
                     CircularProgressIndicator(
                       color = Color.White,
                       strokeWidth = 2.dp,
-                      modifier = Modifier.size(16.dp)
+                      modifier = Modifier.size(14.dp)
                     )
                   } else {
                     Icon(
                       imageVector = if (isPlayingAudioPreview) Icons.Default.Stop else Icons.Default.PlayArrow,
                       contentDescription = null,
                       tint = Color.White,
-                      modifier = Modifier.size(18.dp)
+                      modifier = Modifier.size(15.dp)
                     )
                   }
-                  Spacer(modifier = Modifier.width(6.dp))
+                  Spacer(modifier = Modifier.width(5.dp))
                   Text(
                     text = when {
-                      isLoadingAudioPreview -> if (isKn) "ಡೌನ್‌ಲೋಡ್..." else "Downloading..."
-                      isPlayingAudioPreview -> previewQariName ?: (if (isKn) "ನಿಲ್ಲಿಸಿ" else "Stop preview")
-                      else -> previewQariName ?: (if (isKn) "ಪಠಣ ಕೇಳಿ" else "Preview recitation")
+                      isLoadingAudioPreview -> stringResource(R.string.share_downloading)
+                      isPlayingAudioPreview -> previewQariName ?: stringResource(R.string.share_stop_preview)
+                      else -> previewQariName ?: stringResource(R.string.share_preview_recitation)
                     },
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                   )
@@ -811,7 +1373,7 @@ private fun ShareAyahImageScreen(
               )
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = if (isKn) "ಲೋಡ್ ಆಗುತ್ತಿದೆ..." else "Loading background...",
+                text = stringResource(R.string.share_loading_bg),
                 color = Color.White,
                 fontSize = 12.sp
               )
@@ -822,8 +1384,16 @@ private fun ShareAyahImageScreen(
 
       if (isVideoMode && isLoadingAudioPreview) {
         VideoProgressBanner(
-          statusText = previewAudioStatusText ?: (if (isKn) "ಆಡಿಯೋ ಡೌನ್‌ಲೋಡ್..." else "Downloading audio..."),
+          statusText = previewAudioStatusText ?: stringResource(R.string.share_downloading_audio),
           percent = previewAudioPercent,
+          modifier = Modifier.padding(horizontal = 16.dp)
+        )
+      }
+
+      if (isVideoMode && isLoadingRemoteVideo) {
+        VideoProgressBanner(
+          statusText = stringResource(R.string.share_downloading_bg_video),
+          percent = remoteVideoProgress,
           modifier = Modifier.padding(horizontal = 16.dp)
         )
       }
@@ -831,7 +1401,7 @@ private fun ShareAyahImageScreen(
       if (isVideoMode && availableQaris.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxWidth()) {
           Text(
-            text = if (isKn) "ವಾಚಕರು" else "Reciter",
+            text = stringResource(R.string.share_reciter_label),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF495057),
@@ -872,6 +1442,45 @@ private fun ShareAyahImageScreen(
         }
       }
 
+      if (isVideoMode) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+          Text(
+            text = pickLocalizedLabel(context, "Video Quality", "ವೀಡಿಯೊ ಗುಣಮಟ್ಟ", "جودة الفيديو"),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF495057),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+          )
+          SegmentedControlRow(
+            options = AyahVideoExportQuality.entries.map { it.displayName(context) },
+            selectedIndex = AyahVideoExportQuality.entries.indexOf(selectedVideoQuality).coerceAtLeast(0),
+            onSelect = { idx ->
+              selectedVideoQuality = AyahVideoExportQuality.entries.getOrElse(idx) { AyahVideoExportQuality.HIGH_1080P }
+            },
+            modifier = Modifier.padding(horizontal = 16.dp)
+          )
+        }
+      }
+
+      if (isVideoMode && hasMultiAyahSlides) {
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = Color.White,
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+        ) {
+          ToggleRow(
+            label = stringResource(R.string.share_sync_ayah_audio),
+            checked = syncAyahWithAudio,
+            onCheckedChange = { checked ->
+              syncAyahWithAudio = checked
+              if (!checked) activePreviewSlideIndex = 0
+            }
+          )
+        }
+      }
+
       // 1. Aspect Ratio Selector (1:1, 4:5, 9:16)
       Row(
         modifier = Modifier
@@ -889,7 +1498,7 @@ private fun ShareAyahImageScreen(
               .clickable { selectedAspectRatio = ratio }
           ) {
             Text(
-              text = ratio.displayName(isKn),
+              text = ratio.displayName(context),
               fontSize = 12.sp,
               fontWeight = FontWeight.Medium,
               color = if (selected) Color.White else Color(0xFF212529),
@@ -901,17 +1510,32 @@ private fun ShareAyahImageScreen(
         }
       }
 
-      // 2. Background Mode Segmented Control: Colors vs Photos
+      // 2. Background Mode Segmented Control: Colors vs Photos (vs Videos in video mode)
+      val bgModeOptions = if (isVideoMode) {
+        listOf(
+          stringResource(R.string.share_bg_colors),
+          stringResource(R.string.share_bg_photos),
+          stringResource(R.string.share_bg_videos)
+        )
+      } else {
+        listOf(
+          stringResource(R.string.share_bg_colors),
+          stringResource(R.string.share_bg_photos)
+        )
+      }
       SegmentedControlRow(
-        options = listOf(
-          if (isKn) "ಬಣ್ಣಗಳು" else "Colors",
-          if (isKn) "ಫೋಟೋಗಳು" else "Photos"
-        ),
-        selectedIndex = backgroundMode,
+        options = bgModeOptions,
+        selectedIndex = backgroundMode.coerceIn(0, bgModeOptions.lastIndex),
         onSelect = { newMode ->
           backgroundMode = newMode
-          if (newMode == 1 && !isUsingCloudPhoto && selectedPhotoPreset == null) {
-            selectedPhotoPreset = AyahCardPhotoPreset.MOSQUE_DUSK
+          if (newMode == 1 && selectedRemotePhotoItem == null) {
+            (downloadedPhotoCatalogItems.firstOrNull() ?: photoCatalogItems.firstOrNull())?.let {
+              selectCloudPhotoItem(it)
+            }
+          } else if (newMode == 2 && selectedRemoteVideoItem == null) {
+            (downloadedVideoCatalogItems.firstOrNull() ?: videoCatalogItems.firstOrNull())?.let {
+              selectCloudVideoItem(it)
+            }
           }
         },
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -956,162 +1580,69 @@ private fun ShareAyahImageScreen(
             }
           }
         }
-      } else {
-        // Photo Swatches: More (Cloud) + Downloaded Cloud Photo (if any) + 8 Curated Presets
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalAlignment = Alignment.Top
-        ) {
-          // 1. More Cloud Backgrounds button
-          Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-              .width(56.dp)
-              .clickable { showCloudSheet = true }
-          ) {
-            Box(
-              modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF0E5A47).copy(alpha = 0.1f))
-                .border(1.5.dp, Color(0xFF0E5A47).copy(alpha = 0.6f), CircleShape),
-              contentAlignment = Alignment.Center
-            ) {
-              Icon(
-                imageVector = Icons.Default.CloudDownload,
-                contentDescription = "More Cloud Backgrounds",
-                tint = Color(0xFF0E5A47),
-                modifier = Modifier.size(20.dp)
-              )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-              text = if (isKn) "ಇನ್ನಷ್ಟು" else "More",
-              fontSize = 11.sp,
-              color = Color(0xFF495057),
-              maxLines = 1
-            )
-          }
-
-          // 2. Selected Cloud Background (only if one was downloaded from Cloud)
-          val cloudBmp = downloadedCloudPhoto
-          if (cloudBmp != null) {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              modifier = Modifier
-                .width(56.dp)
-                .clickable { isUsingCloudPhoto = true }
-            ) {
-              Box(
-                modifier = Modifier
-                  .size(48.dp)
-                  .clip(CircleShape)
-                  .border(
-                    width = if (isUsingCloudPhoto) 3.dp else 1.dp,
-                    color = if (isUsingCloudPhoto) Color(0xFF0E5A47) else Color(0xFFCED4DA),
-                    shape = CircleShape
-                  ),
-                contentAlignment = Alignment.Center
-              ) {
-                Image(
-                  bitmap = cloudBmp.asImageBitmap(),
-                  contentDescription = "Cloud Photo",
-                  contentScale = ContentScale.Crop,
-                  modifier = Modifier.fillMaxSize()
-                )
-                if (isUsingCloudPhoto) {
-                  Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                  )
-                }
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(
-                text = selectedRemoteItem?.localizedName(isKn) ?: if (isKn) "ಕ್ಲೌಡ್" else "Cloud",
-                fontSize = 11.sp,
-                color = if (isUsingCloudPhoto) Color(0xFF0E5A47) else Color(0xFF495057),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-              )
-            }
-          }
-
-          // 3. All 8 Curated Photo Presets
-          AyahCardPhotoPreset.entries.forEach { preset ->
-            val isSelected = !isUsingCloudPhoto && selectedPhotoPreset == preset
-            val thumb = presetBitmaps[preset]
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              modifier = Modifier
-                .width(56.dp)
-                .clickable {
-                  isUsingCloudPhoto = false
-                  selectedPhotoPreset = preset
-                }
-            ) {
-              Box(
-                modifier = Modifier
-                  .size(48.dp)
-                  .clip(CircleShape)
-                  .background(Color(0xFF212529))
-                  .border(
-                    width = if (isSelected) 3.dp else 1.dp,
-                    color = if (isSelected) Color(0xFF0E5A47) else Color(0xFFCED4DA),
-                    shape = CircleShape
-                  ),
-                contentAlignment = Alignment.Center
-              ) {
-                if (thumb != null) {
-                  Image(
-                    bitmap = thumb.asImageBitmap(),
-                    contentDescription = preset.displayName(isKn),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                  )
-                }
-                if (isSelected) {
-                  Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                  )
-                }
-              }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(
-                text = preset.displayName(isKn),
-                fontSize = 11.sp,
-                color = if (isSelected) Color(0xFF0E5A47) else Color(0xFF495057),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-              )
-            }
-          }
-        }
-
-        // Photo Zoom Stepper (100% to 200%, matching iOS)
-        StepperCard(
-          label = if (isKn) "ಫೋಟೋ ಜೂಮ್" else "Photo Zoom",
-          valueText = "${(photoScale * 100).roundToInt()}%",
-          canDecrease = photoScale > 1.05f,
-          canIncrease = photoScale < 1.95f,
-          onDecrease = { photoScale = (photoScale - 0.1f).coerceAtLeast(1.0f) },
-          onIncrease = { photoScale = (photoScale + 0.1f).coerceAtMost(2.0f) },
-          modifier = Modifier.padding(horizontal = 16.dp)
+      } else if (backgroundMode == 2 && isVideoMode) {
+        CloudBackgroundSwatchesRow(
+          items = inlineVideoCatalogItems,
+          isKannada = isKn,
+          repository = repository,
+          selectedId = selectedRemoteVideoItem?.id,
+          downloadedIds = downloadedVideoCatalogItems.map { it.id }.toSet(),
+          isLoadingInline = inlineVideoCatalogItems.isEmpty() && (isLoadingRemoteVideo || isLoadingCatalog),
+          moreDescription = stringResource(R.string.share_more_cloud_videos_desc),
+          browseLabel = stringResource(R.string.share_browse_cloud_videos),
+          downloadedBadgeIcon = Icons.Default.Videocam,
+          onBrowseMore = {
+            cloudSheetTab = 1
+            showCloudSheet = true
+          },
+          onSelectItem = { vidItem -> selectCloudVideoItem(vidItem) }
         )
+
+        if (isLiveVideoBackground) {
+          StepperCard(
+            label = stringResource(R.string.share_video_zoom),
+            valueText = "${(photoScale * 100).roundToInt()}%",
+            canDecrease = photoScale > 1.05f,
+            canIncrease = photoScale < 1.95f,
+            onDecrease = { photoScale = (photoScale - 0.1f).coerceAtLeast(1.0f) },
+            onIncrease = { photoScale = (photoScale + 0.1f).coerceAtMost(2.0f) },
+            modifier = Modifier.padding(horizontal = 16.dp)
+          )
+        }
+      } else {
+        CloudBackgroundSwatchesRow(
+          items = inlinePhotoCatalogItems,
+          isKannada = isKn,
+          repository = repository,
+          selectedId = selectedRemotePhotoItem?.id,
+          downloadedIds = downloadedPhotoCatalogItems.map { it.id }.toSet(),
+          isLoadingInline = inlinePhotoCatalogItems.isEmpty() && (isLoadingRemoteImage || isLoadingCatalog),
+          moreDescription = stringResource(R.string.share_more_cloud_backgrounds_desc),
+          browseLabel = stringResource(R.string.share_browse_cloud_photos),
+          downloadedBadgeIcon = Icons.Default.Photo,
+          onBrowseMore = {
+            cloudSheetTab = 0
+            showCloudSheet = true
+          },
+          onSelectItem = { photoItem -> selectCloudPhotoItem(photoItem) }
+        )
+
+        if (downloadedCloudPhoto != null) {
+          StepperCard(
+            label = stringResource(R.string.share_photo_zoom),
+            valueText = "${(photoScale * 100).roundToInt()}%",
+            canDecrease = photoScale > 1.05f,
+            canIncrease = photoScale < 1.95f,
+            onDecrease = { photoScale = (photoScale - 0.1f).coerceAtLeast(1.0f) },
+            onIncrease = { photoScale = (photoScale + 0.1f).coerceAtMost(2.0f) },
+            modifier = Modifier.padding(horizontal = 16.dp)
+          )
+        }
       }
 
       // 3. Text Size Stepper (20% to 200%)
       StepperCard(
-        label = if (isKn) "ಪಠ್ಯದ ಗಾತ್ರ" else "Text Size",
+        label = stringResource(R.string.share_text_size),
         valueText = "${(fontSizeScale * 100).roundToInt()}%",
         canDecrease = fontSizeScale > 0.25f,
         canIncrease = fontSizeScale < 1.95f,
@@ -1138,15 +1669,15 @@ private fun ShareAyahImageScreen(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Text(
-              text = if (isKn) "ಫಾಂಟ್ ಶೈಲಿ" else "Font Style",
+              text = stringResource(R.string.share_font_style),
               fontSize = 14.sp,
               fontWeight = FontWeight.Medium
             )
             Text(
               text = if (colorTarget == AyahCardTextColorTarget.ARABIC) {
-                selectedArabicFont.displayName(isKn)
+                selectedArabicFont.displayName(context)
               } else {
-                selectedTranslationFont.displayName(isKn)
+                selectedTranslationFont.displayName(context)
               },
               fontSize = 12.sp,
               color = Color(0xFF6C757D)
@@ -1161,7 +1692,7 @@ private fun ShareAyahImageScreen(
               AyahCardArabicFont.entries.forEach { fontOption ->
                 val selected = selectedArabicFont == fontOption
                 PillChip(
-                  text = fontOption.displayName(isKn),
+                  text = fontOption.displayName(context),
                   selected = selected,
                   onClick = { selectedArabicFont = fontOption }
                 )
@@ -1170,7 +1701,7 @@ private fun ShareAyahImageScreen(
               AyahCardTranslationFont.entries.forEach { fontOption ->
                 val selected = selectedTranslationFont == fontOption
                 PillChip(
-                  text = fontOption.displayName(isKn),
+                  text = fontOption.displayName(context),
                   selected = selected,
                   onClick = { selectedTranslationFont = fontOption }
                 )
@@ -1198,7 +1729,7 @@ private fun ShareAyahImageScreen(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Text(
-              text = if (isKn) "ಪಠ್ಯದ ಬಣ್ಣ" else "Text Color",
+              text = stringResource(R.string.share_text_color),
               fontSize = 14.sp,
               fontWeight = FontWeight.Medium
             )
@@ -1223,12 +1754,12 @@ private fun ShareAyahImageScreen(
                 ) {
                   Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = if (isKn) "ಮರುಹೊಂದಿಸಿ" else "Reset",
+                    contentDescription = stringResource(R.string.share_reset),
                     tint = Color(0xFF0E5A47),
                     modifier = Modifier.size(12.dp)
                   )
                   Text(
-                    text = if (isKn) "ಮರುಹೊಂದಿಸಿ" else "Reset",
+                    text = stringResource(R.string.share_reset),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF0E5A47)
@@ -1236,7 +1767,7 @@ private fun ShareAyahImageScreen(
                 }
               }
               Text(
-                text = activeColorScheme.displayName(isKn),
+                text = activeColorScheme.displayName(context),
                 fontSize = 12.sp,
                 color = Color(0xFF6C757D)
               )
@@ -1244,7 +1775,7 @@ private fun ShareAyahImageScreen(
           }
 
           SegmentedControlRow(
-            options = AyahCardTextColorTarget.entries.map { it.displayName(isKn) },
+            options = AyahCardTextColorTarget.entries.map { it.displayName(context) },
             selectedIndex = if (colorTarget == AyahCardTextColorTarget.ARABIC) 0 else 1,
             onSelect = { idx ->
               colorTarget = if (idx == 0) AyahCardTextColorTarget.ARABIC else AyahCardTextColorTarget.TRANSLATION
@@ -1309,7 +1840,7 @@ private fun ShareAyahImageScreen(
             ) {
               Icon(
                 imageVector = Icons.Default.Palette,
-                contentDescription = "Custom Color",
+                contentDescription = stringResource(R.string.share_custom_color),
                 tint = Color(0xFF212529),
                 modifier = Modifier.size(16.dp)
               )
@@ -1328,30 +1859,24 @@ private fun ShareAyahImageScreen(
       ) {
         Column {
           ToggleRow(
-            label = if (isKn) "ಅರೇಬಿಕ್ ಪಠ್ಯ ತೋರಿಸಿ" else "Show Arabic Text",
+            label = stringResource(R.string.share_show_arabic),
             checked = showArabic,
             onCheckedChange = { showArabic = it }
           )
           HorizontalDivider(color = Color(0xFFE9ECEF), modifier = Modifier.padding(start = 16.dp))
           ToggleRow(
-            label = if (isKn) "ಅನುವಾದ ತೋರಿಸಿ" else "Show Translation",
+            label = stringResource(R.string.share_show_translation),
             checked = showTranslation,
             onCheckedChange = { showTranslation = it }
           )
           if (data.footnotes.isNotEmpty()) {
             HorizontalDivider(color = Color(0xFFE9ECEF), modifier = Modifier.padding(start = 16.dp))
             ToggleRow(
-              label = if (isKn) "ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ" else "Include Footnotes",
+              label = stringResource(R.string.share_include_footnotes),
               checked = showFootnotes,
               onCheckedChange = { showFootnotes = it }
             )
           }
-          HorizontalDivider(color = Color(0xFFE9ECEF), modifier = Modifier.padding(start = 16.dp))
-          ToggleRow(
-            label = if (isKn) "QR ಕೋಡ್ ಸೇರಿಸಿ" else "Include QR Code",
-            checked = showQRCode,
-            onCheckedChange = { showQRCode = it }
-          )
         }
       }
 
@@ -1363,14 +1888,14 @@ private fun ShareAyahImageScreen(
         verticalArrangement = Arrangement.spacedBy(6.dp)
       ) {
         Text(
-          text = if (isKn) "ಹಂಚಿಕೊಳ್ಳುವ ಸಂದೇಶ" else "Accompanying Text",
+          text = stringResource(R.string.share_accompanying_text),
           fontSize = 13.sp,
           fontWeight = FontWeight.Medium,
           color = Color(0xFF6C757D),
           modifier = Modifier.padding(start = 4.dp)
         )
         SegmentedControlRow(
-          options = AyahShareCaptionMode.entries.map { it.displayName(isKn) },
+          options = AyahShareCaptionMode.entries.map { it.displayName(context) },
           selectedIndex = AyahShareCaptionMode.entries.indexOf(captionMode),
           onSelect = { idx -> captionMode = AyahShareCaptionMode.entries[idx] }
         )
@@ -1385,7 +1910,7 @@ private fun ShareAyahImageScreen(
       ) {
         if (isExporting && isVideoMode) {
           VideoProgressBanner(
-            statusText = exportStatusText ?: if (isKn) "ವೀಡಿಯೊ ರಚಿಸಲಾಗುತ್ತಿದೆ..." else "Creating Video...",
+            statusText = exportStatusText ?: stringResource(R.string.share_creating_video),
             percent = exportProgressPercent
           )
         }
@@ -1408,7 +1933,7 @@ private fun ShareAyahImageScreen(
             if (isVideoMode) {
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = if (isKn) "ವೀಡಿಯೊ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ..." else "Preparing Video...",
+                text = stringResource(R.string.share_btn_preparing_video),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -1423,11 +1948,7 @@ private fun ShareAyahImageScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = if (isVideoMode) {
-                if (isKn) "ವೀಡಿಯೊ ಹಂಚಿಕೊಳ್ಳಿ" else "Share Video"
-              } else {
-                if (isKn) "ಹಂಚಿಕೊಳ್ಳಿ" else "Share"
-              },
+              text = stringResource(if (isVideoMode) R.string.share_btn_share_video else R.string.share_btn_share),
               fontSize = 16.sp,
               fontWeight = FontWeight.SemiBold
             )
@@ -1452,7 +1973,7 @@ private fun ShareAyahImageScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = if (isKn) "ವೀಡಿಯೊ ಉಳಿಸಲಾಗುತ್ತಿದೆ..." else if (isVideoMode) "Saving Video..." else "Saving...",
+              text = stringResource(if (isVideoMode) R.string.share_btn_saving_video else R.string.share_btn_saving),
               fontSize = 15.sp,
               fontWeight = FontWeight.Medium,
               color = Color(0xFF0E5A47),
@@ -1463,11 +1984,7 @@ private fun ShareAyahImageScreen(
             Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = if (isVideoMode) {
-                if (isKn) "ವೀಡಿಯೊ ಉಳಿಸಿ" else "Save Video"
-              } else {
-                if (isKn) "ಫೋಟೋಗಳಿಗೆ ಉಳಿಸಿ" else "Save to Photos"
-              },
+              text = stringResource(if (isVideoMode) R.string.share_btn_save_video else R.string.share_btn_save_photos),
               fontSize = 15.sp,
               fontWeight = FontWeight.Medium,
               color = Color(0xFF212529)
@@ -1482,21 +1999,73 @@ private fun ShareAyahImageScreen(
 
   // Cloud Backgrounds Modal Sheet
   if (showCloudSheet) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val gridState = rememberLazyGridState()
+    val hdVideoItems = remember(videoCatalogItems) { videoCatalogItems.filter { it.isHdVideo } }
+    val standardVideoItems = remember(videoCatalogItems) { videoCatalogItems.filter { !it.isHdVideo } }
+    val activeSheetItems = remember(
+      isVideoMode,
+      cloudSheetTab,
+      videoResolutionFilter,
+      videoCatalogItems,
+      hdVideoItems,
+      standardVideoItems,
+      photoCatalogItems
+    ) {
+      when {
+        isVideoMode && cloudSheetTab == 1 && videoCatalogItems.isNotEmpty() -> when (videoResolutionFilter) {
+          RemoteVideoResolutionFilter.ALL -> videoCatalogItems
+          RemoteVideoResolutionFilter.HD_1080P -> hdVideoItems
+          RemoteVideoResolutionFilter.STANDARD_720P -> standardVideoItems
+        }
+        else -> photoCatalogItems
+      }
+    }
     ModalBottomSheet(
-      onDismissRequest = { showCloudSheet = false }
+      onDismissRequest = { showCloudSheet = false },
+      sheetState = sheetState
     ) {
       Column(
         modifier = Modifier
           .fillMaxWidth()
           .padding(horizontal = 16.dp)
-          .padding(bottom = 24.dp)
+          .padding(bottom = 16.dp)
       ) {
         Text(
-          text = if (isKn) "ಹಿನ್ನೆಲೆ ಚಿತ್ರಗಳು" else "Cloud Backgrounds",
+          text = stringResource(R.string.share_cloud_backgrounds),
           fontSize = 18.sp,
           fontWeight = FontWeight.SemiBold,
           modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        if (isVideoMode && videoCatalogItems.isNotEmpty()) {
+          SegmentedControlRow(
+            options = listOf(
+              stringResource(R.string.share_bg_photos),
+              stringResource(R.string.share_bg_videos)
+            ),
+            selectedIndex = cloudSheetTab.coerceIn(0, 1),
+            onSelect = { cloudSheetTab = it },
+            modifier = Modifier.padding(bottom = 8.dp)
+          )
+
+          if (cloudSheetTab == 1) {
+            SegmentedControlRow(
+              options = listOf(
+                "${RemoteVideoResolutionFilter.ALL.displayName(context)} (${videoCatalogItems.size})",
+                "${RemoteVideoResolutionFilter.HD_1080P.displayName(context)} (${hdVideoItems.size})",
+                "${RemoteVideoResolutionFilter.STANDARD_720P.displayName(context)} (${standardVideoItems.size})"
+              ),
+              selectedIndex = RemoteVideoResolutionFilter.entries.indexOf(videoResolutionFilter).coerceAtLeast(0),
+              onSelect = { idx ->
+                videoResolutionFilter = RemoteVideoResolutionFilter.entries.getOrElse(idx) {
+                  RemoteVideoResolutionFilter.ALL
+                }
+              },
+              modifier = Modifier.padding(bottom = 10.dp)
+            )
+          }
+        }
 
         if (isLoadingCatalog && catalogItems.isEmpty()) {
           Box(
@@ -1507,7 +2076,21 @@ private fun ShareAyahImageScreen(
           ) {
             CircularProgressIndicator(color = Color(0xFF0E5A47))
           }
-        } else if (catalogItems.isEmpty()) {
+        } else if (activeSheetItems.isEmpty()) {
+          val emptyMessage = if (
+            isVideoMode &&
+            cloudSheetTab == 1 &&
+            videoResolutionFilter == RemoteVideoResolutionFilter.HD_1080P
+          ) {
+            pickLocalizedLabel(
+              context,
+              "1080p HD videos coming soon",
+              "1080p HD ವೀಡಿಯೊಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿವೆ",
+              "فيديوهات 1080p HD قريباً"
+            )
+          } else {
+            stringResource(R.string.share_no_cloud_backgrounds)
+          }
           Box(
             modifier = Modifier
               .fillMaxWidth()
@@ -1515,43 +2098,69 @@ private fun ShareAyahImageScreen(
             contentAlignment = Alignment.Center
           ) {
             Text(
-              text = if (isKn) "ಹಿನ್ನೆಲೆ ಚಿತ್ರಗಳು ಲಭ್ಯವಿಲ್ಲ" else "No cloud backgrounds available right now.",
+              text = emptyMessage,
               color = Color.Gray
             )
           }
         } else {
+          // Consume leftover downward fling velocity inside the grid so fast scrolling back to the top
+          // doesn't accidentally swipe-dismiss the ModalBottomSheet (drag handle / header still dismisses).
+          val absorbGridFlingConnection = remember {
+            object : NestedScrollConnection {
+              override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+              ): Offset {
+                return if (source == NestedScrollSource.SideEffect && available.y > 0f) {
+                  Offset(0f, available.y)
+                } else {
+                  Offset.Zero
+                }
+              }
+
+              override suspend fun onPostFling(
+                consumed: Velocity,
+                available: Velocity
+              ): Velocity {
+                return if (available.y > 0f) Velocity(0f, available.y) else Velocity.Zero
+              }
+            }
+          }
           LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.height(380.dp)
+            contentPadding = PaddingValues(bottom = 16.dp),
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(480.dp)
+              .nestedScroll(absorbGridFlingConnection)
           ) {
-            items(catalogItems, key = { it.id }) { item ->
-              val isSelected = isUsingCloudPhoto && selectedRemoteItem?.id == item.id
+            items(activeSheetItems, key = { it.id }) { item ->
+              val isSelected = if (item.isVideo) {
+                backgroundMode == 2 && selectedRemoteVideoItem?.id == item.id
+              } else {
+                backgroundMode == 1 && selectedRemotePhotoItem?.id == item.id
+              }
+              val isDownloaded = if (item.isVideo) {
+                item.id in downloadedVideoIdSet
+              } else {
+                item.id in downloadedPhotoIdSet
+              }
               RemoteBackgroundGridCell(
                 item = item,
                 isKannada = isKn,
                 repository = repository,
                 isSelected = isSelected,
+                isDownloaded = isDownloaded,
                 onClick = {
                   showCloudSheet = false
-                  isLoadingRemoteImage = true
-                  scope.launch {
-                    try {
-                      val fullBmp = repository.loadImage(
-                        url = item.imageUrl,
-                        cacheKey = "full_${item.id}"
-                      )
-                      if (fullBmp != null) {
-                        downloadedCloudPhoto = fullBmp
-                        selectedRemoteItem = item
-                        isUsingCloudPhoto = true
-                        backgroundMode = 1
-                        photoScale = 1.0f
-                      }
-                    } finally {
-                      isLoadingRemoteImage = false
-                    }
+                  if (item.isVideo) {
+                    selectCloudVideoItem(item)
+                  } else {
+                    selectCloudPhotoItem(item)
                   }
                 }
               )
@@ -1570,7 +2179,7 @@ private fun ShareAyahImageScreen(
       customTranslationColorInt
     }
     CustomColorPickerDialog(
-      title = if (isKn) "ಕಸ್ಟಮ್ ಬಣ್ಣ" else "Custom Color",
+      title = stringResource(R.string.share_custom_color),
       initialColorInt = initialColor,
       onDismiss = { showColorPickerDialog = false },
       onConfirm = { chosenInt ->
@@ -1673,7 +2282,7 @@ private fun StepperCard(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               Icons.Default.Remove,
-              contentDescription = "Decrease",
+              contentDescription = stringResource(R.string.share_decrease_desc),
               tint = if (canDecrease) Color(0xFF212529) else Color(0xFFADB5BD),
               modifier = Modifier.size(16.dp)
             )
@@ -1695,7 +2304,7 @@ private fun StepperCard(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               Icons.Default.Add,
-              contentDescription = "Increase",
+              contentDescription = stringResource(R.string.share_increase_desc),
               tint = if (canIncrease) Color(0xFF212529) else Color(0xFFADB5BD),
               modifier = Modifier.size(16.dp)
             )
@@ -1836,12 +2445,12 @@ private fun CustomColorPickerDialog(
     },
     confirmButton = {
       TextButton(onClick = { onConfirm(previewColor.toArgb()) }) {
-        Text("OK")
+        Text(stringResource(R.string.share_ok))
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("Cancel")
+        Text(stringResource(R.string.share_cancel))
       }
     }
   )
@@ -1853,20 +2462,27 @@ private fun RemoteBackgroundGridCell(
   isKannada: Boolean,
   repository: RemoteBackgroundRepository,
   isSelected: Boolean,
+  isDownloaded: Boolean,
   onClick: () -> Unit
 ) {
-  var thumbBitmap by remember(item.id) { mutableStateOf<Bitmap?>(null) }
-  var isLoadingThumb by remember(item.id) { mutableStateOf(true) }
+  var thumbBitmap by remember(item.id) {
+    mutableStateOf(repository.getCachedBitmap("thumb_${item.id}"))
+  }
+  var isLoadingThumb by remember(item.id) {
+    mutableStateOf(thumbBitmap == null)
+  }
 
   LaunchedEffect(item.id) {
-    isLoadingThumb = true
-    thumbBitmap = try {
-      repository.loadImage(
-        url = item.thumbnailUrl,
-        cacheKey = "thumb_${item.id}"
-      )
-    } finally {
-      isLoadingThumb = false
+    if (thumbBitmap == null) {
+      isLoadingThumb = true
+      thumbBitmap = try {
+        repository.loadImage(
+          url = item.thumbnailUrl,
+          cacheKey = "thumb_${item.id}"
+        )
+      } finally {
+        isLoadingThumb = false
+      }
     }
   }
 
@@ -1884,9 +2500,10 @@ private fun RemoteBackgroundGridCell(
     contentAlignment = Alignment.Center
   ) {
     val bmp = thumbBitmap
-    if (bmp != null) {
+    if (bmp != null && !bmp.isRecycled) {
+      val imageBitmap = remember(bmp) { bmp.asImageBitmap() }
       Image(
-        bitmap = bmp.asImageBitmap(),
+        bitmap = imageBitmap,
         contentDescription = item.localizedName(isKannada),
         contentScale = ContentScale.Crop,
         modifier = Modifier.fillMaxSize()
@@ -1907,6 +2524,369 @@ private fun RemoteBackgroundGridCell(
         modifier = Modifier.padding(6.dp)
       )
     }
+
+    if (item.isVideo && item.isHdVideo) {
+      Surface(
+        color = Color(0xFF0E5A47).copy(alpha = 0.92f),
+        shape = RoundedCornerShape(6.dp),
+        modifier = Modifier
+          .align(Alignment.TopStart)
+          .padding(6.dp)
+      ) {
+        Text(
+          text = "HD",
+          color = Color.White,
+          fontSize = 9.sp,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+        )
+      }
+    }
+
+    if (item.isVideo) {
+      item.formattedSizeLabel()?.let { sizeText ->
+        Surface(
+          color = Color.Black.copy(alpha = 0.65f),
+          shape = RoundedCornerShape(6.dp),
+          modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(6.dp)
+        ) {
+          Text(
+            text = sizeText,
+            color = Color.White,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+          )
+        }
+      }
+    }
+
+    if (item.isVideo || isDownloaded) {
+      Surface(
+        color = Color.Black.copy(alpha = 0.65f),
+        shape = CircleShape,
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .padding(6.dp)
+      ) {
+        Icon(
+          imageVector = if (isDownloaded) Icons.Default.Check else Icons.Default.Videocam,
+          contentDescription = null,
+          tint = Color.White,
+          modifier = Modifier
+            .padding(4.dp)
+            .size(12.dp)
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun CloudBackgroundSwatchesRow(
+  items: List<RemoteAyahBackgroundItem>,
+  isKannada: Boolean,
+  repository: RemoteBackgroundRepository,
+  selectedId: String?,
+  downloadedIds: Set<String>,
+  isLoadingInline: Boolean,
+  moreDescription: String,
+  browseLabel: String,
+  downloadedBadgeIcon: androidx.compose.ui.graphics.vector.ImageVector,
+  onBrowseMore: () -> Unit,
+  onSelectItem: (RemoteAyahBackgroundItem) -> Unit
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .horizontalScroll(rememberScrollState())
+      .padding(horizontal = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier
+        .width(56.dp)
+        .clickable(onClick = onBrowseMore)
+    ) {
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(Color(0xFF0E5A47).copy(alpha = 0.1f))
+          .border(1.5.dp, Color(0xFF0E5A47).copy(alpha = 0.6f), CircleShape),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(
+          imageVector = Icons.Default.CloudDownload,
+          contentDescription = moreDescription,
+          tint = Color(0xFF0E5A47),
+          modifier = Modifier.size(20.dp)
+        )
+      }
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(
+        text = stringResource(R.string.share_more),
+        fontSize = 11.sp,
+        color = Color(0xFF495057),
+        maxLines = 1
+      )
+    }
+
+    if (items.isEmpty()) {
+      if (isLoadingInline) {
+        Box(
+          modifier = Modifier.height(48.dp),
+          contentAlignment = Alignment.Center
+        ) {
+          CircularProgressIndicator(
+            strokeWidth = 2.dp,
+            color = Color(0xFF0E5A47),
+            modifier = Modifier.size(22.dp)
+          )
+        }
+      } else {
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = Color(0xFF0E5A47).copy(alpha = 0.1f),
+          border = BorderStroke(1.dp, Color(0xFF0E5A47).copy(alpha = 0.3f)),
+          modifier = Modifier.clickable(onClick = onBrowseMore)
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.CloudDownload,
+              contentDescription = null,
+              tint = Color(0xFF0E5A47),
+              modifier = Modifier.size(16.dp)
+            )
+            Text(
+              text = browseLabel,
+              fontSize = 12.5.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = Color(0xFF0E5A47)
+            )
+          }
+        }
+      }
+    } else {
+      items.forEach { item ->
+        CloudMediaSwatchCell(
+          item = item,
+          isKannada = isKannada,
+          repository = repository,
+          isSelected = selectedId == item.id,
+          isDownloaded = item.id in downloadedIds,
+          downloadedBadgeIcon = downloadedBadgeIcon,
+          onClick = { onSelectItem(item) }
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun CloudMediaSwatchCell(
+  item: RemoteAyahBackgroundItem,
+  isKannada: Boolean,
+  repository: RemoteBackgroundRepository,
+  isSelected: Boolean,
+  isDownloaded: Boolean,
+  downloadedBadgeIcon: androidx.compose.ui.graphics.vector.ImageVector,
+  onClick: () -> Unit
+) {
+  var thumbBitmap by remember(item.id) {
+    mutableStateOf(repository.getCachedBitmap("thumb_${item.id}"))
+  }
+
+  LaunchedEffect(item.id) {
+    if (thumbBitmap == null) {
+      thumbBitmap = runCatching {
+        repository.loadImage(url = item.thumbnailUrl, cacheKey = "thumb_${item.id}")
+      }.getOrNull()
+    }
+  }
+
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = Modifier
+      .width(56.dp)
+      .clickable(onClick = onClick)
+  ) {
+    Box(
+      modifier = Modifier
+        .size(48.dp)
+        .clip(CircleShape)
+        .background(Color(0xFF212529))
+        .border(
+          width = if (isSelected) 3.dp else 1.dp,
+          color = if (isSelected) Color(0xFF0E5A47) else Color(0xFFCED4DA),
+          shape = CircleShape
+        ),
+      contentAlignment = Alignment.Center
+    ) {
+      val bmp = thumbBitmap
+      if (bmp != null && !bmp.isRecycled) {
+        Image(
+          bitmap = bmp.asImageBitmap(),
+          contentDescription = item.localizedName(isKannada),
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize()
+        )
+      }
+      if (!isDownloaded) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.28f)),
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(
+            imageVector = Icons.Default.Download,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+          )
+        }
+      } else if (isSelected) {
+        Icon(
+          imageVector = Icons.Default.Check,
+          contentDescription = null,
+          tint = Color.White,
+          modifier = Modifier.size(18.dp)
+        )
+      } else {
+        Icon(
+          imageVector = downloadedBadgeIcon,
+          contentDescription = null,
+          tint = Color.White.copy(alpha = 0.85f),
+          modifier = Modifier.size(14.dp)
+        )
+      }
+    }
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+      text = item.localizedName(isKannada),
+      fontSize = 11.sp,
+      color = if (isSelected) Color(0xFF0E5A47) else Color(0xFF495057),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis
+    )
+  }
+}
+
+@Composable
+private fun LoopingBackgroundVideoView(
+  videoFile: File,
+  zoom: Float,
+  modifier: Modifier = Modifier
+) {
+  key(videoFile.absolutePath) {
+    val playerState = remember {
+      object {
+        var player: MediaPlayer? = null
+        var surface: Surface? = null
+        var videoWidth = 0
+        var videoHeight = 0
+        var currentZoom = zoom
+
+        fun applyTransform(tv: TextureView) {
+          val viewW = tv.width.toFloat()
+          val viewH = tv.height.toFloat()
+          if (viewW <= 0f || viewH <= 0f || videoWidth <= 0 || videoHeight <= 0) return
+          val viewRatio = viewW / viewH
+          val vidRatio = videoWidth.toFloat() / videoHeight.toFloat()
+          val z = maxOf(1f, currentZoom)
+          val scaleX: Float
+          val scaleY: Float
+          if (vidRatio > viewRatio) {
+            scaleX = (vidRatio / viewRatio) * z
+            scaleY = z
+          } else {
+            scaleX = z
+            scaleY = (viewRatio / vidRatio) * z
+          }
+          val matrix = Matrix()
+          matrix.setScale(scaleX, scaleY, viewW / 2f, viewH / 2f)
+          tv.setTransform(matrix)
+        }
+
+        fun release() {
+          runCatching { player?.stop() }
+          runCatching { player?.release() }
+          player = null
+          runCatching { surface?.release() }
+          surface = null
+        }
+      }
+    }
+
+    DisposableEffect(Unit) {
+      onDispose {
+        playerState.release()
+      }
+    }
+
+    AndroidView(
+      factory = { ctx ->
+        TextureView(ctx).apply {
+          addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            playerState.applyTransform(this)
+          }
+          surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+            override fun onSurfaceTextureAvailable(st: SurfaceTexture, w: Int, h: Int) {
+              playerState.release()
+              val s = Surface(st)
+              playerState.surface = s
+              val mp = MediaPlayer()
+              playerState.player = mp
+              try {
+                mp.setDataSource(videoFile.absolutePath)
+                mp.setSurface(s)
+                mp.isLooping = true
+                mp.setVolume(0f, 0f)
+                mp.setOnVideoSizeChangedListener { _, vw, vh ->
+                  playerState.videoWidth = vw
+                  playerState.videoHeight = vh
+                  playerState.applyTransform(this@apply)
+                }
+                mp.setOnPreparedListener {
+                  playerState.videoWidth = it.videoWidth
+                  playerState.videoHeight = it.videoHeight
+                  playerState.applyTransform(this@apply)
+                  it.start()
+                }
+                mp.prepareAsync()
+              } catch (e: Exception) {
+                Timber.e(e, "Failed to start preview video player")
+              }
+            }
+
+            override fun onSurfaceTextureSizeChanged(st: SurfaceTexture, w: Int, h: Int) {
+              playerState.applyTransform(this@apply)
+            }
+
+            override fun onSurfaceTextureDestroyed(st: SurfaceTexture): Boolean {
+              playerState.release()
+              return true
+            }
+
+            override fun onSurfaceTextureUpdated(st: SurfaceTexture) = Unit
+          }
+        }
+      },
+      update = { tv ->
+        playerState.currentZoom = zoom
+        playerState.applyTransform(tv)
+      },
+      modifier = modifier
+    )
   }
 }
 

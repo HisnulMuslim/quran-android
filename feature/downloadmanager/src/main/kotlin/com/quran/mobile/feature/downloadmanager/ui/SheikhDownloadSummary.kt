@@ -31,7 +31,7 @@ fun SheikhDownloadSummary(
   onQariItemClicked: ((QariItem) -> Unit)
 ) {
   val (color, tintColor) = if (downloadedSheikhUiModel.downloadedSuras > 0) {
-    Color(0xff5e8900) to MaterialTheme.colorScheme.onPrimary
+    Color(0xff5e8900) to Color.White
   } else {
     MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.onTertiary
   }

@@ -10,14 +10,42 @@
 
     <style name="ToolBarArea" />
 
-  <style name="ToolbarStyle" parent="ThemeOverlay.AppCompat.ActionBar">
+  <style name="ToolbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
     <item name="iconTint">@color/toolbar_icon_tint</item>
     <item name="android:textColorPrimary">@color/toolbar_text</item>
     <item name="android:textColorSecondary">@color/toolbar_secondary_text</item>
 
-    <item name="android:colorBackground">@color/page_background</item>
-    <item name="android:textColor">@color/accent_color_dark</item>
+    <item name="android:colorBackground">@color/secondary_dark_background</item>
+    <item name="colorBackgroundFloating">@color/secondary_dark_background</item>
     <item name="android:textColorHint">@color/search_text_hint</item>
+    <item name="textAppearanceSearchResultTitle">@style/QuranSearchResultTitle</item>
+    <item name="textAppearanceSearchResultSubtitle">@style/QuranSearchResultSubtitle</item>
+    <item name="searchViewStyle">@style/QuranSearchViewStyle</item>
+  </style>
+
+  <style name="HomeToolbarStyle" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+    <item name="android:textColorPrimary">@color/title_color</item>
+    <item name="android:textColorSecondary">@color/sura_details_color</item>
+    <item name="android:colorBackground">@color/secondary_dark_background</item>
+    <item name="colorBackgroundFloating">@color/secondary_dark_background</item>
+    <item name="android:textColorHint">@color/sura_details_color</item>
+    <item name="textAppearanceSearchResultTitle">@style/QuranSearchResultTitle</item>
+    <item name="textAppearanceSearchResultSubtitle">@style/QuranSearchResultSubtitle</item>
+    <item name="searchViewStyle">@style/QuranSearchViewStyle</item>
+  </style>
+
+  <style name="QuranSearchViewStyle" parent="Widget.AppCompat.SearchView.ActionBar">
+    <item name="suggestionRowLayout">@layout/quran_search_dropdown_item</item>
+  </style>
+
+  <style name="QuranSearchResultTitle" parent="TextAppearance.AppCompat.SearchResult.Title">
+    <item name="android:textColor">@color/title_color</item>
+    <item name="android:textSize">15sp</item>
+  </style>
+
+  <style name="QuranSearchResultSubtitle" parent="TextAppearance.AppCompat.SearchResult.Subtitle">
+    <item name="android:textColor">@color/sura_details_color</item>
+    <item name="android:textSize">13sp</item>
   </style>
 
   <style name="ToolbarTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title" />
@@ -59,13 +87,13 @@
   </style>
 
     <style name="SearchResult">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/title_color</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="SearchResult.Location">
-        <item name="android:textColor">#aaaaaa</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/sura_details_color</item>
+        <item name="android:textSize">13.5sp</item>
     </style>
 
     <style name="PanelLabel">

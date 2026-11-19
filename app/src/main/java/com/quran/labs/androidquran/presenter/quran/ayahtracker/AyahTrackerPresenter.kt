@@ -16,6 +16,7 @@ import com.quran.data.model.highlight.HighlightInfo
 import com.quran.data.model.highlight.HighlightType
 import com.quran.data.model.selection.AyahSelection
 import com.quran.data.model.selection.SelectionIndicator
+import com.quran.data.model.selection.endSuraAyah
 import com.quran.data.model.selection.startSuraAyah
 import com.quran.labs.androidquran.common.QuranAyahInfo
 import com.quran.labs.androidquran.common.audio.model.playback.currentPlaybackAyah
@@ -73,6 +74,7 @@ class AyahTrackerPresenter @Inject constructor(
   private var items: Array<AyahTrackerItem> = emptyArray()
   private var pendingHighlightInfo: HighlightInfo? = null
   private var lastHighlightedAyah: SuraAyah? = null
+  private var lastHighlightedEndAyah: SuraAyah? = null
   private var lastHighlightedAudioAyah: SuraAyah? = null
 
   private val isRecitationEnabled = recitationPresenter.isRecitationEnabled()
@@ -119,13 +121,15 @@ class AyahTrackerPresenter @Inject constructor(
 
   private fun onAyahSelectionChanged(ayahSelection: AyahSelection) {
     val startSuraAyah = ayahSelection.startSuraAyah()
+    val endSuraAyah = ayahSelection.endSuraAyah()
+    val shrunk = lastHighlightedEndAyah != null && endSuraAyah != null && endSuraAyah < lastHighlightedEndAyah!!
 
-    // optimization - if the current ayah is still highlighted, don't issue a request
-    // to unhighlight.
-    if (startSuraAyah != lastHighlightedAyah) {
+    // Clear selection highlights when starting a different selection OR when shrinking an active range
+    if (startSuraAyah != lastHighlightedAyah || shrunk) {
       unHighlightAyahs(HighlightTypes.SELECTION)
-      lastHighlightedAyah = startSuraAyah
     }
+    lastHighlightedAyah = startSuraAyah
+    lastHighlightedEndAyah = endSuraAyah
 
     when (ayahSelection) {
       is AyahSelection.Ayah -> {

@@ -1,8 +1,5 @@
 package com.quran.labs.androidquran.ui
 
-import android.app.SearchManager
-import android.content.ComponentName
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -40,7 +36,6 @@ import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.TajweedActivity
 import com.quran.labs.androidquran.QuranPreferenceActivity
 import com.quran.labs.androidquran.R
-import com.quran.labs.androidquran.SearchActivity
 import com.quran.labs.androidquran.ShortcutsActivity
 import com.quran.labs.androidquran.data.Constants
 import com.quran.labs.androidquran.model.bookmark.RecentPageModel
@@ -50,6 +45,7 @@ import com.quran.labs.androidquran.service.AudioService
 import com.quran.labs.androidquran.service.QuranDownloadService
 import com.quran.labs.androidquran.service.util.ServiceIntentHelper.getDownloadIntent
 import com.quran.labs.androidquran.util.QuranFileUtils
+import com.quran.labs.androidquran.util.SearchViewStyler
 import java.io.File
 import com.quran.labs.androidquran.ui.fragment.AddTagDialog
 import com.quran.labs.androidquran.ui.fragment.AddTagDialog.Companion.newInstance
@@ -336,24 +332,13 @@ class QuranActivity : AppCompatActivity(),
     val inflater = menuInflater
     inflater.inflate(R.menu.home_menu, menu)
     searchItem = menu.findItem(R.id.search)
-    searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-      override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-        searchItemCollapserCallback.isEnabled = true
-        return true
-      }
-
-      override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-        searchItemCollapserCallback.isEnabled = false
-        return true
-      }
-    })
-    val searchView = searchItem?.actionView as SearchView
-    val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-    searchView.queryHint = getString(R.string.search_hint)
-    searchView.setSearchableInfo(
-        searchManager.getSearchableInfo(
-            ComponentName(this, SearchActivity::class.java)
-        )
+    SearchViewStyler.configure(
+      activity = this,
+      menu = menu,
+      searchItem = searchItem,
+      hasAlwaysDarkToolbarSurface = false,
+      expandToFullToolbarWidth = true,
+      onExpandChanged = { expanded -> searchItemCollapserCallback.isEnabled = expanded }
     )
 
     // Add additional injected screens (if any)

@@ -90,9 +90,35 @@ public class TranslationsSpinnerAdapter extends ArrayAdapter<String> {
     holder = (SpinnerHolder) convertView.getTag();
 
     holder.title.setText(R.string.translations);
-    holder.subtitle.setVisibility(View.GONE);
+    String activeLabel = buildActiveSummary();
+    if (activeLabel != null && !activeLabel.isEmpty()) {
+      holder.subtitle.setText(activeLabel);
+      holder.subtitle.setVisibility(View.VISIBLE);
+    } else {
+      holder.subtitle.setVisibility(View.GONE);
+    }
 
     return convertView;
+  }
+
+  private String buildActiveSummary() {
+    if (translations == null || translations.isEmpty()) {
+      return null;
+    }
+    List<String> activeNames = new ArrayList<>();
+    for (int i = 0; i < translations.size(); i++) {
+      LocalTranslation item = translations.get(i);
+      if (selectedItems != null && selectedItems.contains(item.getFilename())) {
+        activeNames.add(translationNames[i]);
+      }
+    }
+    if (activeNames.isEmpty()) {
+      return translationNames[0];
+    }
+    if (activeNames.size() == 1) {
+      return activeNames.get(0);
+    }
+    return android.text.TextUtils.join(" · ", activeNames);
   }
 
   @Override

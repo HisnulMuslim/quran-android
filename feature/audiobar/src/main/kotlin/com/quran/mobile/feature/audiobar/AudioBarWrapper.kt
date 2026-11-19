@@ -52,7 +52,7 @@ class AudioBarWrapper @JvmOverloads constructor(
 
   @Composable
   override fun Content() {
-    QuranTheme {
+    QuranTheme(useDarkTheme = false) {
       val eventListeners = audioBarPresenter.eventListeners()
       val flow = scope.launchMolecule(mode = RecompositionMode.ContextClock) {
         audioBarPresenter.audioBarPresenter()
